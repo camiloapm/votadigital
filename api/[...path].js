@@ -3,12 +3,30 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+if (!supabaseUrl || !supabaseKey) {
+  // En Vercel esto ayuda a detectar rápido el problema
+  console.warn('Faltan variables de entorno SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY');
+}
+
 const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: { autoRefreshToken: false, persistSession: false }
 });
 
+function setCors(res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-admin-code');
+}
+
+function isValidAccessCode(code) {
+  return typeof code === 'string' && /^\d{5}$/.test(code);
+}
+
 export default async function handler(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
+
+  // CORS en TODAS las respuestas (no solo OPTIONS)
+  setCors(res);
 
   // Health check robusto
   if (url.pathname === '/api/health' || url.pathname === '/api/health/') {
@@ -17,9 +35,6 @@ export default async function handler(req, res) {
 
   // Preflight
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-admin-code');
     return res.status(200).end();
   }
 
@@ -46,20 +61,26 @@ export default async function handler(req, res) {
   }
 }
 
-async function checkStatus(req, res) {
+async function getConfigRow() {
   const { data, error } = await supabase
     .from('config')
-    .select('election_status, school_logo_url, school_name')
+    .select('*')
     .eq('id', 1)
     .single();
 
-  if (error) return res.status(500).json({ error: 'Error al consultar estado' });
+  if (error || !data) return null;
+  return data;
+}
+
+async function checkStatus(req, res) {
+  const config = await getConfigRow();
+  if (!config) return res.status(500).json({ error: 'Config no encontrada (id=1)' });
 
   return res.status(200).json({
-    open: data.election_status === 'open',
-    status: data.election_status,
-    school_logo: data.school_logo_url,
-    school_name: data.school_name
+    open: config.election_status === 'open',
+    status: config.election_status,
+    school_logo: config.school_logo_url,
+    school_name: config.school_name
   });
 }
 
@@ -67,7 +88,7 @@ async function verifyCode(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
   const { access_code } = req.body || {};
-  if (!access_code || !/^\d{5}$/.test(access_code)) {
+  if (!isValidAccessCode(access_code)) {
     return res.status(400).json({ error: 'Código inválido (debe tener 5 dígitos)' });
   }
 
@@ -92,15 +113,23 @@ async function castVote(req, res) {
   const { access_code, candidate_id } = req.body || {};
   if (!access_code || !candidate_id) return res.status(400).json({ error: 'Datos incompletos' });
 
+  // Validación extra: código 5 dígitos
+  if (!isValidAccessCode(access_code)) {
+    return res.status(400).json({ error: 'Código inválido (debe tener 5 dígitos)' });
+  }
+
   const { data, error } = await supabase.rpc('cast_vote', {
     p_access_code: access_code,
     p_candidate_id: candidate_id
   });
 
-  if (error) return res.status(500).json({ error: 'Error al procesar voto' });
+  if (error) {
+    console.error('RPC cast_vote error:', error);
+    return res.status(500).json({ error: 'Error al procesar voto' });
+  }
 
   const result = data;
-  if (!result.success) return res.status(400).json({ error: result.error });
+  if (!result?.success) return res.status(400).json({ error: result?.error || 'Error al votar' });
 
   return res.status(200).json({
     success: true,
@@ -116,7 +145,7 @@ async function getCandidates(req, res) {
     .order('name');
 
   if (error) return res.status(500).json({ error: 'Error al cargar candidatos' });
-  return res.status(200).json({ candidates: data });
+  return res.status(200).json({ candidates: data || [] });
 }
 
 async function handleConfig(req, res) {
@@ -127,14 +156,15 @@ async function handleConfig(req, res) {
       .eq('id', 1)
       .single();
 
-    if (error) return res.status(500).json({ error: 'Error' });
+    if (error || !data) return res.status(500).json({ error: 'Error cargando config' });
     return res.status(200).json(data);
   }
 
   if (req.method === 'POST') {
     const adminCode = req.headers['x-admin-code'];
-    const { data: config } = await supabase.from('config').select('admin_code').eq('id', 1).single();
-    if (!config || adminCode !== config.admin_code) return res.status(401).json({ error: 'No autorizado' });
+    const config = await getConfigRow();
+    if (!config) return res.status(500).json({ error: 'Config no encontrada (id=1)' });
+    if (!adminCode || adminCode !== config.admin_code) return res.status(401).json({ error: 'No autorizado' });
 
     const { school_logo_url, school_name } = req.body || {};
     const { error } = await supabase
@@ -171,8 +201,8 @@ async function getFinalResults(req, res) {
     const { count: totalStudents } = await supabase.from('students').select('*', { count: 'exact', head: true });
     const { count: votedStudents } = await supabase.from('students').select('*', { count: 'exact', head: true }).eq('has_voted', true);
 
-    const maxVotes = Math.max(...results.map(r => r.votes));
-    const winners = results.filter(r => r.votes === maxVotes && r.votes > 0);
+    const maxVotes = Math.max(...(results || []).map(r => r.votes));
+    const winners = (results || []).filter(r => r.votes === maxVotes && r.votes > 0);
 
     return res.status(200).json({
       results: results || [],
@@ -180,33 +210,35 @@ async function getFinalResults(req, res) {
       totalStudents: totalStudents || 0,
       totalVoted: votedStudents || 0,
       participation: (totalStudents || 0) > 0 ? Math.round(((votedStudents || 0) / totalStudents) * 100) : 0,
-      winners: winners,
+      winners,
       isTie: winners.length > 1,
       electionClosed: true
     });
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: 'Error al obtener resultados' });
   }
 }
 
 async function getMonitorData(req, res) {
   const adminCode = req.headers['x-admin-code'];
-  const { data: config } = await supabase.from('config').select('admin_code').eq('id', 1).single();
-  if (!config || adminCode !== config.admin_code) return res.status(401).json({ error: 'No autorizado' });
+  const config = await getConfigRow();
+  if (!config) return res.status(500).json({ error: 'Config no encontrada (id=1)' });
+  if (!adminCode || adminCode !== config.admin_code) return res.status(401).json({ error: 'No autorizado' });
 
   try {
-    const { data: students } = await supabase
+    const { data: students, error } = await supabase
       .from('students')
       .select('grade, course, has_voted')
       .order('grade')
       .order('course');
 
+    if (error) return res.status(500).json({ error: 'Error al cargar estudiantes' });
+
     const monitorData = {};
-    students.forEach(s => {
+    (students || []).forEach(s => {
       const key = `${s.grade}-${s.course}`;
-      if (!monitorData[key]) {
-        monitorData[key] = { grade: s.grade, course: s.course, total: 0, voted: 0 };
-      }
+      if (!monitorData[key]) monitorData[key] = { grade: s.grade, course: s.course, total: 0, voted: 0 };
       monitorData[key].total++;
       if (s.has_voted) monitorData[key].voted++;
     });
@@ -219,18 +251,18 @@ async function getMonitorData(req, res) {
 
     const gradeSummary = {};
     courses.forEach(c => {
-      if (!gradeSummary[c.grade]) {
-        gradeSummary[c.grade] = { grade: c.grade, total: 0, voted: 0 };
-      }
+      if (!gradeSummary[c.grade]) gradeSummary[c.grade] = { grade: c.grade, total: 0, voted: 0 };
       gradeSummary[c.grade].total += c.total;
       gradeSummary[c.grade].voted += c.voted;
     });
 
-    const grades = Object.values(gradeSummary).map(g => ({
-      ...g,
-      pending: g.total - g.voted,
-      participation: g.total > 0 ? Math.round((g.voted / g.total) * 100) : 0
-    })).sort((a, b) => a.grade - b.grade);
+    const grades = Object.values(gradeSummary)
+      .map(g => ({
+        ...g,
+        pending: g.total - g.voted,
+        participation: g.total > 0 ? Math.round((g.voted / g.total) * 100) : 0
+      }))
+      .sort((a, b) => a.grade - b.grade);
 
     const totalGeneral = grades.reduce(
       (acc, g) => ({ total: acc.total + g.total, voted: acc.voted + g.voted }),
@@ -239,7 +271,7 @@ async function getMonitorData(req, res) {
 
     return res.status(200).json({
       courses: courses.sort((a, b) => a.grade - b.grade || a.course - b.course),
-      grades: grades,
+      grades,
       summary: {
         total: totalGeneral.total,
         voted: totalGeneral.voted,
@@ -249,14 +281,18 @@ async function getMonitorData(req, res) {
       lastUpdate: new Date().toLocaleTimeString()
     });
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: 'Error al obtener datos de monitoreo' });
   }
 }
 
 async function handleAdmin(req, res, subEndpoint) {
   const adminCode = req.headers['x-admin-code'] || req.body?.admin_code;
-  const { data: config } = await supabase.from('config').select('admin_code').eq('id', 1).single();
-  if (!config || adminCode !== config.admin_code) return res.status(401).json({ error: 'Código de administrador inválido' });
+  const config = await getConfigRow();
+  if (!config) return res.status(500).json({ error: 'Config no encontrada (id=1)' });
+  if (!adminCode || adminCode !== config.admin_code) {
+    return res.status(401).json({ error: 'Código de administrador inválido' });
+  }
 
   switch (subEndpoint) {
     case 'login': return res.status(200).json({ success: true });
@@ -280,7 +316,7 @@ async function handleStudents(req, res) {
       .order('list_number');
 
     if (error) return res.status(500).json({ error: 'Error al cargar estudiantes' });
-    return res.status(200).json({ students: data });
+    return res.status(200).json({ students: data || [] });
   }
 
   if (req.method === 'DELETE') {
@@ -300,7 +336,7 @@ async function handleCandidates(req, res) {
   if (req.method === 'GET') {
     const { data, error } = await supabase.from('candidates').select('*').order('name');
     if (error) return res.status(500).json({ error: 'Error al cargar candidatos' });
-    return res.status(200).json({ candidates: data });
+    return res.status(200).json({ candidates: data || [] });
   }
 
   if (req.method === 'POST') {
@@ -356,7 +392,7 @@ async function handleElection(req, res) {
   return res.status(200).json({ success: true, status: action === 'open' ? 'open' : 'closed' });
 }
 
-// Import: Asigna listas secuenciales por grado-curso y genera access_code con formato GGCLL
+// Import: Asigna listas secuenciales por grado-curso y genera access_code con formato GGCLL (06105)
 async function importStudents(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
@@ -378,13 +414,12 @@ async function importStudents(req, res) {
     const grado = parseInt(s.grade, 10);
     const curso = parseInt(s.course, 10) || 1;
 
-    // Validar mínimos
     if (!nombre || !grado || isNaN(grado)) {
       console.log('Estudiante inválido:', s);
       return;
     }
 
-    // Validar curso 1-9
+    // curso 1-9
     if (curso < 1 || curso > 9) {
       console.log('Curso fuera de rango (1-9):', s);
       return;
@@ -404,14 +439,16 @@ async function importStudents(req, res) {
 
   console.log('Grupos detectados:', Object.keys(groupedByGradeCourse));
 
-  // PASO 2: Asignar lista 1..N por cada grupo y generar GGCLL
+  // PASO 2: Asignar lista 1..N por grupo y generar 06105
   const studentsWithListNumber = [];
 
   for (const [key, group] of Object.entries(groupedByGradeCourse)) {
     console.log(`Grupo ${key}: ${group.students.length} estudiantes`);
 
     group.students.forEach((student, idx) => {
-      const listNumber = idx + 1; // 1..N por curso
+      const listNumber = idx + 1;
+
+      // GG + C + LL
       const accessCode =
         `${String(student.grade).padStart(2, '0')}` +
         `${student.course}` +
@@ -430,7 +467,7 @@ async function importStudents(req, res) {
   console.log('Total a insertar:', studentsWithListNumber.length);
   console.log('Primeros 5:', studentsWithListNumber.slice(0, 5).map(s => `${s.full_name}: ${s.access_code}`));
 
-  // PASO 3: Insertar
+  // PASO 3: Insertar en batches
   const batchSize = 50;
   let inserted = 0;
   const insertErrors = [];
@@ -454,8 +491,8 @@ async function importStudents(req, res) {
           else inserted++;
         }
       } else {
-        inserted += data.length;
-        console.log(`✓ Insertados ${data.length} estudiantes en batch`);
+        inserted += (data || []).length;
+        console.log(`✓ Insertados ${(data || []).length} estudiantes en batch`);
       }
     } catch (err) {
       console.error('Error excepción:', err);
@@ -485,13 +522,17 @@ async function resetCodes(req, res) {
 
   let updated = 0;
 
-  for (const student of students) {
+  for (const student of (students || [])) {
     const newCode =
       `${String(student.grade).padStart(2, '0')}` +
       `${student.course}` +
       `${String(student.list_number).padStart(2, '0')}`;
 
-    const { error } = await supabase.from('students').update({ access_code: newCode }).eq('id', student.id);
+    const { error } = await supabase
+      .from('students')
+      .update({ access_code: newCode })
+      .eq('id', student.id);
+
     if (!error) updated++;
   }
 
@@ -514,11 +555,18 @@ async function clearData(req, res) {
 
 async function getStats(req, res) {
   const adminCode = req.headers['x-admin-code'];
-  const { data: config } = await supabase.from('config').select('admin_code').eq('id', 1).single();
-  if (!config || adminCode !== config.admin_code) return res.status(401).json({ error: 'No autorizado' });
+  const config = await getConfigRow();
+  if (!config) return res.status(500).json({ error: 'Config no encontrada (id=1)' });
+  if (!adminCode || adminCode !== config.admin_code) return res.status(401).json({ error: 'No autorizado' });
 
-  const { count: totalStudents } = await supabase.from('students').select('*', { count: 'exact', head: true });
-  const { count: votedStudents } = await supabase.from('students').select('*', { count: 'exact', head: true }).eq('has_voted', true);
+  const { count: totalStudents } = await supabase
+    .from('students')
+    .select('*', { count: 'exact', head: true });
+
+  const { count: votedStudents } = await supabase
+    .from('students')
+    .select('*', { count: 'exact', head: true })
+    .eq('has_voted', true);
 
   const { data: totalVotes } = await supabase.from('candidates').select('votes');
   const sumVotes = totalVotes?.reduce((a, b) => a + (b.votes || 0), 0) || 0;
