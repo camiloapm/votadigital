@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Votación Escolar</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🗳️ Votación Escolar</h1>
+            <div id="status-badge" class="badge closed">Cerrada</div>
+        </header>
+
+        <section id="step-verify" class="step active">
+            <div class="card">
+                <h2>Ingresa tu Código de Votación</h2>
+                <p class="hint">El código está en tu credencial: Grado + Curso + Lista</p>
+
+                <div class="input-group">
+                    <input
+                        type="text"
+                        id="access-code"
+                        placeholder="Ej: 6112"
+                        maxlength="5"
+                        inputmode="numeric"
+                        pattern="\\d*"
+                    >
+                </div>
+
+                <button id="btn-verify" class="btn btn-primary btn-large">
+                    Verificar Código
+                </button>
+
+                <div id="verify-error" class="error-message"></div>
+            </div>
+        </section>
+
+        <section id="step-confirm" class="step">
+            <div class="card">
+                <h2>Confirma tus Datos</h2>
+                <div id="student-info" class="info-box"></div>
+
+                <p class="warning">⚠️ Solo puedes votar una vez. ¿Son correctos tus datos?</p>
+
+                <div class="button-group">
+                    <button id="btn-back" class="btn btn-secondary">No, corregir</button>
+                    <button id="btn-continue" class="btn btn-primary">Sí, continuar</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="step-vote" class="step">
+            <div class="card">
+                <h2>Selecciona tu Candidato</h2>
+                <div id="candidates-list" class="candidates-grid"></div>
+
+                <div id="selected-candidate" class="selected-box hidden">
+                    <p>Has seleccionado: <strong id="selected-name"></strong></p>
+                    <button id="btn-cast" class="btn btn-success btn-large">
+                        Confirmar Voto ✓
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="step-done" class="step">
+            <div class="card success-card">
+                <div class="success-icon">✓</div>
+                <h2>¡Voto Registrado!</h2>
+                <p>Tu voto ha sido contado de forma segura.</p>
+                <div id="final-info" class="info-box"></div>
+                <p class="note">Puedes cerrar esta ventana</p>
+            </div>
+        </section>
+
+        <section id="step-error" class="step">
+            <div class="card error-card">
+                <div class="error-icon">✕</div>
+                <h2 id="error-title">Error</h2>
+                <p id="error-message"></p>
+                <button onclick="location.reload()" class="btn btn-primary">
+                    Intentar de nuevo
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
