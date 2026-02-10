@@ -291,7 +291,7 @@
         <div>
           <button onclick="resetElectionVotes()" class="action-btn btn-warning" title="Restablece los votos sin borrar estudiantes">🔄 Restablecer Votación</button>
           <button onclick="resetCodes()" class="action-btn btn-secondary">Regenerar Códigos</button>
-          <button onclick="clearAllData()" class="action-btn btn-danger">Eliminar Todo</button>
+          <button onclick="clearStudents()" class="action-btn btn-danger" title="Elimina solo los estudiantes">🗑️ Eliminar Estudiantes</button>
         </div>
       </div>
       <div id="students-table-container"></div>
@@ -1062,19 +1062,22 @@
       }
     }
 
-    async function clearAllData() {
-      const c = prompt('Escribe ELIMINAR TODO para confirmar:');
-      if (c !== 'ELIMINAR TODO') return;
+    async function clearStudents() {
+      if (!confirm('⚠️ ¿Eliminar todos los estudiantes?\n\nEsto eliminará SOLO los estudiantes. Los candidatos, votos y configuración se mantendrán.')) return;
+      
+      const c = prompt('Escribe ELIMINAR ESTUDIANTES para confirmar:');
+      if (c !== 'ELIMINAR ESTUDIANTES') return;
+      
       try {
-        const res = await fetch(`${API_URL}/admin/clear-data`, {
+        const res = await fetch(`${API_URL}/admin/clear-students`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
-          body: JSON.stringify({ confirm: 'ELIMINAR TODO', admin_code: adminCode })
+          body: JSON.stringify({ admin_code: adminCode })
         });
-        if (res.ok) { showToast('Datos eliminados', 'success'); location.reload(); }
-        else showToast('Error', 'error');
+        if (res.ok) { showToast('Estudiantes eliminados', 'success'); location.reload(); }
+        else showToast('Error al eliminar estudiantes', 'error');
       } catch {
-        showToast('Error', 'error');
+        showToast('Error de conexión', 'error');
       }
     }
 
