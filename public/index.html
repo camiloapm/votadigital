@@ -6,72 +6,101 @@
   <title>Votación Escolar</title>
   <style>
     :root{
-      --bg:#f1f5f9; --card:#ffffff; --text:#0f172a; --remember:#64748b;
+      --bg:#f0f4f8; --card:#ffffff; --text:#1e293b; --remember:#64748b;
       --primary:#3b82f6; --primary-dark:#2563eb;
-      --ok:#10b981; --warn:#f59e0b; --danger:#ef4444;
+      --ok:#10b981; --ok-dark:#059669; --warn:#f59e0b; --danger:#ef4444;
       --border:#e2e8f0;
+      --shadow-sm:0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md:0 4px 12px rgba(0,0,0,0.1);
+      --shadow-lg:0 8px 24px rgba(0,0,0,0.12);
     }
     *{box-sizing:border-box; margin:0; padding:0;}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;}
-    .container{max-width:980px;margin:0 auto;padding:1rem;}
-    .header{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem 1rem;display:flex;gap:1rem;align-items:center;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;}
+    .container{max-width:1200px;margin:0 auto;padding:1.5rem;}
+
+    /* Header moderno */
+    .header{background:var(--card);border-radius:16px;padding:1.25rem 1.5rem;display:flex;gap:1.25rem;align-items:center;justify-content:space-between;box-shadow:var(--shadow-md);margin-bottom:1.5rem;}
     .brand{display:flex;gap:1rem;align-items:center;}
-    .logo{width:56px;height:56px;border-radius:12px;object-fit:cover;border:1px solid var(--border);background:#fff}
-    .title h1{font-size:1.25rem;margin-bottom:.15rem}
-    .title p{color:var(--remember);font-size:.95rem}
-    .badge{padding:.35rem .6rem;border-radius:999px;font-size:.85rem;font-weight:700;border:1px solid var(--border);background:#fff;white-space:nowrap}
-    .badge.open{color:#065f46;border-color:#bbf7d0;background:#ecfdf5}
-    .badge.closed{color:#7f1d1d;border-color:#fecaca;background:#fef2f2}
+    .logo{width:64px;height:64px;border-radius:14px;object-fit:cover;border:2px solid var(--border);background:#fff;box-shadow:var(--shadow-sm);}
+    .title h1{font-size:1.4rem;font-weight:700;color:var(--text);margin-bottom:.2rem;}
+    .title p{color:var(--remember);font-size:.95rem;}
+    .badge{padding:.45rem 1rem;border-radius:999px;font-size:.9rem;font-weight:700;border:2px solid transparent;white-space:nowrap;transition:all .2s;}
+    .badge.open{color:#065f46;background:#ecfdf5;border-color:#86efac;}
+    .badge.closed{color:#991b1b;background:#fef2f2;border-color:#fecaca;}
 
-    .grid{display:grid;grid-template-columns: 1fr;gap:1rem;margin-top:1rem;}
-    @media (min-width: 900px){ .grid{grid-template-columns: 360px 1fr;} }
+    /* Layout de grid */
+    .grid{display:grid;grid-template-columns:1fr;gap:1.5rem;}
+    @media (min-width: 1024px){ .grid{grid-template-columns:380px 1fr;} }
 
-    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-    .card h2{font-size:1.05rem;margin-bottom:.5rem}
-    .muted{color:var(--remember);font-size:.95rem}
-    .hr{height:1px;background:var(--border);margin:1rem 0}
+    /* Tarjetas modernas */
+    .card{background:var(--card);border-radius:16px;padding:1.5rem;box-shadow:var(--shadow-md);border:1px solid var(--border);}
+    .card h2{font-size:1.15rem;font-weight:700;margin-bottom:.75rem;color:var(--text);}
+    .muted{color:var(--remember);font-size:.95rem;}
+    .hr{height:1px;background:linear-gradient(90deg,var(--border) 0%,transparent 100%);margin:1.25rem 0;}
 
-    .row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-    .input{width:100%;padding:.8rem .9rem;border:2px solid var(--border);border-radius:12px;font-size:1rem;outline:none}
-    .input:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.15)}
-    .btn{border:none;border-radius:12px;padding:.8rem 1rem;font-weight:800;cursor:pointer;font-size:1rem;transition:transform .02s, background .15s, opacity .15s}
-    .btn:active{transform:translateY(1px)}
-    .btn.primary{background:var(--primary);color:#fff}
-    .btn.primary:hover{background:var(--primary-dark)}
-    .btn.secondary{background:#e2e8f0;color:#0f172a}
-    .btn.secondary:hover{background:#cbd5e1}
-    .btn.success{background:var(--ok);color:#fff}
-    .btn.success:hover{background:#059669}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
+    /* Elementos de formulario */
+    .input{width:100%;padding:1rem 1.1rem;border:2px solid var(--border);border-radius:12px;font-size:1.1rem;outline:none;transition:all .2s;}
+    .input:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.12);}
+    .btn{border:none;border-radius:12px;padding:.9rem 1.5rem;font-weight:700;cursor:pointer;font-size:1rem;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;}
+    .btn.primary{background:var(--primary);color:#fff;}
+    .btn.primary:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,130,246,.3);}
+    .btn.secondary{background:#f1f5f9;color:var(--text);}
+    .btn.secondary:hover{background:#e2e8f0;}
+    .btn.success{background:var(--ok);color:#fff;}
+    .btn.success:hover{background:var(--ok-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(16,185,129,.3);}
+    .btn:disabled{opacity:.6;cursor:not-allowed;transform:none !important;box-shadow:none !important;}
 
-    .alert{border-radius:12px;padding:.75rem .9rem;border:1px solid var(--border);margin-top:.75rem;font-size:.95rem}
-    .alert.ok{background:#ecfdf5;border-color:#bbf7d0;color:#065f46}
-    .alert.warn{background:#fffbeb;border-color:#fde68a;color:#92400e}
-    .alert.danger{background:#fef2f2;border-color:#fecaca;color:#7f1d1d}
+    /* Alertas */
+    .alert{border-radius:12px;padding:.9rem 1.1rem;border:2px solid;margin-top:.9rem;font-size:.95rem;font-weight:500;}
+    .alert.ok{background:#ecfdf5;border-color:#86efac;color:#065f46;}
+    .alert.warn{background:#fffbeb;border-color:#fde68a;color:#92400e;}
+    .alert.danger{background:#fef2f2;border-color:#fecaca;color:#991b1d;}
 
-    .candidates{display:grid;grid-template-columns:1fr;gap:.75rem}
-    @media (min-width: 560px){ .candidates{grid-template-columns:1fr 1fr;} }
-    .cand{border:2px solid var(--border);border-radius:14px;padding:.75rem;display:flex;gap:.75rem;align-items:center;cursor:pointer;background:#fff;transition:border-color .15s, box-shadow .15s, transform .02s}
-    .cand:hover{border-color:#cbd5e1}
-    .cand:active{transform:translateY(1px)}
-    .cand.selected{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.12)}
-    .cand.disabled{opacity:0.5;pointer-events:none;}
-    .cand img{width:58px;height:58px;border-radius:50%;object-fit:cover;border:1px solid var(--border);background:#fff}
-    .cand .meta{min-width:0}
-    .cand .meta .name{font-weight:900}
-    .cand .meta .party{color:var(--remember);font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px}
+    /* Grid de candidatos - diseño nuevo */
+    .candidates-title{font-size:1.15rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+    .candidates-title span{font-size:1.5rem;}
+    .candidates{display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:1.25rem;}
 
-    .footer{margin-top:1.25rem;color:var(--remember);font-size:.9rem;text-align:center}
-    .codehint{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-weight:800}
+    /* Tarjeta de candidato - diseño atractivo */
+    .cand{background:#fff;border:2px solid var(--border);border-radius:16px;padding:1.5rem;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden;}
+    .cand::before{content:'';position:absolute;top:0;left:0;right:0;height:80px;background:linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);border-radius:14px 14px 0 0;margin:-1.5rem -1.5rem 0 -1.5rem;}
+    .cand:hover{border-color:#c7d2fe;transform:translateY(-4px);box-shadow:var(--shadow-lg);}
+    .cand.selected{border-color:var(--primary);box-shadow:0 0 0 4px rgba(59,130,246,.2),var(--shadow-lg);transform:translateY(-4px);}
+    .cand.selected::before{background:linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);}
+    .cand.disabled{opacity:0.5;pointer-events:none;filter:grayscale(50%);}
 
-    /* Estilos para botón siguiente estudiante */
-    .next-student-section{margin-top:1rem;padding-top:1rem;border-top:1px dashed var(--border);}
-    .next-student-btn{width:100%;background:var(--ok);color:#fff;font-weight:800;padding:.9rem;border-radius:12px;border:none;cursor:pointer;font-size:1rem;transition:all .15s;}
-    .next-student-btn:hover{background:#059669;transform:translateY(-1px);}
-    .next-student-btn:active{transform:translateY(0);}
+    /* Foto del candidato - más grande y circular */
+    .cand-photo-container{position:relative;z-index:1;margin-bottom:1rem;}
+    .cand img{width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.15);background:#f8fafc;transition:all .3s;}
+    .cand:hover img{border-color:#bfdbfe;transform:scale(1.02);}
+    .cand.selected img{border-color:var(--primary);box-shadow:0 4px 16px rgba(59,130,246,.3);}
 
-    /* Countdown */
-    .countdown-text{font-size:.85rem;color:var(--ok);text-align:center;margin-top:.5rem;}
+    .cand .meta{position:relative;z-index:1;width:100%;}
+    .cand .name{font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:.4rem;line-height:1.3;}
+    .cand .party{display:inline-flex;align-items:center;gap:.4rem;background:linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);padding:.4rem .9rem;border-radius:20px;font-size:.85rem;font-weight:600;color:var(--remember);margin-bottom:.5rem;}
+    .cand .party-icon{font-size:1rem;}
+
+    .selection-indicator{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;background:#fff;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .2s;opacity:0;}
+    .cand.selected .selection-indicator{opacity:1;background:var(--ok);border-color:var(--ok);color:#fff;}
+    .selection-indicator svg{width:16px;height:16px;}
+
+    /* Footer */
+    .footer{margin-top:2rem;color:var(--remember);font-size:.9rem;text-align:center;padding:.75rem;}
+    .codehint{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-weight:700;background:#f1f5f9;padding:.2rem .5rem;border-radius:6px;}
+
+    /* Sección siguiente estudiante */
+    .next-student-section{margin-top:1.5rem;padding-top:1.5rem;border-top:2px dashed var(--border);}
+    .next-student-btn{width:100%;background:linear-gradient(135deg, var(--ok) 0%, #34d399 100%);color:#fff;font-weight:800;padding:1rem;border-radius:14px;border:none;cursor:pointer;font-size:1.1rem;transition:all .2s;box-shadow:0 4px 12px rgba(16,185,129,.3);}
+    .next-student-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(16,185,129,.4);}
+    .countdown-text{font-size:.9rem;color:var(--ok);text-align:center;margin-top:.75rem;font-weight:500;}
+
+    /* Animaciones */
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    .cand{animation:fadeIn 0.4s ease forwards;}
+
+    /* Student info box mejorado */
+    #student-box{padding:1rem 1.25rem;border-radius:12px;margin-top:1rem;}
+    #student-box strong{display:block;font-size:1.1rem;margin-bottom:.25rem;}
   </style>
 </head>
 <body>
@@ -81,22 +110,22 @@
         <img id="school-logo" class="logo" alt="Escudo del colegio" style="display:none">
         <div class="title">
           <h1 id="school-name">Votación Escolar</h1>
-          <p id="subtitle">Cargando estado…</p>
+          <p id="subtitle">Cargando estado...</p>
         </div>
-      </div>
-      <div id="status-badge" class="badge">…</div>
+      <div id="status-badge" class="</div>
+      badge">...</div>
     </header>
 
     <main class="grid">
       <!-- Paso 1: Validación de código -->
       <section class="card" aria-label="Acceso">
-        <h2>1) Ingresa tu código</h2>
+        <h2>🎫 Identificación</h2>
         <p class="muted">
-          El código tiene <span class="codehint">5 dígitos</span> (ej: <span class="codehint">06105</span>).
+          Ingresa tu código de 5 dígitos para participar en la votación.
         </p>
         <div class="hr"></div>
 
-        <label class="muted" for="access-code">Código</label>
+        <label class="muted" for="access-code" style="display:block;margin-bottom:.5rem;font-weight:500;">Tu código</label>
         <input
           id="access-code"
           class="input"
@@ -105,34 +134,45 @@
           placeholder="Ej: 06105"
           maxlength="5"
         />
-        <div class="row" style="margin-top:.75rem">
-          <button id="btn-verify" class="btn primary" type="button">Verificar</button>
-          <button id="btn-clear" class="btn secondary" type="button">Limpiar</button>
+        <div style="display:flex;gap:.75rem;margin-top:1rem;flex-wrap:wrap;">
+          <button id="btn-verify" class="btn primary" type="button" style="flex:1;min-width:120px;">
+            ✓ Verificar
+          </button>
+          <button id="btn-clear" class="btn secondary" type="button" style="flex:1;min-width:100px;">
+            Limpiar
+          </button>
         </div>
 
         <div id="access-alert" class="alert" style="display:none"></div>
 
-        <div id="student-box" class="alert ok" style="display:none; margin-top: .75rem">
-          <div><strong>Habilitado:</strong> <span id="student-name"></span></div>
-          <div class="muted">Grado <span id="student-grade"></span> — Curso <span id="student-course"></span></div>
+        <div id="student-box" class="alert ok" style="display:none;">
+          <strong>✅ Estudiante habilitado</strong>
+          <span id="student-name" style="font-size:1.1rem;font-weight:600;"></span>
+          <div class="muted" style="margin-top:.25rem;">
+            Grado <span id="student-grade"></span> • Curso <span id="student-course"></span>
+          </div>
         </div>
       </section>
 
       <!-- Paso 2: Candidatos + voto -->
       <section class="card" aria-label="Votación">
-        <h2>2) Elige un candidato</h2>
+        <h2 class="candidates-title"><span>🗳️</span> Candidatos</h2>
         <p class="muted" id="vote-instructions">
-          Primero verifica tu código. Luego selecciona un candidato y confirma tu voto.
+          Verifica tu código y selecciona al candidato de tu preferencia.
         </p>
         <div class="hr"></div>
 
-        <div id="candidates" class="candidates" aria-live="polite"></div>
+        <div id="candidates" class="candidates" aria-live="polite">
+          <div class="muted" style="text-align:center;padding:2rem;">Cargando candidatos...</div>
+        </div>
 
         <div class="hr"></div>
 
-        <div class="row" style="justify-content:space-between">
-          <div class="muted" id="selection-text">Ningún candidato seleccionado.</div>
-          <button id="btn-vote" class="btn primary" type="button" disabled>Confirmar voto</button>
+        <div style="display:flex;flex-direction:column;gap:.75rem;">
+          <div class="muted" id="selection-text" style="font-weight:500;">Ningún candidato seleccionado.</div>
+          <button id="btn-vote" class="btn success" type="button" disabled style="font-size:1.1rem;padding:1rem 1.5rem;">
+            🗳️ Confirmar Voto
+          </button>
         </div>
 
         <div id="vote-alert" class="alert" style="display:none"></div>
@@ -140,7 +180,7 @@
         <!-- Sección para siguiente estudiante -->
         <div id="next-student-section" class="next-student-section" style="display:none;">
           <button id="btn-next-student" class="next-student-btn" type="button">
-            ✓ Siguiente Estudiante
+            ✓ Listo para Siguiente Estudiante
           </button>
           <p id="countdown-text" class="countdown-text"></p>
         </div>
@@ -148,20 +188,21 @@
     </main>
 
     <div class="footer">
-      Si tienes problemas, verifica que tu código tenga 5 dígitos exactos (ej: <span class="codehint">06105</span>).
+      Si tienes dudas sobre tu código, consulta con tu profesor. |
+      <span class="codehint">Código: GGCLL</span> (Grado-Curso-Lista)
     </div>
   </div>
 
   <script>
     const API_URL = '/api';
 
-    // Estado en memoria (sin localStorage)
+    // Estado en memoria
     let electionOpen = false;
-    let verifiedStudent = null; // { name, grade, course }
+    let verifiedStudent = null;
     let verifiedCode = '';
     let candidates = [];
     let selectedCandidateId = null;
-    let autoResetEnabled = true; // Habilitar reinicio automático
+    let autoResetEnabled = true;
     let countdownInterval = null;
 
     const $ = (id) => document.getElementById(id);
@@ -170,11 +211,13 @@
       el.className = `alert ${type}`;
       el.textContent = msg;
       el.style.display = 'block';
+      
+      // Scroll suave hacia la alerta
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
     function hideAlert(el){ el.style.display = 'none'; el.textContent=''; el.className='alert'; }
 
     function onlyDigits(s){ return String(s || '').replace(/[^\d]/g, ''); }
-
     function isValidCode(code){ return /^\d{5}$/.test(code); }
 
     async function fetchJSON(path, options = {}) {
@@ -185,11 +228,13 @@
 
     // Generador de imagen placeholder con iniciales
     function generatePlaceholder(name, size = 120) {
-      const initial = name ? name.charAt(0).toUpperCase() : '?';
+      const initials = name ? name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '?';
+      const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+      const color = colors[name ? name.charCodeAt(0) % colors.length : 0];
+      
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-        <rect width="100%" height="100%" fill="#e2e8f0"/>
-        <circle cx="${size/2}" cy="${size/2}" r="${size/3}" fill="#94a3b8"/>
-        <text x="50%" y="52%" text-anchor="middle" font-family="Arial, sans-serif" font-size="${size/3}" font-weight="bold" fill="#ffffff">${initial}</text>
+        <rect width="100%" height="100%" fill="${color}" rx="${size/2}"/>
+        <text x="50%" y="52%" text-anchor="middle" font-family="Arial, sans-serif" font-size="${size/2.5}" font-weight="bold" fill="#ffffff">${initials}</text>
       </svg>`;
       return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
     }
@@ -197,7 +242,7 @@
     // Generador de escudo placeholder
     function generateSchoolLogoPlaceholder() {
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
-        <rect width="100%" height="100%" fill="#f1f5f9" rx="12"/>
+        <rect width="100%" height="100%" fill="#f1f5f9" rx="16"/>
         <path d="M60 20 L90 40 L90 80 L60 100 L30 80 L30 40 Z" fill="#3b82f6" opacity="0.3"/>
         <path d="M60 30 L80 45 L80 75 L60 90 L40 75 L40 45 Z" fill="#3b82f6" opacity="0.5"/>
         <text x="60" y="65" text-anchor="middle" font-family="Arial" font-size="24" fill="#1e40af">★</text>
@@ -208,7 +253,7 @@
     async function loadStatus() {
       const { ok, data } = await fetchJSON(`${API_URL}/check-status`);
       if (!ok) {
-        $('subtitle').textContent = 'No se pudo cargar el estado.';
+        $('subtitle').textContent = 'Error al cargar';
         $('status-badge').textContent = 'Error';
         $('status-badge').className = 'badge closed';
         electionOpen = false;
@@ -220,20 +265,20 @@
       // Branding
       if (data.school_name) $('school-name').textContent = data.school_name;
       
-      // Manejo mejorado del logo
+      // Manejo del logo
       const img = $('school-logo');
-      if (data.school_logo && data.school_logo.trim() !== '') {
+      const logoUrl = data.school_logo || data.school_logo_url || '';
+      
+      if (logoUrl && logoUrl.trim() !== '') {
         img.onload = function() {
           img.style.display = 'block';
         };
         img.onerror = function() {
-          // Si falla, usar placeholder
           img.src = generateSchoolLogoPlaceholder();
           img.style.display = 'block';
         };
-        img.src = data.school_logo;
+        img.src = logoUrl;
       } else {
-        // Usar placeholder si no hay logo configurado
         img.src = generateSchoolLogoPlaceholder();
         img.style.display = 'block';
       }
@@ -241,16 +286,15 @@
       // Estado
       const badge = $('status-badge');
       if (electionOpen) {
-        badge.textContent = 'Votación ABIERTA';
+        badge.textContent = '🟢 ABIERTA';
         badge.className = 'badge open';
         $('subtitle').textContent = 'Puedes votar ahora.';
       } else {
-        badge.textContent = 'Votación CERRADA';
+        badge.textContent = '🔴 CERRADA';
         badge.className = 'badge closed';
         $('subtitle').textContent = 'La votación está cerrada.';
       }
 
-      // Si está cerrada, bloqueamos voto (pero igual cargamos candidatos para mostrar)
       $('btn-vote').disabled = true;
     }
 
@@ -259,30 +303,44 @@
       wrap.innerHTML = '';
 
       if (!candidates || candidates.length === 0) {
-        wrap.innerHTML = `<div class="muted">No hay candidatos cargados aún.</div>`;
+        wrap.innerHTML = `<div class="muted" style="text-align:center;padding:2rem;grid-column:1/-1;">
+          📋 No hay candidatos registrados actualmente.
+        </div>`;
         return;
       }
 
-      for (const c of candidates) {
+      for (const [index, c] of candidates.entries()) {
         const div = document.createElement('div');
         div.className = 'cand';
         div.dataset.id = c.id;
+        div.style.animationDelay = `${index * 0.1}s`;
+
+        // Indicador de selección
+        const indicator = document.createElement('div');
+        indicator.className = 'selection-indicator';
+        indicator.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>`;
+        div.appendChild(indicator);
+
+        // Contenedor de foto
+        const photoContainer = document.createElement('div');
+        photoContainer.className = 'cand-photo-container';
 
         const img = document.createElement('img');
         img.alt = `Foto de ${c.name}`;
         
-        // Manejo mejorado de fotos de candidatos
         if (c.photo_url && c.photo_url.trim() !== '') {
           img.src = c.photo_url;
           img.onerror = function() {
-            // Si falla la URL, usar placeholder con iniciales
             this.src = generatePlaceholder(c.name, 120);
           };
         } else {
-          // Usar placeholder con iniciales si no hay foto
           img.src = generatePlaceholder(c.name, 120);
         }
 
+        photoContainer.appendChild(img);
+        div.appendChild(photoContainer);
+
+        // Meta información
         const meta = document.createElement('div');
         meta.className = 'meta';
 
@@ -292,31 +350,35 @@
 
         const party = document.createElement('div');
         party.className = 'party';
-        party.textContent = c.party ? `Lista: ${c.party}` : ' ';
+        if (c.party) {
+          party.innerHTML = `<span class="party-icon">📋</span> Lista ${c.party}`;
+        } else {
+          party.innerHTML = `<span class="party-icon">👤</span> Independiente`;
+        }
 
         meta.appendChild(name);
         meta.appendChild(party);
-
-        div.appendChild(img);
         div.appendChild(meta);
 
         div.addEventListener('click', () => {
-          // Solo permitir seleccionar si está abierto y el código está verificado
           if (!electionOpen) {
-            showAlert($('vote-alert'), 'warn', 'La votación está cerrada. No puedes votar ahora.');
+            showAlert($('vote-alert'), 'warn', '⏰ La votación está cerrada.');
             return;
           }
           if (!verifiedStudent) {
-            showAlert($('vote-alert'), 'warn', 'Primero verifica tu código.');
+            showAlert($('vote-alert'), 'warn', '🔑 Primero verifica tu código.');
             return;
           }
 
           selectedCandidateId = c.id;
           document.querySelectorAll('.cand').forEach(x => x.classList.remove('selected'));
           div.classList.add('selected');
-          $('selection-text').textContent = `Seleccionado: ${c.name}${c.party ? ' — Lista: ' + c.party : ''}`;
+          $('selection-text').innerHTML = `<span style="color:var(--ok);">✓</span> Seleccionado: <strong>${c.name}</strong>${c.party ? ` (Lista ${c.party})` : ''}`;
           hideAlert($('vote-alert'));
           $('btn-vote').disabled = false;
+          
+          // Scroll suave al botón de votar
+          $('btn-vote').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
 
         wrap.appendChild(div);
@@ -326,7 +388,7 @@
     async function loadCandidates() {
       const { ok, data } = await fetchJSON(`${API_URL}/get-candidates`);
       if (!ok) {
-        $('candidates').innerHTML = `<div class="muted">Error al cargar candidatos.</div>`;
+        $('candidates').innerHTML = `<div class="muted" style="text-align:center;padding:2rem;grid-column:1/-1;">❌ Error al cargar candidatos.</div>`;
         return;
       }
       candidates = data.candidates || [];
@@ -347,6 +409,7 @@
         x.classList.remove('selected');
         x.classList.remove('disabled');
         x.style.pointerEvents = 'auto';
+        x.style.filter = 'none';
       });
       $('selection-text').textContent = 'Ningún candidato seleccionado.';
       $('btn-vote').disabled = true;
@@ -354,7 +417,6 @@
       hideAlert($('access-alert'));
       hideAlert($('vote-alert'));
 
-      // Ocultar sección de siguiente estudiante
       $('next-student-section').style.display = 'none';
       if (countdownInterval) {
         clearInterval(countdownInterval);
@@ -364,16 +426,14 @@
     }
 
     function prepareForNextStudent() {
-      // Habilitar controles para el siguiente estudiante
       $('access-code').disabled = false;
       $('access-code').value = '';
       $('access-code').focus();
       $('btn-verify').disabled = false;
-      $('btn-verify').textContent = 'Verificar';
+      $('btn-verify').innerHTML = '✓ Verificar';
       
-      // Reiniciar UI
       resetSessionUI();
-      $('vote-instructions').textContent = 'Primero verifica tu código. Luego selecciona un candidato y confirma tu voto.';
+      $('vote-instructions').textContent = 'Verifica tu código y selecciona al candidato de tu preferencia.';
     }
 
     async function verifyCode() {
@@ -381,7 +441,7 @@
       hideAlert($('vote-alert'));
 
       if (!electionOpen) {
-        showAlert($('access-alert'), 'warn', 'La votación está cerrada. No es posible votar.');
+        showAlert($('access-alert'), 'warn', '⏰ La votación está cerrada.');
         return;
       }
 
@@ -390,12 +450,12 @@
       $('access-code').value = code;
 
       if (!isValidCode(code)) {
-        showAlert($('access-alert'), 'danger', 'Código inválido. Debe tener 5 dígitos (ej: 06105).');
+        showAlert($('access-alert'), 'danger', '❌ Código inválido. Debe tener 5 dígitos.');
         return;
       }
 
       $('btn-verify').disabled = true;
-      $('btn-verify').textContent = 'Verificando…';
+      $('btn-verify').innerHTML = '⏳ Verificando...';
 
       const { ok, data, status } = await fetchJSON(`${API_URL}/verify-code`, {
         method: 'POST',
@@ -404,14 +464,13 @@
       });
 
       $('btn-verify').disabled = false;
-      $('btn-verify').textContent = 'Verificar';
+      $('btn-verify').innerHTML = '✓ Verificar';
 
       if (!ok) {
-        const msg =
-          data?.error ||
-          (status === 404 ? 'Código no encontrado.' :
-           status === 403 ? 'Este código ya fue usado.' :
-           'No se pudo verificar el código.');
+        const msg = data?.error ||
+          (status === 404 ? '🔍 Código no encontrado.' :
+           status === 403 ? '⚠️ Este código ya fue utilizado.' :
+           '❌ No se pudo verificar el código.');
         showAlert($('access-alert'), status === 403 ? 'warn' : 'danger', msg);
         verifiedStudent = null;
         verifiedCode = '';
@@ -428,31 +487,33 @@
       $('student-course').textContent = verifiedStudent?.course ?? '';
       $('student-box').style.display = 'block';
 
-      showAlert($('access-alert'), 'ok', 'Código válido. Ya puedes seleccionar un candidato.');
-      $('vote-instructions').textContent = 'Selecciona un candidato y presiona "Confirmar voto".';
+      showAlert($('access-alert'), 'ok', '✅ Código verificado. ¡Ya puedes votar!');
+      $('vote-instructions').textContent = '👇 Selecciona un candidato y presiona "Confirmar Voto".';
     }
 
     async function castVote() {
       hideAlert($('vote-alert'));
 
       if (!electionOpen) {
-        showAlert($('vote-alert'), 'warn', 'La votación está cerrada. No puedes votar ahora.');
+        showAlert($('vote-alert'), 'warn', '⏰ La votación está cerrada.');
         return;
       }
       if (!verifiedStudent || !isValidCode(verifiedCode)) {
-        showAlert($('vote-alert'), 'warn', 'Primero verifica tu código.');
+        showAlert($('vote-alert'), 'warn', '🔑 Primero verifica tu código.');
         return;
       }
       if (!selectedCandidateId) {
-        showAlert($('vote-alert'), 'warn', 'Selecciona un candidato.');
+        showAlert($('vote-alert'), 'warn', '👈 Selecciona un candidato.');
         return;
       }
 
-      const confirmMsg = `¿Confirmas tu voto?\n\nEstudiante: ${verifiedStudent.name}\nGrado: ${verifiedStudent.grade}  Curso: ${verifiedStudent.course}\n`;
+      const candidate = candidates.find(c => c.id === selectedCandidateId);
+      const confirmMsg = `¿Confirmas tu voto?\n\n👤 Estudiante: ${verifiedStudent.name}\n📚 Grado: ${verifiedStudent.grade}° - Curso: ${verifiedStudent.course}\n🗳️ Candidato: ${candidate?.name || 'Unknown'}\n${candidate?.party ? `📋 Lista: ${candidate.party}` : ''}`;
+      
       if (!confirm(confirmMsg)) return;
 
       $('btn-vote').disabled = true;
-      $('btn-vote').textContent = 'Enviando…';
+      $('btn-vote').innerHTML = '⏳ Enviando voto...';
 
       const { ok, data } = await fetchJSON(`${API_URL}/cast-vote`, {
         method: 'POST',
@@ -460,26 +521,26 @@
         body: JSON.stringify({ access_code: verifiedCode, candidate_id: selectedCandidateId })
       });
 
-      $('btn-vote').textContent = 'Confirmar voto';
+      $('btn-vote').innerHTML = '🗳️ Confirmar Voto';
 
       if (!ok) {
-        const msg = data?.error || 'No se pudo registrar el voto.';
+        const msg = data?.error || '❌ No se pudo registrar el voto.';
         showAlert($('vote-alert'), 'danger', msg);
         $('btn-vote').disabled = false;
         return;
       }
 
-      showAlert($('vote-alert'), 'ok', '✅ Voto registrado correctamente. ¡Gracias por participar!');
+      showAlert($('vote-alert'), 'ok', '🎉 ¡Voto registrado correctamente! Gracias por participar.');
       
-      // Bloquear controles después de votar
       $('btn-vote').disabled = true;
       $('btn-verify').disabled = true;
       $('access-code').disabled = true;
 
-      document.querySelectorAll('.cand').forEach(x => x.classList.add('disabled'));
-      document.querySelectorAll('.cand').forEach(x => x.style.pointerEvents = 'none');
+      document.querySelectorAll('.cand').forEach(x => {
+        x.classList.add('disabled');
+        x.style.pointerEvents = 'none';
+      });
 
-      // Mostrar sección para siguiente estudiante
       showNextStudentSection();
     }
 
@@ -487,10 +548,9 @@
       const section = $('next-student-section');
       section.style.display = 'block';
       
-      // Iniciar cuenta regresiva automática
-      let secondsLeft = 8; // 8 segundos antes de reiniciar
+      let secondsLeft = 8;
       
-      $('countdown-text').textContent = `Esta pantalla se reiniciará automáticamente en ${secondsLeft} segundos...`;
+      $('countdown-text').textContent = `⏱️ Esta pantalla se reiniciará automáticamente en ${secondsLeft} segundos...`;
       
       if (countdownInterval) {
         clearInterval(countdownInterval);
@@ -499,7 +559,7 @@
       countdownInterval = setInterval(() => {
         secondsLeft--;
         if (secondsLeft > 0) {
-          $('countdown-text').textContent = `Esta pantalla se reiniciará automáticamente en ${secondsLeft} segundos...`;
+          $('countdown-text').textContent = `⏱️ Esta pantalla se reiniciará automáticamente en ${secondsLeft} segundos...`;
         } else {
           clearInterval(countdownInterval);
           prepareForNextStudent();
@@ -510,17 +570,15 @@
     // Eventos
     $('btn-verify').addEventListener('click', verifyCode);
     $('btn-vote').addEventListener('click', castVote);
-    
-    // Botón manual para siguiente estudiante
     $('btn-next-student').addEventListener('click', prepareForNextStudent);
 
     $('btn-clear').addEventListener('click', () => {
       $('access-code').value = '';
       $('access-code').disabled = false;
       $('btn-verify').disabled = false;
-      $('btn-verify').textContent = 'Verificar';
+      $('btn-verify').innerHTML = '✓ Verificar';
       resetSessionUI();
-      $('vote-instructions').textContent = 'Primero verifica tu código. Luego selecciona un candidato y confirma tu voto.';
+      $('vote-instructions').textContent = 'Verifica tu código y selecciona al candidato de tu preferencia.';
     });
 
     $('access-code').addEventListener('input', () => {
@@ -537,8 +595,6 @@
       resetSessionUI();
       await loadStatus();
       await loadCandidates();
-
-      // Auto-refresh del estado cada 10s (si abren/cierra)
       setInterval(loadStatus, 10000);
     })();
   </script>
