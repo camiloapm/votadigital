@@ -2,278 +2,329 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Votación Escolar</title>
+
   <style>
     :root{
-      --bg:#f1f5f9; --card:#ffffff; --text:#0f172a; --remember:#64748b;
-      --primary:#3b82f6; --primary-dark:#2563eb;
-      --ok:#10b981; --warn:#f59e0b; --danger:#ef4444;
-      --border:#e2e8f0;
+      --bg:#0b1220;
+      --card:#0f1a2e;
+      --muted:#9ca3af;
+      --text:#e5e7eb;
+      --primary:#3b82f6;
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --border:#22304d;
+      --shadow: 0 18px 45px rgba(0,0,0,.45);
     }
-    *{box-sizing:border-box; margin:0; padding:0;}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;}
-    .container{max-width:980px;margin:0 auto;padding:1rem;}
-    .header{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem 1rem;display:flex;gap:1rem;align-items:center;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-    .brand{display:flex;gap:1rem;align-items:center;}
-    .logo{width:56px;height:56px;border-radius:12px;object-fit:cover;border:1px solid var(--border);background:#fff}
-    .title h1{font-size:1.25rem;margin-bottom:.15rem}
-    .title p{color:var(--remember);font-size:.95rem}
-    .badge{padding:.35rem .6rem;border-radius:999px;font-size:.85rem;font-weight:700;border:1px solid var(--border);background:#fff;white-space:nowrap}
-    .badge.open{color:#065f46;border-color:#bbf7d0;background:#ecfdf5}
-    .badge.closed{color:#7f1d1d;border-color:#fecaca;background:#fef2f2}
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Arial, "Noto Sans", sans-serif;
+      background: radial-gradient(1000px 700px at 20% 0%, #1b2a4a 0%, var(--bg) 60%);
+      color: var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 24px 14px;
+    }
+    .wrap{
+      width: 100%;
+      max-width: 980px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media(min-width: 900px){
+      .wrap{ grid-template-columns: 1.05fr .95fr; }
+    }
+    .card{
+      background: rgba(15,26,46,.92);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .header{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .logo{
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(59,130,246,.14);
+      border: 1px solid rgba(59,130,246,.35);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 22px;
+      flex: 0 0 auto;
+      overflow:hidden;
+    }
+    .logo img{width:100%; height:100%; object-fit:cover}
+    .title h1{
+      font-size: 18px;
+      margin:0;
+      line-height:1.2;
+    }
+    .title p{
+      margin:2px 0 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
 
-    .grid{display:grid;grid-template-columns: 1fr;gap:1rem;margin-top:1rem;}
-    @media (min-width: 900px){ .grid{grid-template-columns: 360px 1fr;} }
+    .section-title{
+      font-size: 14px;
+      margin: 0 0 10px 0;
+      color: #cbd5e1;
+      letter-spacing: .2px;
+    }
 
-    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-    .card h2{font-size:1.05rem;margin-bottom:.5rem}
-    .muted{color:var(--remember);font-size:.95rem}
-    .hr{height:1px;background:var(--border);margin:1rem 0}
+    .row{
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .field{
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    label{
+      font-size: 12px;
+      color: #cbd5e1;
+    }
+    input{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.25);
+      color: var(--text);
+      font-size: 16px;
+      outline:none;
+    }
+    input:focus{
+      border-color: rgba(59,130,246,.65);
+      box-shadow: 0 0 0 4px rgba(59,130,246,.14);
+    }
+    .btn{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      font-size: 15px;
+      cursor:pointer;
+      transition: .15s;
+    }
+    .btn:hover{ filter: brightness(1.05); }
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+    .btn.secondary{
+      background: rgba(148,163,184,.12);
+      border-color: rgba(148,163,184,.22);
+      color: #e5e7eb;
+    }
 
-    .row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-    .input{width:100%;padding:.8rem .9rem;border:2px solid var(--border);border-radius:12px;font-size:1rem;outline:none}
-    .input:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.15)}
-    .btn{border:none;border-radius:12px;padding:.8rem 1rem;font-weight:800;cursor:pointer;font-size:1rem;transition:transform .02s, background .15s, opacity .15s}
-    .btn:active{transform:translateY(1px)}
-    .btn.primary{background:var(--primary);color:#fff}
-    .btn.primary:hover{background:var(--primary-dark)}
-    .btn.secondary{background:#e2e8f0;color:#0f172a}
-    .btn.secondary:hover{background:#cbd5e1}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,.18);
+      background: rgba(148,163,184,.08);
+      font-size: 13px;
+      color: #e5e7eb;
+    }
+    .pill small{ color: var(--muted); font-weight: 600; }
 
-    .alert{border-radius:12px;padding:.75rem .9rem;border:1px solid var(--border);margin-top:.75rem;font-size:.95rem}
-    .alert.ok{background:#ecfdf5;border-color:#bbf7d0;color:#065f46}
-    .alert.warn{background:#fffbeb;border-color:#fde68a;color:#92400e}
-    .alert.danger{background:#fef2f2;border-color:#fecaca;color:#7f1d1d}
+    .alert{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(148,163,184,.18);
+      background: rgba(148,163,184,.08);
+      color: #e5e7eb;
+      font-size: 14px;
+      display:none;
+    }
+    .alert.ok{ display:block; border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.12); }
+    .alert.warn{ display:block; border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.12); }
+    .alert.danger{ display:block; border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.12); }
 
-    .candidates{display:grid;grid-template-columns:1fr;gap:.75rem}
-    @media (min-width: 560px){ .candidates{grid-template-columns:1fr 1fr;} }
-    .cand{border:2px solid var(--border);border-radius:14px;padding:.75rem;display:flex;gap:.75rem;align-items:center;cursor:pointer;background:#fff;transition:border-color .15s, box-shadow .15s, transform .02s}
-    .cand:hover{border-color:#cbd5e1}
-    .cand:active{transform:translateY(1px)}
-    .cand.selected{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.12)}
-    .cand img{width:58px;height:58px;border-radius:50%;object-fit:cover;border:1px solid var(--border);background:#fff}
-    .cand .meta{min-width:0}
-    .cand .meta .name{font-weight:900}
-    .cand .meta .party{color:var(--remember);font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px}
-
-    .footer{margin-top:1.25rem;color:var(--remember);font-size:.9rem;text-align:center}
-    .codehint{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-weight:800}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    @media(min-width: 520px){
+      .grid{ grid-template-columns: 1fr 1fr; }
+    }
+    .cand{
+      border: 1px solid rgba(148,163,184,.18);
+      background: rgba(0,0,0,.16);
+      padding: 12px;
+      border-radius: 14px;
+      cursor:pointer;
+      transition:.12s;
+      user-select:none;
+    }
+    .cand:hover{
+      border-color: rgba(59,130,246,.45);
+      transform: translateY(-1px);
+    }
+    .cand.selected{
+      border-color: rgba(59,130,246,.9);
+      background: rgba(59,130,246,.12);
+    }
+    .cand.disabled{
+      opacity:.55;
+    }
+    .cand h3{
+      margin:0;
+      font-size: 15px;
+      line-height:1.2;
+    }
+    .cand p{
+      margin: 6px 0 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .muted{ color: var(--muted); }
+    .hr{
+      height:1px;
+      background: rgba(148,163,184,.14);
+      margin: 12px 0;
+    }
+    .small{
+      font-size: 12px;
+      color: var(--muted);
+    }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <header class="header">
-      <div class="brand">
-        <img id="school-logo" class="logo" alt="Escudo del colegio" style="display:none">
+  <div class="wrap">
+    <!-- CARD 1: INGRESO -->
+    <div class="card">
+      <div class="header">
+        <div class="logo" id="school-logo">🗳️</div>
         <div class="title">
           <h1 id="school-name">Votación Escolar</h1>
-          <p id="subtitle">Cargando estado…</p>
+          <p id="status-text">Cargando estado…</p>
         </div>
       </div>
-      <div id="status-badge" class="badge">…</div>
-    </header>
 
-    <main class="grid">
-      <!-- Paso 1: Validación de código -->
-      <section class="card" aria-label="Acceso">
-        <h2>1) Ingresa tu código</h2>
-        <p class="muted">
-          El código tiene <span class="codehint">5 dígitos</span> (ej: <span class="codehint">06105</span>).
-        </p>
-        <div class="hr"></div>
+      <div class="pill" id="status-pill">
+        <span id="status-dot">●</span>
+        <small>Estado:</small>
+        <span id="status-label">Cargando…</span>
+      </div>
 
-        <label class="muted" for="access-code">Código</label>
-        <input
-          id="access-code"
-          class="input"
-          inputmode="numeric"
-          autocomplete="one-time-code"
-          placeholder="Ej: 06105"
-          maxlength="5"
-        />
-        <div class="row" style="margin-top:.75rem">
-          <button id="btn-verify" class="btn primary" type="button">Verificar</button>
-          <button id="btn-clear" class="btn secondary" type="button">Limpiar</button>
-        </div>
+      <div class="hr"></div>
 
-        <div id="access-alert" class="alert" style="display:none"></div>
+      <p class="section-title">1) Ingresa tu código</p>
 
-        <div id="student-box" class="alert ok" style="display:none; margin-top: .75rem">
-          <div><strong>Habilitado:</strong> <span id="student-name"></span></div>
-          <div class="muted">Grado <span id="student-grade"></span> — Curso <span id="student-course"></span></div>
-        </div>
-      </section>
+      <div class="field">
+        <label for="access-code">Código (5 dígitos)</label>
+        <input id="access-code" type="text" inputmode="numeric" maxlength="5" placeholder="Ej: 06105" />
+      </div>
 
-      <!-- Paso 2: Candidatos + voto -->
-      <section class="card" aria-label="Votación">
-        <h2>2) Elige un candidato</h2>
-        <p class="muted" id="vote-instructions">
-          Primero verifica tu código. Luego selecciona un candidato y confirma tu voto.
-        </p>
-        <div class="hr"></div>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn" id="btn-verify">Verificar</button>
+        <button class="btn secondary" id="btn-clear">Limpiar</button>
+      </div>
 
-        <div id="candidates" class="candidates" aria-live="polite"></div>
+      <div class="alert" id="verify-alert"></div>
 
-        <div class="hr"></div>
+      <div class="hr"></div>
 
-        <div class="row" style="justify-content:space-between">
-          <div class="muted" id="selection-text">Ningún candidato seleccionado.</div>
-          <button id="btn-vote" class="btn primary" type="button" disabled>Confirmar voto</button>
-        </div>
+      <p class="section-title">2) Elige un candidato</p>
+      <p class="small" id="vote-instructions">
+        Primero verifica tu código. Luego selecciona un candidato y confirma tu voto.
+      </p>
 
-        <div id="vote-alert" class="alert" style="display:none"></div>
-      </section>
-    </main>
+      <div class="alert" id="vote-alert"></div>
+    </div>
 
-    <div class="footer">
-      Si tienes problemas, verifica que tu código tenga 5 dígitos exactos (ej: <span class="codehint">06105</span>).
+    <!-- CARD 2: CANDIDATOS -->
+    <div class="card">
+      <p class="section-title">Candidatos</p>
+      <div class="grid" id="candidates"></div>
+
+      <div class="hr"></div>
+
+      <button class="btn" id="btn-vote" disabled>Confirmar voto</button>
+
+      <p class="small" style="margin-top:10px;">
+        <span class="muted">API:</span> <span id="api-url"></span>
+      </p>
     </div>
   </div>
 
   <script>
+    // =========================
+    // CONFIG
+    // =========================
     const API_URL = '/api';
+    document.getElementById('api-url').textContent = location.origin + API_URL;
 
-    // Estado en memoria (sin localStorage)
+    // =========================
+    // STATE
+    // =========================
     let electionOpen = false;
-    let verifiedStudent = null; // { name, grade, course }
+    let verifiedStudent = null;
     let verifiedCode = '';
-    let candidates = [];
     let selectedCandidateId = null;
+    let candidates = [];
 
+    // =========================
+    // HELPERS
+    // =========================
     const $ = (id) => document.getElementById(id);
 
+    function onlyDigits(str) {
+      return String(str || '').replace(/\D+/g, '');
+    }
+
+    function isValidCode(code) {
+      return /^\d{5}$/.test(code);
+    }
+
+    async function fetchJSON(url, options = {}) {
+      try {
+        const res = await fetch(url, options);
+        const data = await res.json().catch(() => null);
+        return { ok: res.ok, status: res.status, data };
+      } catch (err) {
+        return { ok: false, status: 0, data: { error: 'No se pudo conectar con el servidor.' } };
+      }
+    }
+
     function showAlert(el, type, msg) {
-      el.className = `alert ${type}`;
+      el.className = 'alert ' + type;
       el.textContent = msg;
       el.style.display = 'block';
     }
-    function hideAlert(el){ el.style.display = 'none'; el.textContent=''; el.className='alert'; }
 
-    function onlyDigits(s){ return String(s || '').replace(/[^\d]/g, ''); }
-
-    function isValidCode(code){ return /^\d{5}$/.test(code); }
-
-    async function fetchJSON(path, options = {}) {
-      const res = await fetch(path, options);
-      const data = await res.json().catch(() => ({}));
-      return { ok: res.ok, status: res.status, data };
-    }
-
-    async function loadStatus() {
-      const { ok, data } = await fetchJSON(`${API_URL}/check-status`);
-      if (!ok) {
-        $('subtitle').textContent = 'No se pudo cargar el estado.';
-        $('status-badge').textContent = 'Error';
-        $('status-badge').className = 'badge closed';
-        electionOpen = false;
-        return;
-      }
-
-      electionOpen = data.open === true;
-
-      // Branding
-      if (data.school_name) $('school-name').textContent = data.school_name;
-      if (data.school_logo) {
-        const img = $('school-logo');
-        img.src = data.school_logo;
-        img.style.display = 'block';
-      }
-
-      // Estado
-      const badge = $('status-badge');
-      if (electionOpen) {
-        badge.textContent = 'Votación ABIERTA';
-        badge.className = 'badge open';
-        $('subtitle').textContent = 'Puedes votar ahora.';
-      } else {
-        badge.textContent = 'Votación CERRADA';
-        badge.className = 'badge closed';
-        $('subtitle').textContent = 'La votación está cerrada.';
-      }
-
-      // Si está cerrada, bloqueamos voto (pero igual cargamos candidatos para mostrar)
-      $('btn-vote').disabled = true;
-    }
-
-    function renderCandidates() {
-      const wrap = $('candidates');
-      wrap.innerHTML = '';
-
-      if (!candidates || candidates.length === 0) {
-        wrap.innerHTML = `<div class="muted">No hay candidatos cargados aún.</div>`;
-        return;
-      }
-
-      for (const c of candidates) {
-        const div = document.createElement('div');
-        div.className = 'cand';
-        div.dataset.id = c.id;
-
-        const img = document.createElement('img');
-        img.alt = `Foto de ${c.name}`;
-        img.src = c.photo_url || 'data:image/svg+xml;utf8,' + encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">
-            <rect width="100%" height="100%" fill="#e2e8f0"/>
-            <text x="50%" y="52%" text-anchor="middle" font-family="Arial" font-size="16" fill="#64748b">Sin foto</text>
-          </svg>
-        `);
-        img.onerror = () => { img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">
-            <rect width="100%" height="100%" fill="#e2e8f0"/>
-            <text x="50%" y="52%" text-anchor="middle" font-family="Arial" font-size="16" fill="#64748b">Sin foto</text>
-          </svg>
-        `); };
-
-        const meta = document.createElement('div');
-        meta.className = 'meta';
-
-        const name = document.createElement('div');
-        name.className = 'name';
-        name.textContent = c.name || 'Candidato';
-
-        const party = document.createElement('div');
-        party.className = 'party';
-        party.textContent = c.party ? `Lista: ${c.party}` : ' ';
-
-        meta.appendChild(name);
-        meta.appendChild(party);
-
-        div.appendChild(img);
-        div.appendChild(meta);
-
-        div.addEventListener('click', () => {
-          // Solo permitir seleccionar si está abierto y el código está verificado
-          if (!electionOpen) {
-            showAlert($('vote-alert'), 'warn', 'La votación está cerrada. No puedes votar ahora.');
-            return;
-          }
-          if (!verifiedStudent) {
-            showAlert($('vote-alert'), 'warn', 'Primero verifica tu código.');
-            return;
-          }
-
-          selectedCandidateId = c.id;
-          document.querySelectorAll('.cand').forEach(x => x.classList.remove('selected'));
-          div.classList.add('selected');
-          $('selection-text').textContent = `Seleccionado: ${c.name}${c.party ? ' — Lista: ' + c.party : ''}`;
-          hideAlert($('vote-alert'));
-          $('btn-vote').disabled = false;
-        });
-
-        wrap.appendChild(div);
-      }
-    }
-
-    async function loadCandidates() {
-      const { ok, data } = await fetchJSON(`${API_URL}/get-candidates`);
-      if (!ok) {
-        $('candidates').innerHTML = `<div class="muted">Error al cargar candidatos.</div>`;
-        return;
-      }
-      candidates = data.candidates || [];
-      renderCandidates();
+    function hideAlert(el) {
+      el.className = 'alert';
+      el.textContent = '';
+      el.style.display = 'none';
     }
 
     function resetSessionUI() {
@@ -281,75 +332,163 @@
       verifiedCode = '';
       selectedCandidateId = null;
 
-      $('student-box').style.display = 'none';
-      $('student-name').textContent = '';
-      $('student-grade').textContent = '';
-      $('student-course').textContent = '';
+      hideAlert($('verify-alert'));
+      hideAlert($('vote-alert'));
 
-      document.querySelectorAll('.cand').forEach(x => x.classList.remove('selected'));
-      $('selection-text').textContent = 'Ningún candidato seleccionado.';
       $('btn-vote').disabled = true;
 
-      hideAlert($('access-alert'));
-      hideAlert($('vote-alert'));
+      // Limpiar selección
+      document.querySelectorAll('.cand').forEach(x => x.classList.remove('selected'));
+      document.querySelectorAll('.cand').forEach(x => x.classList.remove('disabled'));
+      document.querySelectorAll('.cand').forEach(x => x.style.pointerEvents = 'auto');
     }
 
-    async function verifyCode() {
-      hideAlert($('access-alert'));
-      hideAlert($('vote-alert'));
+    function updateStatusUI() {
+      const pill = $('status-pill');
+      const dot = $('status-dot');
+      const label = $('status-label');
 
-      if (!electionOpen) {
-        showAlert($('access-alert'), 'warn', 'La votación está cerrada. No es posible votar.');
+      if (electionOpen) {
+        dot.style.color = '#22c55e';
+        label.textContent = 'ABIERTA';
+        $('status-text').textContent = 'La votación está abierta. Puedes votar.';
+      } else {
+        dot.style.color = '#ef4444';
+        label.textContent = 'CERRADA';
+        $('status-text').textContent = 'La votación está cerrada.';
+      }
+    }
+
+    // =========================
+    // LOAD STATUS
+    // =========================
+    async function loadStatus() {
+      const { ok, data } = await fetchJSON(`${API_URL}/check-status`);
+      if (!ok) {
+        electionOpen = false;
+        updateStatusUI();
         return;
       }
 
-      const raw = $('access-code').value;
-      const code = onlyDigits(raw).slice(0, 5);
+      electionOpen = data?.open === true;
+      updateStatusUI();
+
+      // Config visual
+      if (data?.school_name) $('school-name').textContent = data.school_name;
+
+      if (data?.school_logo) {
+        const logoDiv = $('school-logo');
+        logoDiv.innerHTML = `<img src="${data.school_logo}" alt="Logo" />`;
+      }
+    }
+
+    // =========================
+    // LOAD CANDIDATES
+    // =========================
+    async function loadCandidates() {
+      const { ok, data } = await fetchJSON(`${API_URL}/get-candidates`);
+      if (!ok) {
+        $('candidates').innerHTML = `<p class="muted">No se pudieron cargar candidatos.</p>`;
+        return;
+      }
+
+      candidates = Array.isArray(data?.candidates) ? data.candidates : [];
+      renderCandidates();
+    }
+
+    function renderCandidates() {
+      const container = $('candidates');
+      container.innerHTML = '';
+
+      if (!candidates.length) {
+        container.innerHTML = `<p class="muted">No hay candidatos registrados.</p>`;
+        return;
+      }
+
+      candidates.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'cand';
+        div.dataset.id = c.id;
+
+        div.innerHTML = `
+          <h3>${escapeHTML(c.name || '')}</h3>
+          <p>${escapeHTML(c.party || '')}</p>
+        `;
+
+        div.addEventListener('click', () => {
+          if (!verifiedStudent) return;
+          if (!electionOpen) return;
+
+          document.querySelectorAll('.cand').forEach(x => x.classList.remove('selected'));
+          div.classList.add('selected');
+          selectedCandidateId = c.id;
+
+          $('btn-vote').disabled = false;
+          $('vote-instructions').textContent = 'Seleccionaste un candidato. Ahora confirma tu voto.';
+        });
+
+        container.appendChild(div);
+      });
+    }
+
+    function escapeHTML(str) {
+      return String(str || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    // =========================
+    // VERIFY CODE
+    // =========================
+    async function verifyCode() {
+      hideAlert($('verify-alert'));
+      hideAlert($('vote-alert'));
+
+      if (!electionOpen) {
+        showAlert($('verify-alert'), 'warn', 'La votación está cerrada. No puedes votar ahora.');
+        return;
+      }
+
+      const code = onlyDigits($('access-code').value).slice(0, 5);
       $('access-code').value = code;
 
       if (!isValidCode(code)) {
-        showAlert($('access-alert'), 'danger', 'Código inválido. Debe tener 5 dígitos (ej: 06105).');
+        showAlert($('verify-alert'), 'warn', 'El código debe tener 5 dígitos.');
         return;
       }
 
       $('btn-verify').disabled = true;
       $('btn-verify').textContent = 'Verificando…';
 
-      const { ok, data, status } = await fetchJSON(`${API_URL}/verify-code`, {
+      const { ok, data } = await fetchJSON(`${API_URL}/verify-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ access_code: code })
       });
 
-      $('btn-verify').disabled = false;
       $('btn-verify').textContent = 'Verificar';
+      $('btn-verify').disabled = false;
 
       if (!ok) {
-        const msg =
-          data?.error ||
-          (status === 404 ? 'Código no encontrado.' :
-           status === 403 ? 'Este código ya fue usado.' :
-           'No se pudo verificar el código.');
-        showAlert($('access-alert'), status === 403 ? 'warn' : 'danger', msg);
-        verifiedStudent = null;
-        verifiedCode = '';
-        $('student-box').style.display = 'none';
-        $('btn-vote').disabled = true;
+        const msg = data?.error || 'Código inválido.';
+        showAlert($('verify-alert'), 'danger', msg);
+        resetSessionUI();
         return;
       }
 
       verifiedStudent = data.student;
       verifiedCode = code;
 
-      $('student-name').textContent = verifiedStudent?.name || '';
-      $('student-grade').textContent = verifiedStudent?.grade ?? '';
-      $('student-course').textContent = verifiedStudent?.course ?? '';
-      $('student-box').style.display = 'block';
-
-      showAlert($('access-alert'), 'ok', 'Código válido. Ya puedes seleccionar un candidato.');
-      $('vote-instructions').textContent = 'Selecciona un candidato y presiona “Confirmar voto”.';
+      showAlert($('verify-alert'), 'ok', `✅ Código válido: ${verifiedStudent.name} (Grado ${verifiedStudent.grade} - Curso ${verifiedStudent.course})`);
+      $('vote-instructions').textContent = 'Ahora selecciona un candidato y presiona “Confirmar voto”.';
     }
 
+    // =========================
+    // CAST VOTE
+    // =========================
     async function castVote() {
       hideAlert($('vote-alert'));
 
@@ -387,17 +526,36 @@
         return;
       }
 
+      // ==========================================================
+      // ✅ MEJORA (PUNTO 1):
+      // Después de votar, dejamos la pantalla lista para el siguiente
+      // estudiante SIN refrescar.
+      // ==========================================================
       showAlert($('vote-alert'), 'ok', '✅ Voto registrado correctamente. ¡Gracias por participar!');
-      // Bloquear todo después de votar
+
+      // Bloquear temporalmente mientras se muestra el mensaje
       $('btn-vote').disabled = true;
       $('btn-verify').disabled = true;
       $('access-code').disabled = true;
 
       document.querySelectorAll('.cand').forEach(x => x.classList.add('disabled'));
       document.querySelectorAll('.cand').forEach(x => x.style.pointerEvents = 'none');
+
+      // Reset automático para el siguiente estudiante
+      setTimeout(() => {
+        $('access-code').value = '';
+        $('access-code').disabled = false;
+        $('btn-verify').disabled = false;
+        $('btn-verify').textContent = 'Verificar';
+        resetSessionUI();
+        $('vote-instructions').textContent = 'Primero verifica tu código. Luego selecciona un candidato y confirma tu voto.';
+        $('access-code').focus();
+      }, 1800);
     }
 
-    // Eventos
+    // =========================
+    // EVENTS
+    // =========================
     $('btn-verify').addEventListener('click', verifyCode);
     $('btn-vote').addEventListener('click', castVote);
 
@@ -419,13 +577,15 @@
       if (e.key === 'Enter') verifyCode();
     });
 
-    // Init
+    // =========================
+    // INIT
+    // =========================
     (async function init(){
       resetSessionUI();
       await loadStatus();
       await loadCandidates();
 
-      // Auto-refresh del estado cada 10s (si abren/cierra)
+      // Auto-refresh del estado cada 10s (si cambia en admin)
       setInterval(loadStatus, 10000);
     })();
   </script>
