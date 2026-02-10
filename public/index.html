@@ -15,96 +15,95 @@
       --shadow-lg:0 8px 24px rgba(0,0,0,0.12);
     }
     *{box-sizing:border-box; margin:0; padding:0;}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;}
-    .container{max-width:1200px;margin:0 auto;padding:1.5rem;}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;padding:1rem;}
+    .app-container{max-width:900px;margin:0 auto;}
 
     /* Header moderno */
-    .header{background:var(--card);border-radius:16px;padding:1.25rem 1.5rem;display:flex;gap:1.25rem;align-items:center;justify-content:space-between;box-shadow:var(--shadow-md);margin-bottom:1.5rem;}
-    .brand{display:flex;gap:1rem;align-items:center;}
-    .logo{width:64px;height:64px;border-radius:14px;object-fit:cover;border:2px solid var(--border);background:#fff;box-shadow:var(--shadow-sm);}
-    .title h1{font-size:1.4rem;font-weight:700;color:var(--text);margin-bottom:.2rem;}
-    .title p{color:var(--remember);font-size:.95rem;}
-    .badge{padding:.45rem 1rem;border-radius:999px;font-size:.9rem;font-weight:700;border:2px solid transparent;white-space:nowrap;transition:all .2s;}
+    .header{background:var(--card);border-radius:16px;padding:1rem 1.25rem;display:flex;gap:1rem;align-items:center;justify-content:space-between;box-shadow:var(--shadow-md);margin-bottom:1rem;}
+    .brand{display:flex;gap:.75rem;align-items:center;}
+    .logo{width:56px;height:56px;border-radius:12px;object-fit:contain;border:2px solid var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:4px;}
+    .title h1{font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:.15rem;}
+    .title p{color:var(--remember);font-size:.9rem;}
+    .badge{padding:.35rem .75rem;border-radius:999px;font-size:.85rem;font-weight:700;border:2px solid transparent;white-space:nowrap;transition:all .2s;}
     .badge.open{color:#065f46;background:#ecfdf5;border-color:#86efac;}
     .badge.closed{color:#991b1b;background:#fef2f2;border-color:#fecaca;}
 
-    /* Layout de grid */
-    .grid{display:grid;grid-template-columns:1fr;gap:1.5rem;}
-    @media (min-width: 1024px){ .grid{grid-template-columns:380px 1fr;} }
-
     /* Tarjetas modernas */
-    .card{background:var(--card);border-radius:16px;padding:1.5rem;box-shadow:var(--shadow-md);border:1px solid var(--border);}
-    .card h2{font-size:1.15rem;font-weight:700;margin-bottom:.75rem;color:var(--text);}
-    .muted{color:var(--remember);font-size:.95rem;}
-    .hr{height:1px;background:linear-gradient(90deg,var(--border) 0%,transparent 100%);margin:1.25rem 0;}
+    .card{background:var(--card);border-radius:16px;padding:1.25rem;box-shadow:var(--shadow-md);border:1px solid var(--border);margin-bottom:1rem;}
+    .card h2{font-size:1.1rem;font-weight:700;margin-bottom:.5rem;color:var(--text);}
+    .muted{color:var(--remember);font-size:.9rem;}
+    .hr{height:1px;background:linear-gradient(90deg,var(--border) 0%,transparent 100%);margin:1rem 0;}
 
     /* Elementos de formulario */
-    .input{width:100%;padding:1rem 1.1rem;border:2px solid var(--border);border-radius:12px;font-size:1.1rem;outline:none;transition:all .2s;}
-    .input:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.12);}
-    .btn{border:none;border-radius:12px;padding:.9rem 1.5rem;font-weight:700;cursor:pointer;font-size:1rem;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;}
+    .input{width:100%;padding:.85rem 1rem;border:2px solid var(--border);border-radius:10px;font-size:1rem;outline:none;transition:all .2s;}
+    .input:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(59,130,246,.12);}
+    .btn{border:none;border-radius:10px;padding:.8rem 1.25rem;font-weight:700;cursor:pointer;font-size:.95rem;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;}
     .btn.primary{background:var(--primary);color:#fff;}
-    .btn.primary:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,130,246,.3);}
+    .btn.primary:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:0 3px 10px rgba(59,130,246,.3);}
     .btn.secondary{background:#f1f5f9;color:var(--text);}
     .btn.secondary:hover{background:#e2e8f0;}
     .btn.success{background:var(--ok);color:#fff;}
-    .btn.success:hover{background:var(--ok-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(16,185,129,.3);}
+    .btn.success:hover{background:var(--ok-dark);transform:translateY(-1px);box-shadow:0 3px 10px rgba(16,185,129,.3);}
     .btn:disabled{opacity:.6;cursor:not-allowed;transform:none !important;box-shadow:none !important;}
 
     /* Alertas */
-    .alert{border-radius:12px;padding:.9rem 1.1rem;border:2px solid;margin-top:.9rem;font-size:.95rem;font-weight:500;}
+    .alert{border-radius:10px;padding:.75rem 1rem;border:2px solid;margin-top:.75rem;font-size:.9rem;font-weight:500;}
     .alert.ok{background:#ecfdf5;border-color:#86efac;color:#065f46;}
     .alert.warn{background:#fffbeb;border-color:#fde68a;color:#92400e;}
     .alert.danger{background:#fef2f2;border-color:#fecaca;color:#991b1d;}
 
-    /* Grid de candidatos - diseño nuevo */
-    .candidates-title{font-size:1.15rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
-    .candidates-title span{font-size:1.5rem;}
-    .candidates{display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:1.25rem;}
+    /* Sección candidatos - inicialmente oculta */
+    #candidates-section{display:none;animation:fadeIn 0.4s ease;}
+    #candidates-section.visible{display:block;}
 
-    /* Tarjeta de candidato - diseño atractivo */
-    .cand{background:#fff;border:2px solid var(--border);border-radius:16px;padding:1.5rem;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden;}
-    .cand::before{content:'';position:absolute;top:0;left:0;right:0;height:80px;background:linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);border-radius:14px 14px 0 0;margin:-1.5rem -1.5rem 0 -1.5rem;}
-    .cand:hover{border-color:#c7d2fe;transform:translateY(-4px);box-shadow:var(--shadow-lg);}
-    .cand.selected{border-color:var(--primary);box-shadow:0 0 0 4px rgba(59,130,246,.2),var(--shadow-lg);transform:translateY(-4px);}
+    .candidates-title{font-size:1.1rem;font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:.4rem;}
+    .candidates-title span{font-size:1.3rem;}
+    .candidates{display:grid;grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));gap:1rem;}
+
+    /* Tarjeta de candidato */
+    .cand{background:#fff;border:2px solid var(--border);border-radius:14px;padding:1.25rem;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden;}
+    .cand::before{content:'';position:absolute;top:0;left:0;right:0;height:70px;background:linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);border-radius:12px 12px 0 0;margin:-1.25rem -1.25rem 0 -1.25rem;}
+    .cand:hover{border-color:#c7d2fe;transform:translateY(-3px);box-shadow:var(--shadow-lg);}
+    .cand.selected{border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,130,246,.2),var(--shadow-lg);transform:translateY(-3px);}
     .cand.selected::before{background:linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);}
     .cand.disabled{opacity:0.5;pointer-events:none;filter:grayscale(50%);}
 
-    /* Foto del candidato - más grande y circular */
-    .cand-photo-container{position:relative;z-index:1;margin-bottom:1rem;}
-    .cand img{width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.15);background:#f8fafc;transition:all .3s;}
+    /* Foto del candidato */
+    .cand-photo-container{position:relative;z-index:1;margin-bottom:.75rem;}
+    .cand img{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.12);background:#f8fafc;transition:all .3s;}
     .cand:hover img{border-color:#bfdbfe;transform:scale(1.02);}
-    .cand.selected img{border-color:var(--primary);box-shadow:0 4px 16px rgba(59,130,246,.3);}
+    .cand.selected img{border-color:var(--primary);box-shadow:0 3px 12px rgba(59,130,246,.25);}
 
     .cand .meta{position:relative;z-index:1;width:100%;}
-    .cand .name{font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:.4rem;line-height:1.3;}
-    .cand .party{display:inline-flex;align-items:center;gap:.4rem;background:linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);padding:.4rem .9rem;border-radius:20px;font-size:.85rem;font-weight:600;color:var(--remember);margin-bottom:.5rem;}
-    .cand .party-icon{font-size:1rem;}
+    .cand .name{font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:.3rem;line-height:1.3;}
+    .cand .party{display:inline-flex;align-items:center;gap:.3rem;background:linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);padding:.3rem .75rem;border-radius:16px;font-size:.8rem;font-weight:600;color:var(--remember);}
+    .cand .party-icon{font-size:.9rem;}
 
-    .selection-indicator{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;background:#fff;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .2s;opacity:0;}
+    .selection-indicator{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .2s;opacity:0;}
     .cand.selected .selection-indicator{opacity:1;background:var(--ok);border-color:var(--ok);color:#fff;}
-    .selection-indicator svg{width:16px;height:16px;}
+    .selection-indicator svg{width:14px;height:14px;}
 
     /* Footer */
-    .footer{margin-top:2rem;color:var(--remember);font-size:.9rem;text-align:center;padding:.75rem;}
-    .codehint{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-weight:700;background:#f1f5f9;padding:.2rem .5rem;border-radius:6px;}
+    .footer{margin-top:1.5rem;color:var(--remember);font-size:.85rem;text-align:center;padding:.5rem;}
+    .codehint{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-weight:700;background:#f1f5f9;padding:.15rem .4rem;border-radius:5px;}
 
     /* Sección siguiente estudiante */
-    .next-student-section{margin-top:1.5rem;padding-top:1.5rem;border-top:2px dashed var(--border);}
-    .next-student-btn{width:100%;background:linear-gradient(135deg, var(--ok) 0%, #34d399 100%);color:#fff;font-weight:800;padding:1rem;border-radius:14px;border:none;cursor:pointer;font-size:1.1rem;transition:all .2s;box-shadow:0 4px 12px rgba(16,185,129,.3);}
-    .next-student-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(16,185,129,.4);}
-    .countdown-text{font-size:.9rem;color:var(--ok);text-align:center;margin-top:.75rem;font-weight:500;}
+    .next-student-section{margin-top:1.25rem;padding-top:1.25rem;border-top:2px dashed var(--border);}
+    .next-student-btn{width:100%;background:linear-gradient(135deg, var(--ok) 0%, #34d399 100%);color:#fff;font-weight:700;padding:.9rem;border-radius:12px;border:none;cursor:pointer;font-size:1rem;transition:all .2s;box-shadow:0 3px 10px rgba(16,185,129,.3);}
+    .next-student-btn:hover{transform:translateY(-2px);box-shadow:0 5px 16px rgba(16,185,129,.4);}
+    .countdown-text{font-size:.85rem;color:var(--ok);text-align:center;margin-top:.5rem;font-weight:500;}
 
     /* Animaciones */
     @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
     .cand{animation:fadeIn 0.4s ease forwards;}
 
-    /* Student info box mejorado */
-    #student-box{padding:1rem 1.25rem;border-radius:12px;margin-top:1rem;}
-    #student-box strong{display:block;font-size:1.1rem;margin-bottom:.25rem;}
+    /* Student info box */
+    #student-box{padding:.9rem 1.1rem;border-radius:10px;margin-top:.75rem;}
+    #student-box strong{display:block;font-size:1rem;margin-bottom:.2rem;}
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="app-container">
     <header class="header">
       <div class="brand">
         <img id="school-logo" class="logo" alt="Escudo del colegio" style="display:none">
@@ -112,80 +111,78 @@
           <h1 id="school-name">Votación Escolar</h1>
           <p id="subtitle">Cargando estado...</p>
         </div>
-      <div id="status-badge" class="</div>
-      badge">...</div>
+      </div>
+      <div id="status-badge" class="badge">...</div>
     </header>
 
-    <main class="grid">
-      <!-- Paso 1: Validación de código -->
-      <section class="card" aria-label="Acceso">
-        <h2>🎫 Identificación</h2>
-        <p class="muted">
-          Ingresa tu código de 5 dígitos para participar en la votación.
-        </p>
-        <div class="hr"></div>
+    <!-- Paso 1: Validación de código (siempre visible inicialmente) -->
+    <section class="card" aria-label="Acceso" id="access-section">
+      <h2>🎫 Identificación</h2>
+      <p class="muted">
+        Ingresa tu código de 5 dígitos para participar en la votación.
+      </p>
+      <div class="hr"></div>
 
-        <label class="muted" for="access-code" style="display:block;margin-bottom:.5rem;font-weight:500;">Tu código</label>
-        <input
-          id="access-code"
-          class="input"
-          inputmode="numeric"
-          autocomplete="one-time-code"
-          placeholder="Ej: 06105"
-          maxlength="5"
-        />
-        <div style="display:flex;gap:.75rem;margin-top:1rem;flex-wrap:wrap;">
-          <button id="btn-verify" class="btn primary" type="button" style="flex:1;min-width:120px;">
-            ✓ Verificar
-          </button>
-          <button id="btn-clear" class="btn secondary" type="button" style="flex:1;min-width:100px;">
-            Limpiar
-          </button>
+      <label class="muted" for="access-code" style="display:block;margin-bottom:.4rem;font-weight:500;">Tu código</label>
+      <input
+        id="access-code"
+        class="input"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        placeholder="Ej: 06105"
+        maxlength="5"
+      />
+      <div style="display:flex;gap:.6rem;margin-top:.75rem;flex-wrap:wrap;">
+        <button id="btn-verify" class="btn primary" type="button" style="flex:1;min-width:100px;">
+          ✓ Verificar
+        </button>
+        <button id="btn-clear" class="btn secondary" type="button" style="flex:1;min-width:90px;">
+          Limpiar
+        </button>
+      </div>
+
+      <div id="access-alert" class="alert" style="display:none"></div>
+
+      <div id="student-box" class="alert ok" style="display:none;">
+        <strong>✅ Estudiante habilitado</strong>
+        <span id="student-name" style="font-size:1rem;font-weight:600;"></span>
+        <div class="muted" style="margin-top:.2rem;">
+          Grado <span id="student-grade"></span> • Curso <span id="student-course"></span>
         </div>
+      </div>
+    </section>
 
-        <div id="access-alert" class="alert" style="display:none"></div>
+    <!-- Paso 2: Candidatos + voto (oculto hasta verificar código) -->
+    <section class="card" aria-label="Votación" id="candidates-section">
+      <h2 class="candidates-title"><span>🗳️</span> Candidatos</h2>
+      <p class="muted" id="vote-instructions">
+        Selecciona al candidato de tu preferencia.
+      </p>
+      <div class="hr"></div>
 
-        <div id="student-box" class="alert ok" style="display:none;">
-          <strong>✅ Estudiante habilitado</strong>
-          <span id="student-name" style="font-size:1.1rem;font-weight:600;"></span>
-          <div class="muted" style="margin-top:.25rem;">
-            Grado <span id="student-grade"></span> • Curso <span id="student-course"></span>
-          </div>
-        </div>
-      </section>
+      <div id="candidates" class="candidates" aria-live="polite">
+        <div class="muted" style="text-align:center;padding:1.5rem;">Cargando candidatos...</div>
+      </div>
 
-      <!-- Paso 2: Candidatos + voto -->
-      <section class="card" aria-label="Votación">
-        <h2 class="candidates-title"><span>🗳️</span> Candidatos</h2>
-        <p class="muted" id="vote-instructions">
-          Verifica tu código y selecciona al candidato de tu preferencia.
-        </p>
-        <div class="hr"></div>
+      <div class="hr"></div>
 
-        <div id="candidates" class="candidates" aria-live="polite">
-          <div class="muted" style="text-align:center;padding:2rem;">Cargando candidatos...</div>
-        </div>
+      <div style="display:flex;flex-direction:column;gap:.6rem;">
+        <div class="muted" id="selection-text" style="font-weight:500;">Ningún candidato seleccionado.</div>
+        <button id="btn-vote" class="btn success" type="button" disabled style="font-size:1rem;padding:.9rem 1.25rem;">
+          🗳️ Confirmar Voto
+        </button>
+      </div>
 
-        <div class="hr"></div>
+      <div id="vote-alert" class="alert" style="display:none"></div>
 
-        <div style="display:flex;flex-direction:column;gap:.75rem;">
-          <div class="muted" id="selection-text" style="font-weight:500;">Ningún candidato seleccionado.</div>
-          <button id="btn-vote" class="btn success" type="button" disabled style="font-size:1.1rem;padding:1rem 1.5rem;">
-            🗳️ Confirmar Voto
-          </button>
-        </div>
-
-        <div id="vote-alert" class="alert" style="display:none"></div>
-
-        <!-- Sección para siguiente estudiante -->
-        <div id="next-student-section" class="next-student-section" style="display:none;">
-          <button id="btn-next-student" class="next-student-btn" type="button">
-            ✓ Listo para Siguiente Estudiante
-          </button>
-          <p id="countdown-text" class="countdown-text"></p>
-        </div>
-      </section>
-    </main>
+      <!-- Sección para siguiente estudiante -->
+      <div id="next-student-section" class="next-student-section" style="display:none;">
+        <button id="btn-next-student" class="next-student-btn" type="button">
+          ✓ Siguiente Estudiante
+        </button>
+        <p id="countdown-text" class="countdown-text"></p>
+      </div>
+    </section>
 
     <div class="footer">
       Si tienes dudas sobre tu código, consulta con tu profesor. |
@@ -227,7 +224,7 @@
     }
 
     // Generador de imagen placeholder con iniciales
-    function generatePlaceholder(name, size = 120) {
+    function generatePlaceholder(name, size = 100) {
       const initials = name ? name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '?';
       const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
       const color = colors[name ? name.charCodeAt(0) % colors.length : 0];
@@ -250,6 +247,27 @@
       return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
     }
 
+    // Mostrar sección de candidatos
+    function showCandidatesSection() {
+      const section = $('candidates-section');
+      section.classList.add('visible');
+      section.style.display = 'block';
+      
+      // Scroll suave hacia los candidatos
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Ocultar sección de candidatos
+    function hideCandidatesSection() {
+      const section = $('candidates-section');
+      section.classList.remove('visible');
+      setTimeout(() => {
+        if (!section.classList.contains('visible')) {
+          section.style.display = 'none';
+        }
+      }, 400);
+    }
+
     async function loadStatus() {
       const { ok, data } = await fetchJSON(`${API_URL}/check-status`);
       if (!ok) {
@@ -265,7 +283,7 @@
       // Branding
       if (data.school_name) $('school-name').textContent = data.school_name;
       
-      // Manejo del logo
+      // Manejo del logo con object-fit: contain
       const img = $('school-logo');
       const logoUrl = data.school_logo || data.school_logo_url || '';
       
@@ -303,9 +321,7 @@
       wrap.innerHTML = '';
 
       if (!candidates || candidates.length === 0) {
-        wrap.innerHTML = `<div class="muted" style="text-align:center;padding:2rem;grid-column:1/-1;">
-          📋 No hay candidatos registrados actualmente.
-        </div>`;
+        wrap.innerHTML = `<div class="muted" style="text-align:center;padding:1.5rem;">📋 No hay candidatos registrados.</div>`;
         return;
       }
 
@@ -313,7 +329,7 @@
         const div = document.createElement('div');
         div.className = 'cand';
         div.dataset.id = c.id;
-        div.style.animationDelay = `${index * 0.1}s`;
+        div.style.animationDelay = `${index * 0.08}s`;
 
         // Indicador de selección
         const indicator = document.createElement('div');
@@ -331,10 +347,10 @@
         if (c.photo_url && c.photo_url.trim() !== '') {
           img.src = c.photo_url;
           img.onerror = function() {
-            this.src = generatePlaceholder(c.name, 120);
+            this.src = generatePlaceholder(c.name, 100);
           };
         } else {
-          img.src = generatePlaceholder(c.name, 120);
+          img.src = generatePlaceholder(c.name, 100);
         }
 
         photoContainer.appendChild(img);
@@ -366,7 +382,7 @@
             return;
           }
           if (!verifiedStudent) {
-            showAlert($('vote-alert'), 'warn', '🔑 Primero verifica tu código.');
+            showAlert($('vote-alert'), 'warn', '🔑 Tu sesión ha expirado. Vuelve a verificar tu código.');
             return;
           }
 
@@ -388,7 +404,7 @@
     async function loadCandidates() {
       const { ok, data } = await fetchJSON(`${API_URL}/get-candidates`);
       if (!ok) {
-        $('candidates').innerHTML = `<div class="muted" style="text-align:center;padding:2rem;grid-column:1/-1;">❌ Error al cargar candidatos.</div>`;
+        $('candidates').innerHTML = `<div class="muted" style="text-align:center;padding:1.5rem;">❌ Error al cargar candidatos.</div>`;
         return;
       }
       candidates = data.candidates || [];
@@ -426,14 +442,20 @@
     }
 
     function prepareForNextStudent() {
+      // Habilitar controles para el siguiente estudiante
       $('access-code').disabled = false;
       $('access-code').value = '';
       $('access-code').focus();
       $('btn-verify').disabled = false;
       $('btn-verify').innerHTML = '✓ Verificar';
       
+      // Reiniciar UI
       resetSessionUI();
-      $('vote-instructions').textContent = 'Verifica tu código y selecciona al candidato de tu preferencia.';
+      
+      // Ocultar sección de candidatos
+      hideCandidatesSection();
+      
+      $('vote-instructions').textContent = 'Selecciona al candidato de tu preferencia.';
     }
 
     async function verifyCode() {
@@ -488,7 +510,10 @@
       $('student-box').style.display = 'block';
 
       showAlert($('access-alert'), 'ok', '✅ Código verificado. ¡Ya puedes votar!');
-      $('vote-instructions').textContent = '👇 Selecciona un candidato y presiona "Confirmar Voto".';
+      $('vote-instructions').textContent = '👇 Selecciona un candidato.';
+      
+      // MOSTRAR SECCIÓN DE CANDIDATOS
+      showCandidatesSection();
     }
 
     async function castVote() {
@@ -578,7 +603,8 @@
       $('btn-verify').disabled = false;
       $('btn-verify').innerHTML = '✓ Verificar';
       resetSessionUI();
-      $('vote-instructions').textContent = 'Verifica tu código y selecciona al candidato de tu preferencia.';
+      hideCandidatesSection();
+      $('vote-instructions').textContent = 'Selecciona al candidato de tu preferencia.';
     });
 
     $('access-code').addEventListener('input', () => {
@@ -592,6 +618,9 @@
 
     // Init
     (async function init(){
+      // Asegurar que la sección de candidatos esté oculta inicialmente
+      $('candidates-section').style.display = 'none';
+      
       resetSessionUI();
       await loadStatus();
       await loadCandidates();
