@@ -287,15 +287,25 @@ async function getMonitorData(req, res) {
 }
 
 async function handleAdmin(req, res, subEndpoint) {
+  // LOGIN: solo verifica que el backend esté vivo
+  if (subEndpoint === 'login') {
+    return res.status(200).json({ success: true });
+  }
+
+  // Para TODO lo demás, sí validamos admin_code
   const adminCode = req.headers['x-admin-code'] || req.body?.admin_code;
-  const config = await getConfigRow();
-  if (!config) return res.status(500).json({ error: 'Config no encontrada (id=1)' });
-  if (!adminCode || adminCode !== config.admin_code) {
+
+  const { data: config, error } = await supabase
+    .from('config')
+    .select('admin_code')
+    .eq('id', 1)
+    .single();
+
+  if (error || !config || adminCode !== config.admin_code) {
     return res.status(401).json({ error: 'Código de administrador inválido' });
   }
 
   switch (subEndpoint) {
-    case 'login': return res.status(200).json({ success: true });
     case 'students': return await handleStudents(req, res);
     case 'candidates': return await handleCandidates(req, res);
     case 'election': return await handleElection(req, res);
