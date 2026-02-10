@@ -266,11 +266,12 @@
       }
 
       try {
-        const res = await fetch(`${API_URL}/admin/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-admin-code': code },
-          body: JSON.stringify({ admin_code: code })
-        });
+        const res = await fetch(`${API_URL}/admin/students`, {
+  method: 'GET',
+  headers: {
+    'x-admin-code': code
+  }
+})
 
         // Si es 404, NO es la clave: es ruta rota
         if (res.status === 404) {
