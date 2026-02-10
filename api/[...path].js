@@ -15,11 +15,18 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // ✅ Catch-all path correcto en Vercel:
-  // /api/admin/login => req.query.path = ["admin","login"]
-  const parts = Array.isArray(req.query.path)
+  // ✅ Router robusto (Vercel a veces NO llena req.query.path)
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  let parts = Array.isArray(req.query.path)
     ? req.query.path
     : (typeof req.query.path === 'string' ? [req.query.path] : []);
+
+  // Fallback: parsear desde la URL
+  if (!parts || parts.length === 0) {
+    const rawPath = url.pathname || '';
+    const cleaned = rawPath.startsWith('/api/') ? rawPath.slice(5) : rawPath.replace(/^\/+/, '');
+    parts = cleaned.split('/').filter(Boolean);
+  }
 
   const endpoint = parts[0] || '';
   const subEndpoint = parts[1] || '';
@@ -57,7 +64,13 @@ export default async function handler(req, res) {
         return await getMonitorData(req, res);
 
       default:
-        return res.status(404).json({ error: 'Endpoint no encontrado', endpoint, subEndpoint, parts });
+        return res.status(404).json({
+          error: 'Endpoint no encontrado',
+          endpoint,
+          subEndpoint,
+          parts,
+          pathname: url.pathname
+        });
     }
   } catch (error) {
     console.error('Error handler:', error);
@@ -199,7 +212,7 @@ async function getFinalResults(req, res) {
       totalStudents: totalStudents || 0,
       totalVoted: votedStudents || 0,
       participation: (totalStudents || 0) > 0 ? Math.round(((votedStudents || 0) / totalStudents) * 100) : 0,
-      winners: winners,
+      winners,
       isTie: winners.length > 1,
       electionClosed: true
     });
@@ -273,29 +286,14 @@ async function handleAdmin(req, res, subEndpoint) {
   if (!config || adminCode !== config.admin_code) return res.status(401).json({ error: 'Código de administrador inválido' });
 
   switch (subEndpoint) {
-    case 'login':
-      return res.status(200).json({ success: true });
-
-    case 'students':
-      return await handleStudents(req, res);
-
-    case 'candidates':
-      return await handleCandidates(req, res);
-
-    case 'election':
-      return await handleElection(req, res);
-
-    case 'import':
-      return await importStudents(req, res);
-
-    case 'reset-codes':
-      return await resetCodes(req, res);
-
-    case 'clear-data':
-      return await clearData(req, res);
-
-    default:
-      return res.status(404).json({ error: 'Sub-endpoint no encontrado', subEndpoint });
+    case 'login': return res.status(200).json({ success: true });
+    case 'students': return await handleStudents(req, res);
+    case 'candidates': return await handleCandidates(req, res);
+    case 'election': return await handleElection(req, res);
+    case 'import': return await importStudents(req, res);
+    case 'reset-codes': return await resetCodes(req, res);
+    case 'clear-data': return await clearData(req, res);
+    default: return res.status(404).json({ error: 'Sub-endpoint no encontrado', subEndpoint });
   }
 }
 
@@ -444,7 +442,14 @@ async function importStudents(req, res) {
     }
   }
 
-  return res.status(200).json({ success: true, imported: inserted, valid: rows.length, errors: errors.slice(0, 10), hasErrors: errors.length > 0, groups: Object.keys(grouped).length });
+  return res.status(200).json({
+    success: true,
+    imported: inserted,
+    valid: rows.length,
+    errors: errors.slice(0, 10),
+    hasErrors: errors.length > 0,
+    groups: Object.keys(grouped).length
+  });
 }
 
 async function resetCodes(req, res) {
