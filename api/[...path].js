@@ -55,6 +55,9 @@ export default async function handler(req, res) {
   if (url.pathname === '/api/admin/reset-codes' || url.pathname === '/api/admin/reset-codes/') {
     return await handleAdmin(req, res, 'reset-codes');
   }
+  if (url.pathname === '/api/admin/reset-votes' || url.pathname === '/api/admin/reset-votes/') {
+    return await handleAdmin(req, res, 'reset-votes');
+  }
   if (url.pathname === '/api/admin/clear-data' || url.pathname === '/api/admin/clear-data/') {
     return await handleAdmin(req, res, 'clear-data');
   }
@@ -243,6 +246,7 @@ async function handleAdmin(req, res, subEndpoint) {
     case 'election': return await handleElection(req, res);
     case 'import': return await importStudents(req, res);
     case 'reset-codes': return await resetCodes(req, res);
+    case 'reset-votes': return await resetVotes(req, res);
     case 'clear-data': return await clearData(req, res);
     default: return res.status(404).json({ error: 'Sub-endpoint no encontrado' });
   }
@@ -465,6 +469,55 @@ async function resetCodes(req, res) {
   }
 
   return res.status(200).json({ success: true, message: `${updated} códigos regenerados` });
+}
+
+// ========== RESTABLECER VOTACIÓN (NUEVO) ==========
+// Restablece los votos a cero sin eliminar estudiantes ni candidatos
+async function resetVotes(req, res) {
+  const supabase = getSupabase();
+
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
+
+  try {
+    // 1. Restablecer has_voted a FALSE para todos los estudiantes
+    const { error: studentsError } = await supabase
+      .from('students')
+      .update({ has_voted: false })
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+
+    if (studentsError) {
+      return res.status(500).json({ error: 'Error al restablecer estudiantes', details: studentsError.message });
+    }
+
+    // 2. Restablecer votes a 0 para todos los candidatos
+    const { error: candidatesError } = await supabase
+      .from('candidates')
+      .update({ votes: 0 })
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+
+    if (candidatesError) {
+      return res.status(500).json({ error: 'Error al restablecer candidatos', details: candidatesError.message });
+    }
+
+    // 3. Eliminar todos los registros de votos (histórico)
+    const { error: votesError } = await supabase
+      .from('votes')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+
+    if (votesError) {
+      console.warn('Warning: No se pudieron eliminar los registros históricos de votos:', votesError.message);
+      // No fallamos por esto, ya que los votos se restablecieron
+    }
+
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Votación restablecida correctamente. Los estudiantes pueden volver a votar.' 
+    });
+  } catch (err) {
+    console.error('Error en resetVotes:', err);
+    return res.status(500).json({ error: 'Error interno al restablecer votación', details: err.message });
+  }
 }
 
 async function clearData(req, res) {
