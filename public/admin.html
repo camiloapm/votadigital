@@ -1,806 +1,921 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - Votación Escolar</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f1f5f9; color: #1e293b; line-height: 1.6; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 1rem; }
-        .login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .login-box { background: white; padding: 2rem; border-radius: 0.5rem; width: 90%; max-width: 400px; }
-        .login-box h2 { margin-bottom: 1rem; }
-        .login-box input { width: 100%; padding: 0.75rem; margin: 0.5rem 0; border: 2px solid #e2e8f0; border-radius: 0.375rem; }
-        .btn { display: inline-block; padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 600; border: none; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s; }
-        .btn-primary { background: #3b82f6; color: white; }
-        .btn-danger { background: #ef4444; color: white; }
-        .btn-warning { background: #f59e0b; color: white; }
-        .btn-success { background: #10b981; color: white; }
-        .btn-secondary { background: #64748b; color: white; }
-        .header { background: white; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .admin-nav { background: #1e293b; padding: 1rem; margin: 0 -1rem 2rem -1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
-        .admin-nav button { background: #334155; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; font-size: 0.9rem; }
-        .admin-nav button.active { background: #3b82f6; }
-        .section { display: none; background: white; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1rem; }
-        .section.active { display: block; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; border: 2px solid #e2e8f0; }
-        .stat-number { font-size: 2.5rem; font-weight: bold; color: #3b82f6; }
-        .stat-label { color: #64748b; margin-top: 0.5rem; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 0.5rem; overflow: hidden; margin-top: 1rem; font-size: 0.9rem; }
-        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        th { background: #f8fafc; font-weight: 600; }
-        .import-area { border: 2px dashed #cbd5e1; padding: 2rem; text-align: center; border-radius: 0.5rem; margin: 1rem 0; }
-        .progress-bar { width: 100%; height: 20px; background: #e2e8f0; border-radius: 10px; overflow: hidden; margin-top: 0.5rem; }
-        .progress-fill { height: 100%; background: #3b82f6; transition: width 0.3s; }
-        input[type="text"], input[type="file"], input[type="url"] { width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 0.375rem; margin: 0.5rem 0; }
-        .card { background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0; }
-        .candidate-photo { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0; }
-        .photo-preview { max-width: 200px; max-height: 200px; border-radius: 0.5rem; margin: 0.5rem 0; }
-        .monitor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem; }
-        .monitor-card { background: white; border: 2px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; }
-        .monitor-card.voted { border-color: #10b981; background: #f0fdf4; }
-        .monitor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
-        .monitor-title { font-weight: bold; color: #1e293b; }
-        .monitor-stats { display: flex; gap: 1rem; font-size: 0.875rem; color: #64748b; }
-        .live-indicator { display: inline-flex; align-items: center; gap: 0.5rem; color: #10b981; font-size: 0.875rem; margin-bottom: 1rem; }
-        .live-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .winner-card { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b; border-radius: 0.75rem; padding: 1.5rem; text-align: center; margin: 1rem 0; }
-        .winner-trophy { font-size: 3rem; margin-bottom: 0.5rem; }
-        .results-closed { background: #fee2e2; border: 2px solid #ef4444; color: #991b1b; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
-        .results-open { background: #dcfce7; border: 2px solid #22c55e; color: #166534; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
-        .grade-section { margin-bottom: 1.5rem; }
-        .grade-title { font-size: 1.25rem; font-weight: bold; color: #1e40af; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0; }
-        .refresh-btn { background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; margin-bottom: 1rem; }
-        .refresh-btn:hover { background: #2563eb; }
-        .last-update { color: #64748b; font-size: 0.875rem; margin-top: 0.5rem; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel de Administración - Votación Escolar</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f1f5f9; color: #1e293b; line-height: 1.6; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 1rem; }
+    .login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .login-box { background: white; padding: 2rem; border-radius: 0.5rem; width: 90%; max-width: 400px; }
+    .login-box h2 { margin-bottom: 1rem; }
+    .login-box input { width: 100%; padding: 0.75rem; margin: 0.5rem 0; border: 2px solid #e2e8f0; border-radius: 0.375rem; }
+    .btn { display: inline-block; padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 600; border: none; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: #3b82f6; color: white; }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-warning { background: #f59e0b; color: white; }
+    .btn-success { background: #10b981; color: white; }
+    .btn-secondary { background: #64748b; color: white; }
+
+    .header { background: white; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .admin-nav { background: #1e293b; padding: 1rem; margin: 0 -1rem 2rem -1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .admin-nav button { background: #334155; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; font-size: 0.9rem; }
+    .admin-nav button.active { background: #3b82f6; }
+
+    .section { display: none; background: white; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+    .section.active { display: block; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; border: 2px solid #e2e8f0; }
+    .stat-number { font-size: 2.5rem; font-weight: bold; color: #3b82f6; }
+    .stat-label { color: #64748b; margin-top: 0.5rem; }
+
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 0.5rem; overflow: hidden; margin-top: 1rem; font-size: 0.9rem; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; }
+
+    .import-area { border: 2px dashed #cbd5e1; padding: 2rem; text-align: center; border-radius: 0.5rem; margin: 1rem 0; }
+    .progress-bar { width: 100%; height: 20px; background: #e2e8f0; border-radius: 10px; overflow: hidden; margin-top: 0.5rem; }
+    .progress-fill { height: 100%; background: #3b82f6; transition: width 0.3s; }
+
+    input[type="text"], input[type="file"], input[type="url"], input[type="password"] { width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 0.375rem; margin: 0.5rem 0; }
+    .card { background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0; }
+
+    .candidate-photo { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0; }
+    .photo-preview { max-width: 200px; max-height: 200px; border-radius: 0.5rem; margin: 0.5rem 0; }
+
+    .monitor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .monitor-card { background: white; border: 2px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; }
+    .monitor-card.voted { border-color: #10b981; background: #f0fdf4; }
+    .monitor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .monitor-title { font-weight: bold; color: #1e293b; }
+    .monitor-stats { display: flex; gap: 1rem; font-size: 0.875rem; color: #64748b; }
+
+    .live-indicator { display: inline-flex; align-items: center; gap: 0.5rem; color: #10b981; font-size: 0.875rem; margin-bottom: 1rem; }
+    .live-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    .winner-card { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b; border-radius: 0.75rem; padding: 1.5rem; text-align: center; margin: 1rem 0; }
+    .winner-trophy { font-size: 3rem; margin-bottom: 0.5rem; }
+    .results-closed { background: #fee2e2; border: 2px solid #ef4444; color: #991b1b; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+    .results-open { background: #dcfce7; border: 2px solid #22c55e; color: #166534; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+
+    .grade-section { margin-bottom: 1.5rem; }
+    .grade-title { font-size: 1.25rem; font-weight: bold; color: #1e40af; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0; }
+
+    .refresh-btn { background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; margin-bottom: 1rem; }
+    .refresh-btn:hover { background: #2563eb; }
+    .last-update { color: #64748b; font-size: 0.875rem; margin-top: 0.5rem; }
+
+    .small-note { font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; }
+  </style>
 </head>
+
 <body>
-    <div id="login-overlay" class="login-overlay">
-        <div class="login-box">
-            <h2>🔐 Acceso Administrativo</h2>
-            <p>Ingresa el código de administrador</p>
-            <input type="password" id="admin-code" placeholder="Código admin">
-            <button onclick="login()" class="btn btn-primary" style="width: 100%;">Ingresar</button>
-            <p id="login-error" style="color: #ef4444; margin-top: 1rem;"></p>
-        </div>
+  <div id="login-overlay" class="login-overlay">
+    <div class="login-box">
+      <h2>🔐 Acceso Administrativo</h2>
+      <p>Ingresa el código de administrador</p>
+      <input type="password" id="admin-code" placeholder="Código admin" autocomplete="off">
+      <button onclick="login()" class="btn btn-primary" style="width: 100%;">Ingresar</button>
+      <p class="small-note" id="api-debug"></p>
+      <p id="login-error" style="color: #ef4444; margin-top: 1rem;"></p>
+    </div>
+  </div>
+
+  <div class="container" id="admin-container" style="display:none;">
+    <div class="header">
+      <h1>⚙️ Panel de Administración</h1>
+      <div style="display:flex; gap:1rem; align-items:center; margin-top:0.5rem; flex-wrap:wrap;">
+        <span id="election-status">Estado: Cerrada</span>
+        <button id="btn-toggle" class="btn btn-primary" onclick="toggleElection()">Abrir Votación</button>
+      </div>
     </div>
 
-    <div class="container" id="admin-container" style="display: none;">
-        <div class="header">
-            <h1>⚙️ Panel de Administración</h1>
-            <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.5rem; flex-wrap: wrap;">
-                <span id="election-status">Estado: Cerrada</span>
-                <button id="btn-toggle" class="btn btn-primary" onclick="toggleElection()">Abrir Votación</button>
-            </div>
+    <nav class="admin-nav" id="admin-nav">
+      <button data-sec="dashboard" class="active">Dashboard</button>
+      <button data-sec="monitor">Monitoreo</button>
+      <button data-sec="results">Resultados</button>
+      <button data-sec="school">Colegio</button>
+      <button data-sec="candidates">Candidatos</button>
+      <button data-sec="students">Estudiantes</button>
+      <button data-sec="import">Importar Excel</button>
+    </nav>
+
+    <section id="sec-dashboard" class="section active">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-number" id="stat-total">0</div><div class="stat-label">Total Estudiantes</div></div>
+        <div class="stat-card"><div class="stat-number" id="stat-voted">0</div><div class="stat-label">Han Votado</div></div>
+        <div class="stat-card"><div class="stat-number" id="stat-participation">0%</div><div class="stat-label">Participación</div></div>
+        <div class="stat-card"><div class="stat-number" id="stat-candidates">0</div><div class="stat-label">Candidatos</div></div>
+      </div>
+      <h3>Participación por Grado</h3>
+      <div id="grade-stats"></div>
+    </section>
+
+    <section id="sec-monitor" class="section">
+      <div class="live-indicator"><span class="live-dot"></span><span>Monitoreo en tiempo real</span></div>
+      <button onclick="loadMonitorData()" class="refresh-btn">🔄 Actualizar ahora</button>
+      <div class="last-update" id="monitor-last-update"></div>
+
+      <div class="card" style="margin-top: 1rem;">
+        <h3>Resumen General</h3>
+        <div id="monitor-summary" style="margin-top: 1rem;"></div>
+      </div>
+
+      <h3 style="margin-top: 1.5rem;">Detalle por Grado y Curso</h3>
+      <div id="monitor-courses" style="margin-top: 1rem;"></div>
+
+      <h3 style="margin-top: 1.5rem;">Por Grado (Consolidado)</h3>
+      <div id="monitor-grades" style="margin-top: 1rem;"></div>
+    </section>
+
+    <section id="sec-results" class="section">
+      <div id="results-status"></div>
+      <button onclick="loadFinalResults()" class="refresh-btn" style="margin-bottom: 1rem;">🔄 Actualizar Resultados</button>
+      <div id="final-results-content"></div>
+    </section>
+
+    <section id="sec-school" class="section">
+      <h2>Configuración del Colegio</h2>
+      <div class="card">
+        <h3>Escudo y Nombre del Colegio</h3>
+        <p style="margin-bottom: 1rem; color: #64748b;">Estos datos aparecerán en los carnets y en la página de votación.</p>
+
+        <label>Nombre del Colegio:</label>
+        <input type="text" id="school-name" placeholder="Ej: Colegio San José">
+
+        <label>URL del Escudo (imagen):</label>
+        <input type="url" id="school-logo" placeholder="https://...">
+        <p style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem;">
+          💡 Sube la imagen a Imgur, copia el link directo y pégalo aquí.
+        </p>
+
+        <div id="logo-preview"></div>
+        <button onclick="saveSchoolConfig()" class="btn btn-primary" style="width:auto; margin-top:1rem;">Guardar Configuración</button>
+      </div>
+    </section>
+
+    <section id="sec-candidates" class="section">
+      <h2>Gestión de Candidatos</h2>
+      <div class="card">
+        <h3>Agregar Candidato</h3>
+        <input type="text" id="new-candidate-name" placeholder="Nombre completo">
+        <input type="text" id="new-candidate-party" placeholder="Partido/Lista (opcional)">
+
+        <label>Foto del candidato (URL):</label>
+        <input type="url" id="new-candidate-photo" placeholder="https://...">
+        <p style="font-size: 0.875rem; color: #64748b;">
+          💡 Sube la foto a Imgur y pega el link directo aquí.
+        </p>
+        <div id="new-photo-preview"></div>
+        <button onclick="addCandidate()" class="btn btn-primary" style="width:auto;">Agregar Candidato</button>
+      </div>
+      <div id="candidates-list-admin"></div>
+    </section>
+
+    <section id="sec-students" class="section">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+        <h2>Gestión de Estudiantes</h2>
+        <div>
+          <button onclick="resetCodes()" class="btn btn-warning" style="font-size:0.875rem;">Regenerar Códigos</button>
+          <button onclick="clearAllData()" class="btn btn-danger" style="font-size:0.875rem;">Eliminar Todo</button>
+        </div>
+      </div>
+      <div id="students-table-container"></div>
+    </section>
+
+    <section id="sec-import" class="section">
+      <h2>Importar desde Excel</h2>
+
+      <div class="card" style="background:#dbeafe; border-left:4px solid #3b82f6;">
+        <h4>📋 Instrucciones</h4>
+        <ul style="margin-left:1.5rem; margin-top:0.5rem;">
+          <li>El archivo puede ser <strong>.xlsx, .xls o .csv</strong></li>
+          <li>La primera fila debe tener los títulos de columnas</li>
+          <li>Columnas reconocidas: <strong>Nombre, Grado, Curso</strong></li>
+          <li>Los códigos se generan: <strong>GGCLL</strong> (ej: 06105)</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Seleccionar Archivo</h3>
+        <div class="import-area">
+          <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" style="display:none;">
+          <button onclick="document.getElementById('excel-file').click()" class="btn btn-primary" style="width:auto;">📁 Seleccionar Archivo Excel</button>
+          <p style="margin-top:1rem; color:#64748b;" id="file-name">Ningún archivo seleccionado</p>
         </div>
 
-        <nav class="admin-nav">
-            <button onclick="showSection('dashboard')" class="active">Dashboard</button>
-            <button onclick="showSection('monitor')">Monitoreo</button>
-            <button onclick="showSection('results')">Resultados</button>
-            <button onclick="showSection('school')">Colegio</button>
-            <button onclick="showSection('candidates')">Candidatos</button>
-            <button onclick="showSection('students')">Estudiantes</button>
-            <button onclick="showSection('import')">Importar Excel</button>
-        </nav>
+        <div id="import-preview"></div>
+        <button id="btn-import" onclick="importStudents()" class="btn btn-success" style="display:none; width:100%; margin-top:1rem;">✅ Importar Estudiantes</button>
+        <div id="import-result"></div>
+      </div>
+    </section>
+  </div>
 
-        <section id="sec-dashboard" class="section active">
-            <div class="stats-grid">
-                <div class="stat-card"><div class="stat-number" id="stat-total">0</div><div class="stat-label">Total Estudiantes</div></div>
-                <div class="stat-card"><div class="stat-number" id="stat-voted">0</div><div class="stat-label">Han Votado</div></div>
-                <div class="stat-card"><div class="stat-number" id="stat-participation">0%</div><div class="stat-label">Participación</div></div>
-                <div class="stat-card"><div class="stat-number" id="stat-candidates">0</div><div class="stat-label">Candidatos</div></div>
-            </div>
-            <h3>Participación por Grado</h3>
-            <div id="grade-stats"></div>
-        </section>
+  <script>
+    // ✅ API absoluta (evita fallos por rutas relativas)
+    const API_URL = `${location.origin}/api`;
 
-        <section id="sec-monitor" class="section">
-            <div class="live-indicator">
-                <span class="live-dot"></span>
-                <span>Monitoreo en tiempo real</span>
-            </div>
-            <button onclick="loadMonitorData()" class="refresh-btn">🔄 Actualizar ahora</button>
-            <div class="last-update" id="monitor-last-update"></div>
+    let adminCode = localStorage.getItem('admin_code') || '';
+    let excelData = [];
+    let schoolConfig = {};
+    let monitorInterval = null;
 
-            <div class="card" style="margin-top: 1rem;">
-                <h3>Resumen General</h3>
-                <div id="monitor-summary" style="margin-top: 1rem;"></div>
-            </div>
+    // Debug visible para que veas a qué API está pegando
+    document.getElementById('api-debug').textContent = `API: ${API_URL}`;
 
-            <h3 style="margin-top: 1.5rem;">Detalle por Grado y Curso</h3>
-            <div id="monitor-courses" style="margin-top: 1rem;"></div>
+    if (adminCode) document.getElementById('admin-code').value = adminCode;
 
-            <h3 style="margin-top: 1.5rem;">Por Grado (Consolidado)</h3>
-            <div id="monitor-grades" style="margin-top: 1rem;"></div>
-        </section>
+    // NAV
+    document.getElementById('admin-nav').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-sec]');
+      if (!btn) return;
+      showSection(btn.getAttribute('data-sec'), btn);
+    });
 
-        <section id="sec-results" class="section">
-            <div id="results-status"></div>
-            <button onclick="loadFinalResults()" class="refresh-btn" style="margin-bottom: 1rem;">🔄 Actualizar Resultados</button>
-            <div id="final-results-content"></div>
-        </section>
+    document.getElementById('new-candidate-photo')?.addEventListener('input', function(e) {
+      const url = e.target.value;
+      const preview = document.getElementById('new-photo-preview');
+      if (url && url.startsWith('http')) {
+        preview.innerHTML = `<img src="${url}" class="photo-preview" onerror="this.style.display='none'" onload="this.style.display='block'">`;
+      } else preview.innerHTML = '';
+    });
 
-        <section id="sec-school" class="section">
-            <h2>Configuración del Colegio</h2>
-            <div class="card">
-                <h3>Escudo y Nombre del Colegio</h3>
-                <p style="margin-bottom: 1rem; color: #64748b;">Estos datos aparecerán en los carnets y en la página de votación.</p>
+    document.getElementById('school-logo')?.addEventListener('input', function(e) {
+      const url = e.target.value;
+      const preview = document.getElementById('logo-preview');
+      if (url && url.startsWith('http')) {
+        preview.innerHTML = `<p>Vista previa:</p><img src="${url}" class="photo-preview" onerror="this.style.display='none'" onload="this.style.display='block'">`;
+      } else preview.innerHTML = '';
+    });
 
-                <label>Nombre del Colegio:</label>
-                <input type="text" id="school-name" placeholder="Ej: Colegio San José">
+    // ✅ LOGIN MEJORADO: muestra el error real
+    async function login() {
+      const code = document.getElementById('admin-code').value.trim();
+      const errorDiv = document.getElementById('login-error');
+      errorDiv.textContent = '';
 
-                <label>URL del Escudo (imagen):</label>
-                <input type="url" id="school-logo" placeholder="https://...">
-                <p style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem;">
-                    💡 Sube la imagen a <a href="https://imgur.com/upload" target="_blank">Imgur</a>, copia el link directo y pégalo aquí.
-                </p>
+      if (!code) {
+        errorDiv.textContent = 'Ingresa el código';
+        return;
+      }
 
-                <div id="logo-preview"></div>
-
-                <button onclick="saveSchoolConfig()" class="btn btn-primary" style="width: auto; margin-top: 1rem;">Guardar Configuración</button>
-            </div>
-        </section>
-
-        <section id="sec-candidates" class="section">
-            <h2>Gestión de Candidatos</h2>
-            <div class="card">
-                <h3>Agregar Candidato</h3>
-                <input type="text" id="new-candidate-name" placeholder="Nombre completo">
-                <input type="text" id="new-candidate-party" placeholder="Partido/Lista (opcional)">
-
-                <label>Foto del candidato (URL):</label>
-                <input type="url" id="new-candidate-photo" placeholder="https://...">
-                <p style="font-size: 0.875rem; color: #64748b;">
-                    💡 Sube la foto a <a href="https://imgur.com/upload" target="_blank">Imgur</a> y pega el link directo aquí.
-                </p>
-                <div id="new-photo-preview"></div>
-
-                <button onclick="addCandidate()" class="btn btn-primary" style="width: auto;">Agregar Candidato</button>
-            </div>
-            <div id="candidates-list-admin"></div>
-        </section>
-
-        <section id="sec-students" class="section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-                <h2>Gestión de Estudiantes</h2>
-                <div>
-                    <button onclick="resetCodes()" class="btn btn-warning" style="font-size: 0.875rem;">Regenerar Códigos</button>
-                    <button onclick="clearAllData()" class="btn btn-danger" style="font-size: 0.875rem;">Eliminar Todo</button>
-                </div>
-            </div>
-            <div id="students-table-container"></div>
-        </section>
-
-        <section id="sec-import" class="section">
-            <h2>Importar desde Excel</h2>
-            <div class="card" style="background: #dbeafe; border-left: 4px solid #3b82f6;">
-                <h4>📋 Instrucciones</h4>
-                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
-                    <li>El archivo puede ser <strong>.xlsx, .xls o .csv</strong></li>
-                    <li>La primera fila debe tener los títulos de columnas</li>
-                    <li>Columnas reconocidas automáticamente: <strong>Nombre, Grado, Curso, Lista</strong></li>
-                    <li>No importa el orden de las columnas</li>
-                    <li>Los códigos se generan automáticamente: <strong>GG+Curso+LL</strong> (ej: 06101, 06102... 07101, 07102...)</li>
-                </ul>
-            </div>
-
-            <div class="card">
-                <h3>Seleccionar Archivo</h3>
-                <div class="import-area">
-                    <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" style="display: none;">
-                    <button onclick="document.getElementById('excel-file').click()" class="btn btn-primary" style="width: auto;">📁 Seleccionar Archivo Excel</button>
-                    <p style="margin-top: 1rem; color: #64748b;" id="file-name">Ningún archivo seleccionado</p>
-                </div>
-
-                <div id="import-preview"></div>
-                <button id="btn-import" onclick="importStudents()" class="btn btn-success" style="display: none; width: 100%; margin-top: 1rem;">✅ Importar Estudiantes</button>
-                <div id="import-result"></div>
-            </div>
-        </section>
-    </div>
-
-    <script>
-        const API_URL = '/api';
-        let adminCode = ''; // ✅ sin localStorage
-        let excelData = [];
-        let schoolConfig = {};
-        let monitorInterval = null;
-
-        document.getElementById('new-candidate-photo')?.addEventListener('input', function(e) {
-            const url = e.target.value;
-            const preview = document.getElementById('new-photo-preview');
-            if (url && url.startsWith('http')) {
-                preview.innerHTML = `<img src="${url}" class="photo-preview" onerror="this.style.display='none'" onload="this.style.display='block'">`;
-            } else {
-                preview.innerHTML = '';
-            }
+      try {
+        const res = await fetch(`${API_URL}/admin/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-code': code },
+          body: JSON.stringify({ admin_code: code })
         });
 
-        document.getElementById('school-logo')?.addEventListener('input', function(e) {
-            const url = e.target.value;
-            const preview = document.getElementById('logo-preview');
-            if (url && url.startsWith('http')) {
-                preview.innerHTML = `<p>Vista previa:</p><img src="${url}" class="photo-preview" onerror="this.style.display='none'" onload="this.style.display='block'">`;
-            } else {
-                preview.innerHTML = '';
-            }
+        // Si es 404, NO es la clave: es ruta rota
+        if (res.status === 404) {
+          errorDiv.textContent = 'ERROR: /api/admin/login no existe (404). Revisa el backend api/[...path].js';
+          return;
+        }
+
+        // 401 = clave mala (solo si tu backend lo valida)
+        if (res.status === 401) {
+          errorDiv.textContent = 'Código incorrecto (401)';
+          return;
+        }
+
+        if (!res.ok) {
+          const txt = await res.text();
+          errorDiv.textContent = `Error (${res.status}): ${txt}`;
+          return;
+        }
+
+        adminCode = code;
+        localStorage.setItem('admin_code', code);
+
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('admin-container').style.display = 'block';
+
+        await loadSchoolConfig();
+        await loadDashboard();
+        await refreshElectionStatusUI();
+      } catch (err) {
+        errorDiv.textContent = 'Error de conexión: ' + err.message;
+      }
+    }
+
+    function showSection(section, clickedButton) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.admin-nav button').forEach(b => b.classList.remove('active'));
+
+      document.getElementById(`sec-${section}`).classList.add('active');
+      if (clickedButton) clickedButton.classList.add('active');
+
+      if (monitorInterval) {
+        clearInterval(monitorInterval);
+        monitorInterval = null;
+      }
+
+      if (section === 'dashboard') loadDashboard();
+      if (section === 'monitor') {
+        loadMonitorData();
+        monitorInterval = setInterval(loadMonitorData, 10000);
+      }
+      if (section === 'results') loadFinalResults();
+      if (section === 'students') loadStudents();
+      if (section === 'candidates') loadCandidates();
+      if (section === 'school') loadSchoolConfig();
+    }
+
+    async function refreshElectionStatusUI() {
+      try {
+        const res = await fetch(`${API_URL}/check-status`);
+        const data = await res.json();
+        updateElectionButton(!!data.open);
+      } catch {}
+    }
+
+    async function loadSchoolConfig() {
+      try {
+        const res = await fetch(`${API_URL}/config`);
+        const data = await res.json();
+        schoolConfig = data;
+        document.getElementById('school-name').value = data.school_name || '';
+        document.getElementById('school-logo').value = data.school_logo_url || '';
+        if (data.school_logo_url) {
+          document.getElementById('logo-preview').innerHTML = `<p>Vista previa:</p><img src="${data.school_logo_url}" class="photo-preview">`;
+        } else {
+          document.getElementById('logo-preview').innerHTML = '';
+        }
+      } catch (err) {
+        console.error('Error cargando config:', err);
+      }
+    }
+
+    async function saveSchoolConfig() {
+      const name = document.getElementById('school-name').value.trim();
+      const logo = document.getElementById('school-logo').value.trim();
+
+      try {
+        const res = await fetch(`${API_URL}/config`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
+          body: JSON.stringify({ school_name: name, school_logo_url: logo, admin_code: adminCode })
         });
 
-        async function login() {
-            const code = document.getElementById('admin-code').value.trim();
-            const errorDiv = document.getElementById('login-error');
-            try {
-                const res = await fetch(`${API_URL}/admin/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-admin-code': code },
-                    body: JSON.stringify({ admin_code: code })
-                });
-
-                if (res.ok) {
-                    adminCode = code; // ✅ sin persistencia
-                    document.getElementById('login-overlay').style.display = 'none';
-                    document.getElementById('admin-container').style.display = 'block';
-                    loadSchoolConfig();
-                    loadDashboard();
-                } else {
-                    errorDiv.textContent = 'Código incorrecto';
-                }
-            } catch (err) {
-                errorDiv.textContent = 'Error de conexión';
-            }
+        if (res.ok) {
+          alert('Configuración guardada correctamente');
+          schoolConfig = { school_name: name, school_logo_url: logo };
+        } else {
+          alert('Error al guardar (revisa código admin)');
         }
+      } catch (err) {
+        alert('Error de conexión');
+      }
+    }
 
-        function showSection(section) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.admin-nav button').forEach(b => b.classList.remove('active'));
-            document.getElementById(`sec-${section}`).classList.add('active');
-            event.target.classList.add('active');
+    async function loadDashboard() {
+      try {
+        const res = await fetch(`${API_URL}/stats`, { headers: { 'x-admin-code': adminCode } });
+        if (res.status === 401) { alert('Código admin inválido. Vuelve a iniciar sesión.'); return; }
 
-            if (monitorInterval) {
-                clearInterval(monitorInterval);
-                monitorInterval = null;
-            }
+        const data = await res.json();
+        document.getElementById('stat-total').textContent = data.general.totalStudents;
+        document.getElementById('stat-voted').textContent = data.general.totalVoted;
+        document.getElementById('stat-participation').textContent = data.general.participation + '%';
+        document.getElementById('stat-candidates').textContent = data.results?.length || 0;
 
-            if (section === 'dashboard') loadDashboard();
-            if (section === 'monitor') {
-                loadMonitorData();
-                monitorInterval = setInterval(loadMonitorData, 10000);
-            }
-            if (section === 'results') loadFinalResults();
-            if (section === 'students') loadStudents();
-            if (section === 'candidates') loadCandidates();
-            if (section === 'school') loadSchoolConfig();
-        }
+        const gradeContainer = document.getElementById('grade-stats');
+        gradeContainer.innerHTML = (data.byGrade || []).map(g => `
+          <div style="margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+              <span>Grado ${g.grade}°</span>
+              <span>${g.voted}/${g.total_students} (${g.participation_percent}%)</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${g.participation_percent}%"></div></div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Error dashboard:', err);
+      }
+    }
 
-        async function loadSchoolConfig() {
-            try {
-                const res = await fetch(`${API_URL}/config`);
-                const data = await res.json();
-                schoolConfig = data;
-                document.getElementById('school-name').value = data.school_name || '';
-                document.getElementById('school-logo').value = data.school_logo_url || '';
-                if (data.school_logo_url) {
-                    document.getElementById('logo-preview').innerHTML = `<p>Vista previa:</p><img src="${data.school_logo_url}" class="photo-preview">`;
-                }
-            } catch (err) { console.error('Error cargando config:', err); }
-        }
+    async function loadMonitorData() {
+      try {
+        const res = await fetch(`${API_URL}/monitor`, { headers: { 'x-admin-code': adminCode } });
+        if (res.status === 401) { alert('Código admin inválido. Vuelve a iniciar sesión.'); return; }
 
-        async function saveSchoolConfig() {
-            const name = document.getElementById('school-name').value.trim();
-            const logo = document.getElementById('school-logo').value.trim();
+        const data = await res.json();
+        document.getElementById('monitor-last-update').textContent = `Última actualización: ${data.lastUpdate}`;
 
-            try {
-                const res = await fetch(`${API_URL}/config`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
-                    body: JSON.stringify({ school_name: name, school_logo_url: logo, admin_code: adminCode })
-                });
+        const summary = data.summary || { total:0, voted:0, pending:0, participation:0 };
+        document.getElementById('monitor-summary').innerHTML = `
+          <div class="stats-grid" style="margin-bottom:0;">
+            <div class="stat-card"><div class="stat-number">${summary.total}</div><div class="stat-label">Total Estudiantes</div></div>
+            <div class="stat-card" style="border-color:#10b981;"><div class="stat-number" style="color:#10b981;">${summary.voted}</div><div class="stat-label">Han Votado ✓</div></div>
+            <div class="stat-card" style="border-color:#f59e0b;"><div class="stat-number" style="color:#f59e0b;">${summary.pending}</div><div class="stat-label">Pendientes</div></div>
+            <div class="stat-card" style="border-color:#3b82f6;"><div class="stat-number">${summary.participation}%</div><div class="stat-label">Participación</div></div>
+          </div>
+        `;
 
-                if (res.ok) {
-                    alert('Configuración guardada correctamente');
-                    schoolConfig = { school_name: name, school_logo_url: logo };
-                } else {
-                    alert('Error al guardar');
-                }
-            } catch (err) { alert('Error de conexión'); }
-        }
+        const coursesByGrade = {};
+        (data.courses || []).forEach(c => {
+          if (!coursesByGrade[c.grade]) coursesByGrade[c.grade] = [];
+          coursesByGrade[c.grade].push(c);
+        });
 
-        async function loadDashboard() {
-            try {
-                const res = await fetch(`${API_URL}/stats`, { headers: { 'x-admin-code': adminCode } });
-                const data = await res.json();
-                document.getElementById('stat-total').textContent = data.general.totalStudents;
-                document.getElementById('stat-voted').textContent = data.general.totalVoted;
-                document.getElementById('stat-participation').textContent = data.general.participation + '%';
-                document.getElementById('stat-candidates').textContent = data.results?.length || 0;
-
-                const gradeContainer = document.getElementById('grade-stats');
-                gradeContainer.innerHTML = (data.byGrade || []).map(g => `
-                    <div style="margin-bottom: 1rem;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                            <span>Grado ${g.grade}°</span>
-                            <span>${g.voted}/${g.total_students} (${g.participation_percent}%)</span>
-                        </div>
-                        <div class="progress-bar"><div class="progress-fill" style="width: ${g.participation_percent}%"></div></div>
+        let coursesHTML = '';
+        for (const [grade, courses] of Object.entries(coursesByGrade).sort((a,b)=>a[0]-b[0])) {
+          coursesHTML += `
+            <div class="grade-section">
+              <div class="grade-title">Grado ${grade}°</div>
+              <div class="monitor-grid">
+                ${courses.map(c => `
+                  <div class="monitor-card ${c.voted > 0 ? 'voted' : ''}">
+                    <div class="monitor-header">
+                      <span class="monitor-title">Curso ${c.course}</span>
+                      <span style="font-weight:bold;">${c.participation}%</span>
                     </div>
-                `).join('');
-            } catch (err) { console.error('Error:', err); }
-        }
-
-        async function loadMonitorData() {
-            try {
-                const res = await fetch(`${API_URL}/monitor`, { headers: { 'x-admin-code': adminCode } });
-                const data = await res.json();
-
-                document.getElementById('monitor-last-update').textContent = `Última actualización: ${data.lastUpdate}`;
-
-                const summary = data.summary;
-                document.getElementById('monitor-summary').innerHTML = `
-                    <div class="stats-grid" style="margin-bottom: 0;">
-                        <div class="stat-card"><div class="stat-number">${summary.total}</div><div class="stat-label">Total Estudiantes</div></div>
-                        <div class="stat-card" style="border-color: #10b981;"><div class="stat-number" style="color: #10b981;">${summary.voted}</div><div class="stat-label">Han Votado ✓</div></div>
-                        <div class="stat-card" style="border-color: #f59e0b;"><div class="stat-number" style="color: #f59e0b;">${summary.pending}</div><div class="stat-label">Pendientes</div></div>
-                        <div class="stat-card" style="border-color: #3b82f6;"><div class="stat-number">${summary.participation}%</div><div class="stat-label">Participación</div></div>
+                    <div class="monitor-stats">
+                      <span>✓ ${c.voted} votaron</span>
+                      <span>○ ${c.pending} pendientes</span>
+                      <span>Total: ${c.total}</span>
                     </div>
-                `;
-
-                const coursesByGrade = {};
-                (data.courses || []).forEach(c => {
-                    if (!coursesByGrade[c.grade]) coursesByGrade[c.grade] = [];
-                    coursesByGrade[c.grade].push(c);
-                });
-
-                let coursesHTML = '';
-                for (const [grade, courses] of Object.entries(coursesByGrade).sort((a, b) => a[0] - b[0])) {
-                    coursesHTML += `
-                        <div class="grade-section">
-                            <div class="grade-title">Grado ${grade}°</div>
-                            <div class="monitor-grid">
-                                ${courses.map(c => `
-                                    <div class="monitor-card ${c.voted > 0 ? 'voted' : ''}">
-                                        <div class="monitor-header">
-                                            <span class="monitor-title">Curso ${c.course}</span>
-                                            <span style="color: ${c.participation === 100 ? '#10b981' : c.participation > 50 ? '#f59e0b' : '#ef4444'}; font-weight: bold;">${c.participation}%</span>
-                                        </div>
-                                        <div class="monitor-stats">
-                                            <span>✓ ${c.voted} votaron</span>
-                                            <span>○ ${c.pending} pendientes</span>
-                                            <span>Total: ${c.total}</span>
-                                        </div>
-                                        <div class="progress-bar" style="margin-top: 0.5rem; height: 8px;">
-                                            <div class="progress-fill" style="width: ${c.participation}%; background: ${c.participation === 100 ? '#10b981' : '#3b82f6'};"></div>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-                document.getElementById('monitor-courses').innerHTML = coursesHTML || '<p>No hay datos de cursos</p>';
-
-                document.getElementById('monitor-grades').innerHTML = `
-                    <table>
-                        <thead>
-                            <tr><th>Grado</th><th>Total Estudiantes</th><th>Han Votado</th><th>Pendientes</th><th>Participación</th><th>Progreso</th></tr>
-                        </thead>
-                        <tbody>
-                            ${(data.grades || []).map(g => `
-                                <tr>
-                                    <td><strong>${g.grade}°</strong></td>
-                                    <td>${g.total}</td>
-                                    <td style="color: #10b981; font-weight: 600;">${g.voted}</td>
-                                    <td style="color: ${g.pending > 0 ? '#f59e0b' : '#64748b'};">${g.pending}</td>
-                                    <td><strong>${g.participation}%</strong></td>
-                                    <td style="width: 200px;"><div class="progress-bar" style="height: 20px;"><div class="progress-fill" style="width: ${g.participation}%; background: ${g.participation === 100 ? '#10b981' : g.participation > 50 ? '#3b82f6' : '#f59e0b'};"></div></div></td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
-            } catch (err) {
-                console.error('Error en monitoreo:', err);
-                document.getElementById('monitor-courses').innerHTML = '<p style="color: #ef4444;">Error al cargar datos. Intenta de nuevo.</p>';
-            }
-        }
-
-        async function loadFinalResults() {
-            try {
-                const res = await fetch(`${API_URL}/results`, { headers: { 'x-admin-code': adminCode } });
-                const data = await res.json();
-
-                const container = document.getElementById('final-results-content');
-                const statusDiv = document.getElementById('results-status');
-
-                const statusRes = await fetch(`${API_URL}/check-status`);
-                const statusData = await statusRes.json();
-
-                if (statusData.open) {
-                    statusDiv.innerHTML = `<div class="results-closed">⚠️ <strong>La votación aún está abierta</strong><br>Los resultados finales se mostrarán cuando cierres la votación desde el Dashboard.</div>`;
-                } else {
-                    statusDiv.innerHTML = `<div class="results-open">✅ <strong>Votación cerrada</strong> - Resultados oficiales</div>`;
-                }
-
-                if (data.totalVotes === 0) {
-                    container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #64748b;">No hay votos registrados aún.</p>';
-                    return;
-                }
-
-                let winnerHTML = '';
-                if (data.winners && data.winners.length > 0) {
-                    if (data.isTie) {
-                        winnerHTML = `<div class="winner-card"><div class="winner-trophy">🏆</div><h3>¡EMPATE!</h3><p>Los ganadores con ${data.winners[0].votes} votos cada uno:</p><h2>${data.winners.map(w => w.name).join(' / ')}</h2></div>`;
-                    } else {
-                        winnerHTML = `<div class="winner-card"><div class="winner-trophy">🏆</div><h3>¡GANADOR!</h3><h2>${data.winners[0].name}</h2><p style="font-size: 1.25rem; margin-top: 0.5rem;">${data.winners[0].votes} votos (${data.winners[0].percentage}%)</p>${data.winners[0].party ? `<p>Partido: ${data.winners[0].party}</p>` : ''}</div>`;
-                    }
-                }
-
-                const resultsHTML = `
-                    <h3>Resultados Detallados</h3>
-                    <table>
-                        <thead>
-                            <tr><th>Posición</th><th>Candidato</th><th>Partido/Lista</th><th>Votos</th><th>Porcentaje</th><th>Visual</th></tr>
-                        </thead>
-                        <tbody>
-                            ${data.results.map((r, index) => `
-                                <tr style="${index === 0 ? 'background: #fef3c7; font-weight: bold;' : ''}">
-                                    <td>${index + 1}°</td>
-                                    <td>${r.name}</td>
-                                    <td>${r.party || '-'}</td>
-                                    <td style="font-size: 1.1rem;">${r.votes}</td>
-                                    <td><strong>${r.percentage}%</strong></td>
-                                    <td style="width: 150px;"><div class="progress-bar" style="height: 20px;"><div class="progress-fill" style="width: ${r.percentage}%; background: ${index === 0 ? '#f59e0b' : index === 1 ? '#64748b' : index === 2 ? '#b45309' : '#3b82f6'};"></div></div></td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-
-                    <div class="card" style="margin-top: 2rem; text-align: center;">
-                        <h3>Estadísticas de la Elección</h3>
-                        <div class="stats-grid" style="margin-top: 1rem;">
-                            <div class="stat-card"><div class="stat-number">${data.totalVotes}</div><div class="stat-label">Total Votos Válidos</div></div>
-                            <div class="stat-card"><div class="stat-number">${data.totalStudents}</div><div class="stat-label">Electores Habilitados</div></div>
-                            <div class="stat-card"><div class="stat-number">${data.totalVoted}</div><div class="stat-label">Votantes Efectivos</div></div>
-                            <div class="stat-card"><div class="stat-number">${data.participation}%</div><div class="stat-label">Participación</div></div>
-                        </div>
+                    <div class="progress-bar" style="margin-top:0.5rem; height:8px;">
+                      <div class="progress-fill" style="width:${c.participation}%;"></div>
                     </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+        document.getElementById('monitor-courses').innerHTML = coursesHTML || '<p>No hay datos de cursos</p>';
 
-                    <div style="margin-top: 2rem; text-align: center;">
-                        <button onclick="window.print()" class="btn btn-primary" style="width: auto;">🖨️ Imprimir Resultados</button>
-                    </div>
-                `;
+        document.getElementById('monitor-grades').innerHTML = `
+          <table>
+            <thead>
+              <tr><th>Grado</th><th>Total</th><th>Votaron</th><th>Pendientes</th><th>Participación</th></tr>
+            </thead>
+            <tbody>
+              ${(data.grades || []).map(g => `
+                <tr>
+                  <td><strong>${g.grade}°</strong></td>
+                  <td>${g.total}</td>
+                  <td style="color:#10b981; font-weight:600;">${g.voted}</td>
+                  <td>${g.pending}</td>
+                  <td><strong>${g.participation}%</strong></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } catch (err) {
+        console.error('Error monitoreo:', err);
+        document.getElementById('monitor-courses').innerHTML = '<p style="color:#ef4444;">Error al cargar datos.</p>';
+      }
+    }
 
-                container.innerHTML = winnerHTML + resultsHTML;
-            } catch (err) {
-                console.error('Error cargando resultados:', err);
-                document.getElementById('final-results-content').innerHTML = '<p style="color: #ef4444; text-align: center;">Error al cargar resultados. Intenta de nuevo.</p>';
+    async function loadFinalResults() {
+      try {
+        const res = await fetch(`${API_URL}/results`, { headers: { 'x-admin-code': adminCode } });
+        const data = await res.json();
+
+        const container = document.getElementById('final-results-content');
+        const statusDiv = document.getElementById('results-status');
+
+        const statusRes = await fetch(`${API_URL}/check-status`);
+        const statusData = await statusRes.json();
+
+        if (statusData.open) {
+          statusDiv.innerHTML = `<div class="results-closed">⚠️ <strong>La votación aún está abierta</strong><br>Cierra la votación desde el Dashboard para ver resultados oficiales.</div>`;
+        } else {
+          statusDiv.innerHTML = `<div class="results-open">✅ <strong>Votación cerrada</strong> - Resultados oficiales</div>`;
+        }
+
+        if (data.totalVotes === 0) {
+          container.innerHTML = '<p style="text-align:center; padding:2rem; color:#64748b;">No hay votos registrados aún.</p>';
+          return;
+        }
+
+        let winnerHTML = '';
+        if (data.winners && data.winners.length > 0) {
+          if (data.isTie) {
+            winnerHTML = `<div class="winner-card"><div class="winner-trophy">🏆</div><h3>¡EMPATE!</h3><p>Ganadores con ${data.winners[0].votes} votos:</p><h2>${data.winners.map(w => w.name).join(' / ')}</h2></div>`;
+          } else {
+            winnerHTML = `<div class="winner-card"><div class="winner-trophy">🏆</div><h3>¡GANADOR!</h3><h2>${data.winners[0].name}</h2><p style="font-size:1.25rem; margin-top:0.5rem;">${data.winners[0].votes} votos (${data.winners[0].percentage}%)</p></div>`;
+          }
+        }
+
+        container.innerHTML = winnerHTML + `
+          <h3>Resultados Detallados</h3>
+          <table>
+            <thead><tr><th>Posición</th><th>Candidato</th><th>Partido/Lista</th><th>Votos</th><th>%</th></tr></thead>
+            <tbody>
+              ${(data.results || []).map((r, index) => `
+                <tr style="${index === 0 ? 'background:#fef3c7; font-weight:bold;' : ''}">
+                  <td>${index+1}°</td>
+                  <td>${r.name}</td>
+                  <td>${r.party || '-'}</td>
+                  <td>${r.votes}</td>
+                  <td><strong>${r.percentage}%</strong></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="card" style="margin-top:2rem; text-align:center;">
+            <h3>Estadísticas</h3>
+            <div class="stats-grid" style="margin-top:1rem;">
+              <div class="stat-card"><div class="stat-number">${data.totalVotes}</div><div class="stat-label">Total Votos</div></div>
+              <div class="stat-card"><div class="stat-number">${data.totalStudents}</div><div class="stat-label">Electores</div></div>
+              <div class="stat-card"><div class="stat-number">${data.totalVoted}</div><div class="stat-label">Votantes</div></div>
+              <div class="stat-card"><div class="stat-number">${data.participation}%</div><div class="stat-label">Participación</div></div>
+            </div>
+          </div>
+        `;
+      } catch (err) {
+        console.error('Error resultados:', err);
+        document.getElementById('final-results-content').innerHTML = '<p style="color:#ef4444; text-align:center;">Error al cargar resultados.</p>';
+      }
+    }
+
+    async function toggleElection() {
+      const btn = document.getElementById('btn-toggle');
+      const isOpen = btn.textContent.includes('Cerrar');
+      const action = isOpen ? 'close' : 'open';
+
+      try {
+        const res = await fetch(`${API_URL}/admin/election`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
+          body: JSON.stringify({ action, admin_code: adminCode })
+        });
+
+        if (res.ok) {
+          updateElectionButton(action === 'open');
+        } else {
+          alert('Error al cambiar estado (revisa código admin)');
+        }
+      } catch (err) {
+        alert('Error al cambiar estado');
+      }
+    }
+
+    function updateElectionButton(isOpen) {
+      const btn = document.getElementById('btn-toggle');
+      const status = document.getElementById('election-status');
+
+      if (isOpen) {
+        btn.textContent = 'Cerrar Votación';
+        btn.className = 'btn btn-danger';
+        status.textContent = 'Estado: Abierta';
+        status.style.color = '#10b981';
+      } else {
+        btn.textContent = 'Abrir Votación';
+        btn.className = 'btn btn-primary';
+        status.textContent = 'Estado: Cerrada';
+        status.style.color = '#64748b';
+      }
+    }
+
+    async function loadStudents() {
+      try {
+        const res = await fetch(`${API_URL}/admin/students`, { headers: { 'x-admin-code': adminCode } });
+        const data = await res.json();
+
+        const container = document.getElementById('students-table-container');
+        if (!data.students || data.students.length === 0) {
+          container.innerHTML = '<p>No hay estudiantes registrados</p>';
+          return;
+        }
+
+        container.innerHTML = `
+          <table>
+            <thead><tr><th>Código</th><th>Nombre</th><th>Grado</th><th>Curso</th><th>Lista</th><th>Estado</th><th>Acción</th></tr></thead>
+            <tbody>
+              ${data.students.map(s => `
+                <tr>
+                  <td><code>${s.access_code}</code></td>
+                  <td>${s.full_name}</td>
+                  <td>${s.grade}°</td>
+                  <td>${s.course}</td>
+                  <td>${s.list_number}</td>
+                  <td>${s.has_voted ? '✓ Votó' : 'Pendiente'}</td>
+                  <td><button onclick="deleteStudent('${s.id}')" class="btn btn-danger" style="padding:0.25rem 0.5rem; font-size:0.875rem;">Eliminar</button></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } catch (err) {
+        console.error('Error students:', err);
+      }
+    }
+
+    async function deleteStudent(id) {
+      if (!confirm('¿Eliminar este estudiante?')) return;
+      try {
+        const res = await fetch(`${API_URL}/admin/students`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
+          body: JSON.stringify({ id, admin_code: adminCode })
+        });
+        if (res.ok) loadStudents();
+        else alert('Error al eliminar');
+      } catch {
+        alert('Error al eliminar');
+      }
+    }
+
+    async function resetCodes() {
+      if (!confirm('¿Regenerar todos los códigos?')) return;
+      try {
+        const res = await fetch(`${API_URL}/admin/reset-codes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
+          body: JSON.stringify({ admin_code: adminCode })
+        });
+        if (res.ok) { alert('Códigos regenerados'); loadStudents(); }
+        else alert('Error');
+      } catch {
+        alert('Error');
+      }
+    }
+
+    async function clearAllData() {
+      const c = prompt('Escribe ELIMINAR TODO para confirmar:');
+      if (c !== 'ELIMINAR TODO') return;
+      try {
+        const res = await fetch(`${API_URL}/admin/clear-data`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
+          body: JSON.stringify({ confirm: 'ELIMINAR TODO', admin_code: adminCode })
+        });
+        if (res.ok) { alert('Datos eliminados'); location.reload(); }
+        else alert('Error');
+      } catch {
+        alert('Error');
+      }
+    }
+
+    async function loadCandidates() {
+      try {
+        const res = await fetch(`${API_URL}/admin/candidates`, { headers: { 'x-admin-code': adminCode } });
+        const data = await res.json();
+
+        const container = document.getElementById('candidates-list-admin');
+        if (!data.candidates || data.candidates.length === 0) {
+          container.innerHTML = '<p>No hay candidatos registrados</p>';
+          return;
+        }
+
+        container.innerHTML = `
+          <table>
+            <thead><tr><th>Foto</th><th>Nombre</th><th>Partido</th><th>Votos</th><th>Acciones</th></tr></thead>
+            <tbody>
+              ${data.candidates.map(c => `
+                <tr>
+                  <td>${c.photo_url ? `<img src="${c.photo_url}" class="candidate-photo" onerror="this.style.display='none'">` : '<span style="color:#94a3b8;">Sin foto</span>'}</td>
+                  <td><strong>${c.name}</strong></td>
+                  <td>${c.party || '-'}</td>
+                  <td>${c.votes}</td>
+                  <td>
+                    <button onclick="editPhoto('${c.id}')" class="btn btn-warning" style="padding:0.25rem 0.5rem; font-size:0.875rem; margin-right:0.25rem;">Foto</button>
+                    <button onclick="deleteCandidate('${c.id}')" class="btn btn-danger" style="padding:0.25rem 0.5rem; font-size:0.875rem;">Eliminar</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } catch (err) {
+        console.error('Error candidates:', err);
+      }
+    }
+
+    async function editPhoto(candidateId) {
+      const url = prompt('Pega la URL de la foto:');
+      if (!url) return;
+
+      try {
+        const res = await fetch(`${API_URL}/admin/candidates`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
+          body: JSON.stringify({ id: candidateId, photo_url: url, admin_code: adminCode })
+        });
+        if (res.ok) loadCandidates();
+        else alert('Error al actualizar foto');
+      } catch {
+        alert('Error de conexión');
+      }
+    }
+
+    async function addCandidate() {
+      const name = document.getElementById('new-candidate-name').value.trim();
+      const party = document.getElementById('new-candidate-party').value.trim();
+      const photo_url = document.getElementById('new-candidate-photo').value.trim();
+
+      if (!name) { alert('Ingresa un nombre'); return; }
+
+      try {
+        const res = await fetch(`${API_URL}/admin/candidates`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
+          body: JSON.stringify({ name, party, photo_url, admin_code: adminCode })
+        });
+
+        if (res.ok) {
+          document.getElementById('new-candidate-name').value = '';
+          document.getElementById('new-candidate-party').value = '';
+          document.getElementById('new-candidate-photo').value = '';
+          document.getElementById('new-photo-preview').innerHTML = '';
+          loadCandidates();
+        } else {
+          alert('Error al crear candidato');
+        }
+      } catch {
+        alert('Error');
+      }
+    }
+
+    async function deleteCandidate(id) {
+      if (!confirm('¿Eliminar este candidato?')) return;
+      try {
+        const res = await fetch(`${API_URL}/admin/candidates`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
+          body: JSON.stringify({ id, admin_code: adminCode })
+        });
+        if (res.ok) loadCandidates();
+        else alert('Error');
+      } catch {
+        alert('Error');
+      }
+    }
+
+    document.getElementById('excel-file')?.addEventListener('change', handleFileSelect);
+
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      document.getElementById('file-name').textContent = file.name;
+
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        try {
+          let data;
+          const fileData = e.target.result;
+
+          if (file.name.endsWith('.csv')) {
+            const text = new TextDecoder('utf-8').decode(fileData);
+            const lines = text.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+            const rows = [];
+
+            for (let i = 1; i < lines.length; i++) {
+              if (!lines[i].trim()) continue;
+              const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+              const row = {};
+              headers.forEach((h, idx) => row[h] = values[idx]);
+              rows.push(row);
             }
+            data = rows;
+          } else {
+            const workbook = XLSX.read(fileData, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            data = XLSX.utils.sheet_to_json(firstSheet);
+          }
+
+          processExcelData(data);
+        } catch (err) {
+          alert('Error al leer archivo: ' + err.message);
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    function processExcelData(data) {
+      if (!Array.isArray(data) || data.length === 0) {
+        alert('El archivo está vacío o no tiene el formato correcto');
+        excelData = [];
+        return;
+      }
+
+      const mapped = data.map((row) => {
+        const findField = (possibleNames) => {
+          for (const name of possibleNames) {
+            if (row[name] !== undefined) return row[name];
+            const key = Object.keys(row).find(k => k.toLowerCase().trim() === name.toLowerCase());
+            if (key) return row[key];
+          }
+          return undefined;
+        };
+
+        const nombre = findField(['Nombre', 'Name', 'Estudiante', 'Alumno', 'Apellidos y Nombres', 'Apellido y Nombre', 'APELLIDOS Y NOMBRES', 'APELLIDO Y NOMBRE']);
+        const grado = findField(['Grado', 'Grade', 'Nivel', 'Año', 'GRADO', 'Grado/Nivel', 'NIVEL']);
+        const curso = findField(['Curso', 'Paralelo', 'Sección', 'Seccion', 'Course', 'CURSO', 'PARALELO', 'SECCION']);
+
+        return {
+          full_name: nombre ? String(nombre).trim() : '',
+          grade: parseInt(grado) || 0,
+          course: parseInt(curso) || 1,
+          list_number: 0
+        };
+      }).filter(s => s.full_name && s.grade > 0);
+
+      excelData = mapped;
+
+      const preview = document.getElementById('import-preview');
+      if (mapped.length === 0) {
+        preview.innerHTML = `<div style="background:#fee2e2; border:2px solid #ef4444; color:#991b1b; padding:1rem; border-radius:0.5rem;">
+          <strong>⚠️ No se encontraron estudiantes válidos</strong><br>Columnas detectadas: ${Object.keys(data[0] || {}).join(', ')}
+        </div>`;
+        document.getElementById('btn-import').style.display = 'none';
+        return;
+      }
+
+      preview.innerHTML = `
+        <div style="background:#dcfce7; border:2px solid #22c55e; padding:1rem; border-radius:0.5rem; margin-bottom:1rem;">
+          ✅ <strong>${mapped.length} estudiantes válidos encontrados</strong><br>
+          <small>Códigos GGCLL: ejemplo grado 6 curso 1 lista 5 => 06105</small>
+        </div>
+        <h4>Vista previa (primeros 5):</h4>
+        <table style="margin-top:0.5rem; font-size:0.875rem; width:100%;">
+          <thead><tr><th>Nombre</th><th>Grado</th><th>Curso</th></tr></thead>
+          <tbody>
+            ${mapped.slice(0,5).map(s => `<tr><td>${s.full_name}</td><td>${s.grade}</td><td>${s.course}</td></tr>`).join('')}
+            ${mapped.length > 5 ? `<tr><td colspan="3" style="text-align:center; color:#64748b; padding:0.5rem;">... y ${mapped.length-5} más</td></tr>` : ''}
+          </tbody>
+        </table>
+      `;
+
+      document.getElementById('btn-import').style.display = 'block';
+    }
+
+    async function importStudents() {
+      if (!excelData || excelData.length === 0) {
+        alert('No hay datos para importar. Selecciona un archivo primero.');
+        return;
+      }
+
+      const btn = document.getElementById('btn-import');
+      btn.disabled = true;
+      btn.textContent = '⏳ Importando...';
+
+      try {
+        const studentsToSend = excelData.map(s => ({
+          full_name: String(s.full_name || '').trim(),
+          grade: parseInt(s.grade) || 0,
+          course: parseInt(s.course) || 1,
+          list_number: 0
+        })).filter(s => s.full_name && s.grade > 0);
+
+        const res = await fetch(`${API_URL}/admin/import`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
+          body: JSON.stringify({ students: studentsToSend, admin_code: adminCode })
+        });
+
+        const result = await res.json();
+        const resultDiv = document.getElementById('import-result');
+
+        if (!res.ok || !result.success) {
+          resultDiv.innerHTML = `<div style="background:#fee2e2; border:2px solid #ef4444; color:#991b1b; padding:1rem; border-radius:0.5rem; margin-top:1rem;">
+            <strong>❌ Error:</strong> ${result.error || 'Error desconocido'}
+          </div>`;
+          return;
         }
 
-        async function toggleElection() {
-            const btn = document.getElementById('btn-toggle');
-            const currentStatus = btn.textContent.includes('Abrir') ? 'close' : 'open';
-            const newStatus = currentStatus === 'open' ? 'close' : 'open';
-            try {
-                const res = await fetch(`${API_URL}/admin/election`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
-                    body: JSON.stringify({ action: newStatus === 'open' ? 'open' : 'close', admin_code: adminCode })
-                });
-                if (res.ok) updateElectionButton(newStatus === 'open');
-            } catch (err) { alert('Error al cambiar estado'); }
+        resultDiv.innerHTML = `<div style="background:#dcfce7; border:2px solid #22c55e; padding:1rem; border-radius:0.5rem; margin-top:1rem;">
+          <h4>✅ Importación exitosa</h4>
+          <p><strong>Importados:</strong> ${result.imported} estudiantes</p>
+          <p><strong>Grupos (Grado-Curso):</strong> ${result.groups}</p>
+        </div>`;
+
+        if (result.imported > 0) {
+          excelData = [];
+          document.getElementById('btn-import').style.display = 'none';
+          document.getElementById('excel-file').value = '';
+          document.getElementById('file-name').textContent = 'Ningún archivo seleccionado';
+          document.getElementById('import-preview').innerHTML = '';
         }
+      } catch (err) {
+        document.getElementById('import-result').innerHTML = `<div style="background:#fee2e2; border:2px solid #ef4444; color:#991b1b; padding:1rem; border-radius:0.5rem; margin-top:1rem;">
+          <strong>❌ Error de conexión:</strong> ${err.message}
+        </div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '✅ Importar Estudiantes';
+      }
+    }
 
-        function updateElectionButton(isOpen) {
-            const btn = document.getElementById('btn-toggle');
-            const status = document.getElementById('election-status');
-            if (isOpen) { btn.textContent = 'Cerrar Votación'; btn.className = 'btn btn-danger'; status.textContent = 'Estado: Abierta'; status.style.color = '#10b981'; }
-            else { btn.textContent = 'Abrir Votación'; btn.className = 'btn btn-primary'; status.textContent = 'Estado: Cerrada'; status.style.color = '#64748b'; }
-        }
-
-        async function loadStudents() {
-            try {
-                const res = await fetch(`${API_URL}/admin/students`, { headers: { 'x-admin-code': adminCode } });
-                const data = await res.json();
-                const container = document.getElementById('students-table-container');
-                if (!data.students || data.students.length === 0) { container.innerHTML = '<p>No hay estudiantes registrados</p>'; return; }
-                container.innerHTML = `<table><thead><tr><th>Código</th><th>Nombre</th><th>Grado</th><th>Curso</th><th>Lista</th><th>Estado</th><th>Acción</th></tr></thead><tbody>
-                    ${data.students.map(s => `<tr><td><code>${s.access_code}</code></td><td>${s.full_name}</td><td>${s.grade}°</td><td>${s.course}</td><td>${s.list_number}</td><td>${s.has_voted ? '✓ Votó' : 'Pendiente'}</td><td><button onclick="deleteStudent('${s.id}')" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.875rem;">Eliminar</button></td></tr>`).join('')}
-                </tbody></table>`;
-            } catch (err) { console.error('Error:', err); }
-        }
-
-        async function deleteStudent(id) {
-            if (!confirm('¿Eliminar este estudiante?')) return;
-            try {
-                const res = await fetch(`${API_URL}/admin/students`, {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
-                    body: JSON.stringify({ id, admin_code: adminCode })
-                });
-                if (res.ok) loadStudents();
-            } catch (err) { alert('Error al eliminar'); }
-        }
-
-        async function resetCodes() {
-            if (!confirm('¿Regenerar todos los códigos?')) return;
-            try {
-                const res = await fetch(`${API_URL}/admin/reset-codes`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
-                    body: JSON.stringify({ admin_code: adminCode })
-                });
-                if (res.ok) { alert('Códigos regenerados'); loadStudents(); }
-            } catch (err) { alert('Error'); }
-        }
-
-        async function clearAllData() {
-            const confirmText = prompt('Escribe ELIMINAR TODO para confirmar:');
-            if (confirmText !== 'ELIMINAR TODO') return;
-            try {
-                const res = await fetch(`${API_URL}/admin/clear-data`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
-                    body: JSON.stringify({ confirm: 'ELIMINAR TODO', admin_code: adminCode })
-                });
-                if (res.ok) { alert('Datos eliminados'); location.reload(); }
-            } catch (err) { alert('Error'); }
-        }
-
-        async function loadCandidates() {
-            try {
-                const res = await fetch(`${API_URL}/admin/candidates`, { headers: { 'x-admin-code': adminCode } });
-                const data = await res.json();
-                const container = document.getElementById('candidates-list-admin');
-                if (!data.candidates || data.candidates.length === 0) { container.innerHTML = '<p>No hay candidatos registrados</p>'; return; }
-                container.innerHTML = `<table><thead><tr><th>Foto</th><th>Nombre</th><th>Partido</th><th>Votos</th><th>Acciones</th></tr></thead><tbody>
-                    ${data.candidates.map(c => `<tr>
-                        <td>${c.photo_url ? `<img src="${c.photo_url}" class="candidate-photo" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22><rect fill=%22%23e2e8f0%22 width=%2260%22 height=%2260%22/><text fill=%22%2364748b%22 x=%2230%22 y=%2235%22 text-anchor=%22middle%22 font-size=%2210%22>Sin foto</text></svg>'">` : '<span style="color: #94a3b8;">Sin foto</span>'}</td>
-                        <td><strong>${c.name}</strong></td>
-                        <td>${c.party || '-'}</td>
-                        <td>${c.votes}</td>
-                        <td>
-                            <button onclick="editPhoto('${c.id}')" class="btn btn-warning" style="padding: 0.25rem 0.5rem; font-size: 0.875rem; margin-right: 0.25rem;">Foto</button>
-                            <button onclick="deleteCandidate('${c.id}')" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.875rem;">Eliminar</button>
-                        </td>
-                    </tr>`).join('')}
-                </tbody></table>`;
-            } catch (err) { console.error('Error:', err); }
-        }
-
-        async function editPhoto(candidateId) {
-            const url = prompt('Pega la URL de la foto (sube a Imgur primero):');
-            if (!url) return;
-
-            try {
-                const res = await fetch(`${API_URL}/admin/candidates`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
-                    body: JSON.stringify({ id: candidateId, photo_url: url, admin_code: adminCode })
-                });
-                if (res.ok) { loadCandidates(); } else { alert('Error al actualizar foto'); }
-            } catch (err) { alert('Error de conexión'); }
-        }
-
-        async function addCandidate() {
-            const name = document.getElementById('new-candidate-name').value.trim();
-            const party = document.getElementById('new-candidate-party').value.trim();
-            const photo_url = document.getElementById('new-candidate-photo').value.trim();
-
-            if (!name) { alert('Ingresa un nombre'); return; }
-
-            try {
-                const res = await fetch(`${API_URL}/admin/candidates`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
-                    body: JSON.stringify({ name, party, photo_url, admin_code: adminCode })
-                });
-                if (res.ok) {
-                    document.getElementById('new-candidate-name').value = '';
-                    document.getElementById('new-candidate-party').value = '';
-                    document.getElementById('new-candidate-photo').value = '';
-                    document.getElementById('new-photo-preview').innerHTML = '';
-                    loadCandidates();
-                }
-            } catch (err) { alert('Error'); }
-        }
-
-        async function deleteCandidate(id) {
-            if (!confirm('¿Eliminar este candidato?')) return;
-            try {
-                const res = await fetch(`${API_URL}/admin/candidates`, {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
-                    body: JSON.stringify({ id, admin_code: adminCode })
-                });
-                if (res.ok) loadCandidates();
-            } catch (err) { alert('Error'); }
-        }
-
-        document.getElementById('excel-file')?.addEventListener('change', handleFileSelect);
-
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            document.getElementById('file-name').textContent = file.name;
-
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                try {
-                    let data;
-                    const fileData = e.target.result;
-
-                    if (file.name.endsWith('.csv')) {
-                        const text = new TextDecoder('utf-8').decode(fileData);
-                        const lines = text.split('\n');
-                        const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-                        const rows = [];
-
-                        for (let i = 1; i < lines.length; i++) {
-                            if (!lines[i].trim()) continue;
-                            const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
-                            const row = {};
-                            headers.forEach((h, idx) => row[h] = values[idx]);
-                            rows.push(row);
-                        }
-                        data = rows;
-                    } else {
-                        const workbook = XLSX.read(fileData, { type: 'array' });
-                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                        data = XLSX.utils.sheet_to_json(firstSheet);
-                    }
-
-                    processExcelData(data);
-                } catch (err) {
-                    alert('Error al leer archivo: ' + err.message);
-                }
-            };
-
-            reader.readAsArrayBuffer(file);
-        }
-
-        function processExcelData(data) {
-            if (!Array.isArray(data) || data.length === 0) {
-                alert('El archivo está vacío o no tiene el formato correcto');
-                excelData = [];
-                return;
-            }
-
-            const mapped = data.map((row) => {
-                const findField = (possibleNames) => {
-                    for (const name of possibleNames) {
-                        if (row[name] !== undefined) return row[name];
-                        const key = Object.keys(row).find(k => k.toLowerCase().trim() === name.toLowerCase());
-                        if (key) return row[key];
-                    }
-                    return undefined;
-                };
-
-                const nombre = findField(['Nombre', 'Name', 'Estudiante', 'Alumno', 'Apellidos y Nombres', 'Apellido y Nombre', 'APELLIDOS Y NOMBRES', 'APELLIDO Y NOMBRE', 'Alumno']);
-                const grado = findField(['Grado', 'Grade', 'Nivel', 'Año', 'GRADO', 'Grado/Nivel', 'NIVEL']);
-                const curso = findField(['Curso', 'Paralelo', 'Sección', 'Seccion', 'Aula', 'Course', 'CURSO', 'PARALELO', 'SECCION']);
-                const lista = findField(['Lista', 'List', 'Número', 'Numero', 'No', 'No.', 'Nro', 'Nro.', 'LISTA', 'NÚMERO', 'NUMERO', 'Num']);
-
-                return {
-                    full_name: nombre ? String(nombre).trim() : '',
-                    grade: parseInt(grado, 10) || 0,
-                    course: parseInt(curso, 10) || 1,
-                    list_number: parseInt(lista, 10) || 0
-                };
-            }).filter(s => s.full_name && s.grade > 0);
-
-            excelData = mapped;
-
-            const preview = document.getElementById('import-preview');
-            if (mapped.length === 0) {
-                preview.innerHTML = `<div style="background: #fee2e2; border: 2px solid #ef4444; color: #991b1b; padding: 1rem; border-radius: 0.5rem;"><strong>⚠️ No se encontraron estudiantes válidos</strong><br>Columnas detectadas: ${Object.keys(data[0] || {}).join(', ')}</div>`;
-                document.getElementById('btn-import').style.display = 'none';
-                return;
-            }
-
-            preview.innerHTML = `
-                <div style="background: #dcfce7; border: 2px solid #22c55e; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-                    ✅ <strong>${mapped.length} estudiantes válidos encontrados</strong> de ${data.length} filas<br>
-                    <small>Los códigos se generarán automáticamente reiniciando el número por cada curso (ej: 06101, 06102... 07101, 07102...)</small>
-                </div>
-                <h4>Vista previa (primeros 5):</h4>
-                <table style="margin-top: 0.5rem; font-size: 0.875rem; width: 100%;">
-                    <thead>
-                        <tr><th>Nombre</th><th>Grado</th><th>Curso</th><th>Lista (orig)</th></tr>
-                    </thead>
-                    <tbody>
-                        ${mapped.slice(0, 5).map(s => `
-                            <tr>
-                                <td>${s.full_name}</td>
-                                <td>${s.grade}</td>
-                                <td>${s.course}</td>
-                                <td>${s.list_number || 'Auto'}</td>
-                            </tr>
-                        `).join('')}
-                        ${mapped.length > 5 ? `<tr><td colspan="4" style="text-align: center; color: #64748b; padding: 0.5rem;">... y ${mapped.length - 5} más</td></tr>` : ''}
-                    </tbody>
-                </table>
-            `;
-
-            document.getElementById('btn-import').style.display = 'block';
-        }
-
-        async function importStudents() {
-            if (!excelData || excelData.length === 0) {
-                alert('No hay datos para importar. Selecciona un archivo primero.');
-                return;
-            }
-
-            const btn = document.getElementById('btn-import');
-            btn.disabled = true;
-            btn.textContent = '⏳ Importando...';
-
-            try {
-                const studentsToSend = excelData.map(s => ({
-                    full_name: String(s.full_name || '').trim(),
-                    grade: parseInt(s.grade, 10) || 0,
-                    course: parseInt(s.course, 10) || 1,
-                    list_number: parseInt(s.list_number, 10) || 0
-                })).filter(s => s.full_name && s.grade > 0);
-
-                const res = await fetch(`${API_URL}/admin/import`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-admin-code': adminCode
-                    },
-                    body: JSON.stringify({
-                        students: studentsToSend,
-                        admin_code: adminCode
-                    })
-                });
-
-                const result = await res.json();
-                const resultDiv = document.getElementById('import-result');
-
-                if (!res.ok || !result.success) {
-                    resultDiv.innerHTML = `
-                        <div style="background: #fee2e2; border: 2px solid #ef4444; color: #991b1b; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
-                            <strong>❌ Error:</strong> ${result.error || 'Error desconocido'}
-                        </div>
-                    `;
-                    return;
-                }
-
-                resultDiv.innerHTML = `
-                    <div style="background: #dcfce7; border: 2px solid #22c55e; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
-                        <h4>✅ Importación exitosa</h4>
-                        <p><strong>Importados:</strong> ${result.imported} estudiantes</p>
-                        <p><strong>Grupos (Grado-Curso):</strong> ${result.groups}</p>
-                        ${result.errors && result.errors.length > 0 ? `<details style="margin-top: 0.5rem;"><summary>Ver advertencias (${result.errors.length})</summary><ul style="margin-top: 0.5rem; font-size: 0.875rem;">${result.errors.slice(0, 10).map(e => `<li>${e}</li>`).join('')}</ul></details>` : ''}
-                    </div>
-                `;
-
-                if (result.imported > 0) {
-                    excelData = [];
-                    document.getElementById('btn-import').style.display = 'none';
-                    document.getElementById('excel-file').value = '';
-                    document.getElementById('file-name').textContent = 'Ningún archivo seleccionado';
-                    document.getElementById('import-preview').innerHTML = '';
-                }
-            } catch (err) {
-                document.getElementById('import-result').innerHTML = `
-                    <div style="background: #fee2e2; border: 2px solid #ef4444; color: #991b1b; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
-                        <strong>❌ Error de conexión:</strong> ${err.message}
-                    </div>
-                `;
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '✅ Importar Estudiantes';
-            }
-        }
-    </script>
+    // Permite enter en login
+    document.getElementById('admin-code').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') login();
+    });
+  </script>
 </body>
 </html>
