@@ -313,7 +313,13 @@
         $('subtitle').textContent = 'La votación está cerrada.';
       }
 
-      $('btn-vote').disabled = true;
+      // Mantener el estado del botón de votar según si hay un candidato seleccionado
+      // Solo deshabilitar el botón si NO hay un candidato seleccionado y la elección está abierta
+      if (!selectedCandidateId) {
+        $('btn-vote').disabled = true;
+      } else if (electionOpen) {
+        $('btn-vote').disabled = false;
+      }
     }
 
     function renderCandidates() {
