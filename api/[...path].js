@@ -543,24 +543,12 @@ async function clearData(req, res) {
 async function clearStudents(req, res) {
   const supabase = getSupabase();
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
-  try {
-    // Eliminar solo estudiantes (NO candidatos, NO votos, NO config)
-    const { error } = await supabase.from('students').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  // Eliminar solo estudiantes (NO candidatos, NO votos, NO config)
+  await supabase.from('students').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 
-    if (error) {
-      console.error('Error al eliminar estudiantes:', error);
-      return res.status(500).json({ error: 'Error al eliminar estudiantes', details: error.message });
-    }
-
-    return res.status(200).json({ success: true, message: 'Estudiantes eliminados' });
-  } catch (err) {
-    console.error('Excepción en clearStudents:', err);
-    return res.status(500).json({ error: 'Error inesperado al eliminar estudiantes' });
-  }
+  return res.status(200).json({ success: true, message: 'Estudiantes eliminados' });
 }
 
 // =====================================================
