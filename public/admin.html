@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Panel de Administración - Votación Escolar</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -98,6 +98,7 @@
     .carnet-info { font-size: 0.85rem; }
     .carnet-code { font-family: monospace; font-size: 1.25rem; font-weight: bold; color: #3b82f6; text-align: center; padding: 0.5rem; background: #f1f5f9; border-radius: 0.375rem; margin-top: 0.5rem; }
     .carnet-qr-container { display: flex; justify-content: center; margin: 0.75rem 0; }
+    .carnet-qr-container img { border: 2px solid #e2e8f0; border-radius: 0.375rem; max-width: 120px; height: auto; }
     .carnet-qr-container canvas { border: 2px solid #e2e8f0; border-radius: 0.375rem; max-width: 120px; height: auto; }
     .carnet-footer { font-size: 0.7rem; color: #94a3b8; text-align: center; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed #e2e8f0; }
 
@@ -1382,8 +1383,7 @@
             <p><strong>Lista:</strong> ${s.list_number}</p>
           </div>
           <div class="carnet-code">${s.access_code}</div>
-          <div class="carnet-qr-container">
-            <canvas id="qr-${s.id}"></canvas>
+          <div class="carnet-qr-container" id="qr-container-${s.id}">
           </div>
           <div class="carnet-footer">
             Escanea el QR o usa el código • Votación ${new Date().getFullYear()}
@@ -1393,25 +1393,39 @@
       
       // Generar QR codes después de renderizar
       setTimeout(() => {
+        // Verificar si la librería QRCode está disponible
+        if (typeof QRCode === 'undefined') {
+          console.error('Librería QRCode no está cargada');
+          showToast('Error: No se pudo cargar la librería de códigos QR. Intenta recargar la página.', 'error');
+          return;
+        }
+        
         filtered.forEach(s => {
-          const canvas = document.getElementById(`qr-${s.id}`);
-          if (canvas) {
-            const baseURL = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
-            const qrData = `${baseURL}?code=${s.access_code}`;
-            
-            QRCode.toCanvas(canvas, qrData, {
-              width: 120,
-              margin: 1,
-              color: {
-                dark: '#1e293b',
-                light: '#ffffff'
-              }
-            }).catch(err => {
-              console.error('Error generando QR:', err);
-            });
+          const container = document.getElementById(`qr-container-${s.id}`);
+          if (container) {
+            try {
+              // Limpiar contenedor
+              container.innerHTML = '';
+              
+              const baseURL = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
+              const qrData = `${baseURL}?code=${s.access_code}`;
+              
+              // Generar QR usando QRCode.js
+              new QRCode(container, {
+                text: qrData,
+                width: 120,
+                height: 120,
+                colorDark: '#1e293b',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
+              });
+            } catch (err) {
+              console.error('Error generando QR para estudiante', s.full_name, ':', err);
+              container.innerHTML = '<div style="font-size:0.7rem;color:#ef4444;text-align:center;">Error QR</div>';
+            }
           }
         });
-      }, 100);
+      }, 300);
     }
 
     function generatePlaceholderLogo() {
@@ -1482,6 +1496,7 @@
               justify-content: center;
               margin: 6px 0;
             }
+            .carnet-qr-container img,
             .carnet-qr-container canvas {
               border: 2px solid #e2e8f0;
               border-radius: 0.25rem;
