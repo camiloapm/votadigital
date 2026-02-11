@@ -61,6 +61,9 @@ export default async function handler(req, res) {
   if (url.pathname === '/api/admin/clear-data' || url.pathname === '/api/admin/clear-data/') {
     return await handleAdmin(req, res, 'clear-data');
   }
+  if (url.pathname === '/api/admin/clear-students' || url.pathname === '/api/admin/clear-students/') {
+    return await handleAdmin(req, res, 'clear-students');
+  }
 
   // ======== ROUTER GENERAL ========
   const pathParts = url.pathname.replace('/api/', '').split('/').filter(Boolean);
@@ -248,6 +251,7 @@ async function handleAdmin(req, res, subEndpoint) {
     case 'reset-codes': return await resetCodes(req, res);
     case 'reset-votes': return await resetVotes(req, res);
     case 'clear-data': return await clearData(req, res);
+    case 'clear-students': return await clearStudents(req, res);
     default: return res.status(404).json({ error: 'Sub-endpoint no encontrado' });
   }
 }
@@ -534,6 +538,17 @@ async function clearData(req, res) {
   await supabase.from('config').update({ election_status: 'closed' }).eq('id', 1);
 
   return res.status(200).json({ success: true, message: 'Datos eliminados' });
+}
+
+async function clearStudents(req, res) {
+  const supabase = getSupabase();
+
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
+
+  // Eliminar solo estudiantes (NO candidatos, NO votos, NO config)
+  await supabase.from('students').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+  return res.status(200).json({ success: true, message: 'Estudiantes eliminados' });
 }
 
 // =====================================================
