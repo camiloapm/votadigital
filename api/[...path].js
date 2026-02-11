@@ -74,6 +74,7 @@ export default async function handler(req, res) {
     switch (endpoint) {
       case 'check-status': return await checkStatus(req, res);
       case 'verify-code': return await verifyCode(req, res);
+      case 'verify-qr': return await verifyQRCode(req, res);
       case 'cast-vote': return await castVote(req, res);
       case 'get-candidates': return await getCandidates(req, res);
       case 'admin': return await handleAdmin(req, res, subEndpoint);
@@ -130,6 +131,43 @@ async function verifyCode(req, res) {
 
   if (error || !student) return res.status(404).json({ error: 'Código no encontrado' });
   if (student.has_voted) return res.status(403).json({ error: 'Este código ya ha sido utilizado' });
+
+  return res.status(200).json({
+    valid: true,
+    student: { name: student.full_name, grade: student.grade, course: student.course }
+  });
+}
+
+// Función para verificar códigos QR (acepta cualquier código no vacío)
+async function verifyQRCode(req, res) {
+  const supabase = getSupabase();
+
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
+
+  // El QR contiene el código de acceso del estudiante
+  const { qr_token } = req.body || {};
+  
+  if (!qr_token) {
+    return res.status(400).json({ error: 'Código QR requerido' });
+  }
+
+  // Limpiar el token (quitar espacios en blanco)
+  const accessCode = qr_token.trim();
+
+  // Buscar estudiante por código de acceso
+  const { data: student, error } = await supabase
+    .from('students')
+    .select('id, full_name, grade, course, has_voted')
+    .eq('access_code', accessCode)
+    .single();
+
+  if (error || !student) {
+    return res.status(404).json({ error: 'Código QR no encontrado' });
+  }
+  
+  if (student.has_voted) {
+    return res.status(403).json({ error: 'Este código ya ha sido utilizado' });
+  }
 
   return res.status(200).json({
     valid: true,
