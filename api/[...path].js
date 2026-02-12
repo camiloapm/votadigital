@@ -384,19 +384,20 @@ async function importStudents(req, res) {
     return res.status(400).json({ error: 'No hay estudiantes válidos para importar' });
   }
 
-  // Obtener TODOS los access_codes y list_numbers existentes de una sola consulta
+  // Obtener TODOS los estudiantes existentes de una sola consulta
   const { data: existing, error: fetchError } = await supabase
     .from('students')
-    .select('grade, course, list_number, access_code');
+    .select('full_name, grade, course, list_number, access_code');
 
-  // Si falla la consulta, no podemos continuar de forma segura
   if (fetchError) {
     return res.status(500).json({ error: 'Error al consultar estudiantes existentes', details: fetchError.message });
   }
 
-  // Construir Set de códigos usados y mapa de máximo list_number por grupo
+  // Construir Set de códigos usados, mapa de máximo list_number por grupo
+  // y Set de "nombre|grado|curso" para detectar duplicados
   const usedCodes = new Set();
   const maxListPerGroup = {};
+  const existingStudentKeys = new Set();
 
   for (const s of (existing || [])) {
     if (s.access_code) usedCodes.add(String(s.access_code));
@@ -404,11 +405,38 @@ async function importStudents(req, res) {
     if ((s.list_number || 0) > (maxListPerGroup[key] || 0)) {
       maxListPerGroup[key] = s.list_number;
     }
+    const studentKey = `${String(s.full_name).trim().toLowerCase()}|${s.grade}|${s.course}`;
+    existingStudentKeys.add(studentKey);
   }
 
-  // Agrupar nuevos por grado-curso
+  // Filtrar estudiantes que ya existen (mismo nombre + grado + curso)
+  let skipped = 0;
+  const newStudents = validStudents.filter(s => {
+    const studentKey = `${s.full_name.toLowerCase()}|${s.grade}|${s.course}`;
+    if (existingStudentKeys.has(studentKey)) {
+      skipped++;
+      return false;
+    }
+    return true;
+  });
+
+  if (newStudents.length === 0) {
+    return res.status(200).json({
+      success: true,
+      imported: 0,
+      skipped,
+      total: students.length,
+      valid: 0,
+      groups: 0,
+      message: 'Todos los estudiantes ya estaban registrados',
+      errors: [],
+      hasErrors: false,
+    });
+  }
+
+  // Agrupar solo los nuevos por grado-curso
   const groups = {};
-  for (const s of validStudents) {
+  for (const s of newStudents) {
     const key = `${s.grade}-${s.course}`;
     if (!groups[key]) groups[key] = { grade: s.grade, course: s.course, students: [] };
     groups[key].students.push(s);
@@ -491,8 +519,9 @@ async function importStudents(req, res) {
   }
 
   return res.status(200).json({
-    success: inserted > 0,
+    success: inserted > 0 || skipped > 0,
     imported: inserted,
+    skipped,
     total: students.length,
     valid: toInsert.length,
     groups: Object.keys(groups).length,
