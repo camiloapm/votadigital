@@ -736,12 +736,27 @@
         schoolConfig = data;
         document.getElementById('school-name').value = data.school_name || '';
         
-        // Cargar logo desde URL (compatibilidad hacia atrás)
+        // Mostrar vista previa del logo guardado
         const logoUrl = data.school_logo_url || '';
         if (logoUrl) {
-          document.getElementById('school-logo-url').value = logoUrl;
+          // Guardar en campo oculto para compatibilidad
           document.getElementById('school-logo-url-legacy').value = logoUrl;
-          document.getElementById('logo-preview').innerHTML = `<p>Vista previa:</p><img src="${logoUrl}" class="photo-preview" onerror="this.style.display='none'" onload="this.style.display='block'">`;
+          
+          // Mostrar vista previa del escudo guardado
+          const previewDiv = document.getElementById('logo-preview');
+          previewDiv.innerHTML = `
+            <div style="margin-top: 1rem; padding: 1rem; background: #f8fafc; border-radius: 0.5rem; border: 2px solid #e2e8f0;">
+              <p style="margin-bottom: 0.5rem; font-weight: 600; color: #1e293b;">📸 Escudo actual del colegio:</p>
+              <img src="${logoUrl}" class="photo-preview" onerror="this.style.display='none'" onload="this.style.display='block'" style="max-width: 200px; max-height: 200px; border-radius: 0.5rem; border: 2px solid #e2e8f0;">
+              <p style="margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;">Para cambiar el escudo, selecciona una nueva imagen arriba.</p>
+            </div>
+          `;
+        } else {
+          document.getElementById('logo-preview').innerHTML = `
+            <div style="margin-top: 1rem; padding: 1rem; background: #fef3c7; border-radius: 0.5rem; border: 2px solid #f59e0b;">
+              <p style="color: #92400e; font-size: 0.9rem;">⚠️ Aún no has cargado un escudo para el colegio.</p>
+            </div>
+          `;
         }
       } catch (err) {
         console.error('Error cargando config:', err);
@@ -765,10 +780,13 @@
           showToast('Configuración guardada correctamente', 'success');
           schoolConfig = { school_name: name, school_logo_url: logoData };
           
-          // Limpiar previsualización si se guardó correctamente
+          // Limpiar el área de carga
           if (logoData) {
             removeImage('school-logo-preview', 'school-logo-data');
           }
+          
+          // Recargar la configuración para mostrar la vista previa actualizada
+          await loadSchoolConfig();
         } else {
           showToast('Error al guardar configuración', 'error');
         }
