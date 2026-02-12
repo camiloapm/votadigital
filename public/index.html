@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Votación Escolar</title>
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     :root{
       --bg:#f0f4f8; --card:#ffffff; --text:#1e293b; --remember:#64748b;
@@ -137,23 +136,9 @@
         <button id="btn-verify" class="btn primary" type="button" style="flex:1;min-width:100px;">
           ✓ Verificar
         </button>
-        <button id="btn-scan-qr" class="btn" type="button" style="flex:1;min-width:100px;background:#8b5cf6;color:#fff;">
-          📱 Escanear QR
-        </button>
         <button id="btn-clear" class="btn secondary" type="button" style="flex:1;min-width:90px;">
           Limpiar
         </button>
-      </div>
-      
-      <!-- Modal para escáner QR -->
-      <div id="qr-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;">
-        <div style="background:var(--card);border-radius:16px;padding:1.5rem;max-width:500px;width:90%;position:relative;">
-          <button id="btn-close-qr" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--remember);">×</button>
-          <h3 style="margin-bottom:1rem;font-size:1.2rem;">📱 Escanear Código QR</h3>
-          <p class="muted" style="margin-bottom:1rem;">Apunta la cámara hacia el código QR de tu estudiante</p>
-          <div id="qr-reader" style="border-radius:12px;overflow:hidden;"></div>
-          <div id="qr-status" class="muted" style="text-align:center;margin-top:.75rem;font-weight:500;"></div>
-        </div>
       </div>
 
       <div id="access-alert" class="alert" style="display:none"></div>
@@ -216,7 +201,6 @@
     let selectedCandidateId = null;
     let autoResetEnabled = true;
     let countdownInterval = null;
-    let html5QrCode = null;
 
     const $ = (id) => document.getElementById(id);
 
@@ -638,102 +622,6 @@
       if (e.key === 'Enter') verifyCode();
     });
 
-    // ==================== FUNCIONES QR ====================
-    
-    function openQRScanner() {
-      const modal = $('qr-modal');
-      modal.style.display = 'flex';
-      
-      if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("qr-reader");
-      }
-      
-      $('qr-status').textContent = '📷 Iniciando cámara...';
-      
-      const config = {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0
-      };
-      
-      html5QrCode.start(
-        { facingMode: "environment" },
-        config,
-        onScanSuccess,
-        onScanError
-      ).then(() => {
-        $('qr-status').textContent = '🎯 Escanea el código QR';
-      }).catch(err => {
-        $('qr-status').textContent = '❌ Error al acceder a la cámara';
-        console.error('Error starting QR scanner:', err);
-      });
-    }
-    
-    function closeQRScanner() {
-      const modal = $('qr-modal');
-      modal.style.display = 'none';
-      
-      if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().catch(err => console.error('Error stopping scanner:', err));
-      }
-      
-      $('qr-status').textContent = '';
-    }
-    
-    function onScanSuccess(decodedText) {
-      // Extraer el código del QR
-      let code = '';
-      
-      // Si el QR contiene una URL con parámetro ?code=
-      if (decodedText.includes('?code=')) {
-        const url = new URL(decodedText);
-        code = url.searchParams.get('code');
-      } else {
-        // Si es solo el código
-        code = decodedText;
-      }
-      
-      code = onlyDigits(code).slice(0, 5);
-      
-      if (isValidCode(code)) {
-        $('access-code').value = code;
-        $('qr-status').textContent = `✅ Código detectado: ${code}`;
-        
-        // Cerrar escáner después de 1 segundo
-        setTimeout(() => {
-          closeQRScanner();
-          // Verificar automáticamente
-          verifyCode();
-        }, 1000);
-      }
-    }
-    
-    function onScanError(errorMessage) {
-      // No hacer nada con los errores normales de escaneo
-    }
-    
-    function checkURLForCode() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-      
-      if (code) {
-        const cleanCode = onlyDigits(code).slice(0, 5);
-        if (isValidCode(cleanCode)) {
-          $('access-code').value = cleanCode;
-          // Limpiar la URL
-          window.history.replaceState({}, document.title, window.location.pathname);
-          // Verificar automáticamente después de un momento
-          setTimeout(() => {
-            verifyCode();
-          }, 500);
-        }
-      }
-    }
-    
-    // Event listeners para QR
-    $('btn-scan-qr').addEventListener('click', openQRScanner);
-    $('btn-close-qr').addEventListener('click', closeQRScanner);
-
     // Init
     (async function init(){
       // Asegurar que la sección de candidatos esté oculta inicialmente
@@ -743,9 +631,6 @@
       await loadStatus();
       await loadCandidates();
       setInterval(loadStatus, 10000);
-      
-      // Verificar si hay código en la URL (desde QR)
-      checkURLForCode();
     })();
   </script>
 </body>

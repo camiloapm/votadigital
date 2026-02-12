@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Panel de Administración - Votación Escolar</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -97,9 +96,6 @@
     .carnet-subtitle { font-size: 0.8rem; color: #64748b; }
     .carnet-info { font-size: 0.85rem; }
     .carnet-code { font-family: monospace; font-size: 1.25rem; font-weight: bold; color: #3b82f6; text-align: center; padding: 0.5rem; background: #f1f5f9; border-radius: 0.375rem; margin-top: 0.5rem; }
-    .carnet-qr-container { display: flex; justify-content: center; margin: 0.75rem 0; }
-    .carnet-qr-container img { border: 2px solid #e2e8f0; border-radius: 0.375rem; max-width: 120px; height: auto; }
-    .carnet-qr-container canvas { border: 2px solid #e2e8f0; border-radius: 0.375rem; max-width: 120px; height: auto; }
     .carnet-footer { font-size: 0.7rem; color: #94a3b8; text-align: center; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed #e2e8f0; }
 
     /* Área de filtros para carnets */
@@ -168,7 +164,6 @@
       <button data-sec="candidates">Candidatos</button>
       <button data-sec="students">Estudiantes</button>
       <button data-sec="carnets">Carnets</button>
-      <button data-sec="qrcodes">Códigos QR</button>
       <button data-sec="import">Importar Excel</button>
     </nav>
 
@@ -304,19 +299,7 @@
 
     <section id="sec-carnets" class="section">
       <h2>🎴 Generador de Carnets Electorales</h2>
-      <p style="margin-bottom: 1rem; color: #64748b;">
-        Genera carnets electorales para imprimir. Cada carnet incluye el <strong>código numérico</strong> y un <strong>código QR</strong> 
-        para que el estudiante pueda votar de la forma que prefiera.
-      </p>
-      
-      <div class="card" style="background:#ecfdf5; border-left:4px solid #10b981; margin-bottom:1rem;">
-        <h4>✨ Carnets con doble opción</h4>
-        <ul style="margin-left:1.5rem; margin-top:0.5rem;">
-          <li><strong>Código numérico:</strong> El estudiante puede ingresar manualmente su código de 5 dígitos</li>
-          <li><strong>Código QR:</strong> El estudiante puede escanear el QR con su celular para votar automáticamente</li>
-          <li>Ambas opciones están en el mismo carnet - ¡el estudiante elige!</li>
-        </ul>
-      </div>
+      <p style="margin-bottom: 1rem; color: #64748b;">Genera carnets electorales para imprimir en tamaño cédula (ID-1). Cada estudiante necesita su carnet para votar.</p>
       
       <div class="filter-area">
         <div class="filter-group">
@@ -351,68 +334,6 @@
 
       <div id="carnets-container" class="carnet-grid">
         <p style="color: #64748b; text-align: center; padding: 2rem;">Cargando estudiantes...</p>
-      </div>
-    </section>
-
-    <section id="sec-qrcodes" class="section">
-      <h2>📱 Códigos QR para Votación</h2>
-      
-      <div class="card" style="background:#ecfdf5; border-left:4px solid #10b981;">
-        <h4>✅ ¡Los carnets ya incluyen códigos QR!</h4>
-        <p style="margin-top:0.5rem;">
-          Los <strong>Carnets Electorales</strong> (sección anterior) ya incluyen automáticamente el código QR de cada estudiante.
-          <strong>No necesitas generar códigos QR por separado</strong> - solo imprime los carnets.
-        </p>
-      </div>
-
-      <div class="card" style="background:#fffbeb; border-left:4px solid #f59e0b; margin-top:1rem;">
-        <h4>🤔 ¿Cuándo usar esta sección?</h4>
-        <p style="margin-top:0.5rem;">
-          Esta página de códigos QR independientes es <strong>opcional</strong> y solo útil si:
-        </p>
-        <ul style="margin-left:1.5rem; margin-top:0.5rem;">
-          <li>Quieres distribuir códigos QR digitalmente (sin imprimir carnets)</li>
-          <li>Necesitas códigos QR más grandes para imprimir separado</li>
-          <li>Quieres solo el QR sin el carnet completo</li>
-        </ul>
-        <p style="margin-top:0.5rem;">
-          <strong>Para uso normal:</strong> Ve a la sección "Carnets" que ya incluye todo lo que necesitas.
-        </p>
-      </div>
-      
-      <div class="action-buttons" style="margin-top:1rem;">
-        <button onclick="window.location.hash = '#carnets'; showSection('carnets', document.querySelector('[data-sec=carnets]'))" class="action-btn btn-success" style="font-size:1rem; padding:0.75rem 1.5rem;">
-          🎴 Ir a Generar Carnets (Recomendado)
-        </button>
-        <button onclick="window.open('generar-qr.html', '_blank')" class="action-btn btn-secondary">
-          📱 Abrir Generador QR Independiente (Opcional)
-        </button>
-      </div>
-
-      <div class="card" style="background:#dbeafe; border-left:4px solid #3b82f6; margin-top:1rem;">
-        <h4>💡 ¿Cómo funcionan los códigos QR?</h4>
-        <ul style="margin-left:1.5rem; margin-top:0.5rem;">
-          <li>Cada código QR contiene el código único del estudiante</li>
-          <li>El estudiante escanea el QR con su celular</li>
-          <li>Se abre automáticamente la página de votación con su código pre-cargado</li>
-          <li>Solo debe confirmar su identidad y seleccionar su candidato</li>
-          <li><strong>También puede ingresar el código manualmente si lo prefiere</strong></li>
-        </ul>
-      </div>
-
-      <div class="card" style="margin-top:1rem;">
-        <h4>🔧 Opciones de votación para estudiantes</h4>
-        <p style="color:#64748b; margin-bottom:0.75rem;">
-          En la página de votación, los estudiantes tienen estas opciones:
-        </p>
-        <ul style="margin-left:1.5rem;">
-          <li><strong>Escanear QR del carnet:</strong> Con la cámara del celular, abre directamente la página</li>
-          <li><strong>Botón "Escanear QR":</strong> Usar la cámara del dispositivo para escanear el QR</li>
-          <li><strong>Ingresar código manualmente:</strong> Escribir el código de 5 dígitos</li>
-        </ul>
-        <p style="margin-top:0.75rem; padding:0.75rem; background:#f8fafc; border-radius:0.5rem; font-size:0.9rem;">
-          <strong>💡 Tip:</strong> Los carnets incluyen ambas opciones (código numérico y QR) para máxima flexibilidad.
-        </p>
       </div>
     </section>
 
@@ -1383,49 +1304,11 @@
             <p><strong>Lista:</strong> ${s.list_number}</p>
           </div>
           <div class="carnet-code">${s.access_code}</div>
-          <div class="carnet-qr-container" id="qr-container-${s.id}">
-          </div>
           <div class="carnet-footer">
-            Escanea el QR o usa el código • Votación ${new Date().getFullYear()}
+            Votación Escolar ${new Date().getFullYear()}
           </div>
         </div>
       `).join('');
-      
-      // Generar QR codes después de renderizar
-      setTimeout(() => {
-        // Verificar si la librería QRCode está disponible
-        if (typeof QRCode === 'undefined') {
-          console.error('Librería QRCode no está cargada');
-          showToast('Error: No se pudo cargar la librería de códigos QR. Intenta recargar la página.', 'error');
-          return;
-        }
-        
-        filtered.forEach(s => {
-          const container = document.getElementById(`qr-container-${s.id}`);
-          if (container) {
-            try {
-              // Limpiar contenedor
-              container.innerHTML = '';
-              
-              const baseURL = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
-              const qrData = `${baseURL}?code=${s.access_code}`;
-              
-              // Generar QR usando QRCode.js
-              new QRCode(container, {
-                text: qrData,
-                width: 120,
-                height: 120,
-                colorDark: '#1e293b',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.M
-              });
-            } catch (err) {
-              console.error('Error generando QR para estudiante', s.full_name, ':', err);
-              container.innerHTML = '<div style="font-size:0.7rem;color:#ef4444;text-align:center;">Error QR</div>';
-            }
-          }
-        });
-      }, 300);
     }
 
     function generatePlaceholderLogo() {
@@ -1490,18 +1373,6 @@
               background: #f1f5f9; 
               border-radius: 0.25rem; 
               margin-top: 4px; 
-            }
-            .carnet-qr-container {
-              display: flex;
-              justify-content: center;
-              margin: 6px 0;
-            }
-            .carnet-qr-container img,
-            .carnet-qr-container canvas {
-              border: 2px solid #e2e8f0;
-              border-radius: 0.25rem;
-              max-width: 100px;
-              height: auto;
             }
             .carnet-footer { 
               font-size: 0.6rem; 
