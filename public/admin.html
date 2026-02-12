@@ -246,10 +246,6 @@
         
         <!-- Campo oculto para compatibilidad con URLs existentes -->
         <input type="hidden" id="school-logo-url-legacy" placeholder="https://...">
-        <p style="font-size: 0.875rem; color: #64748b; margin-top: 0.5rem;">
-          💡 También puedes usar una URL directa si lo prefieres:
-        </p>
-        <input type="url" id="school-logo-url" placeholder="https://..." onchange="handleLogoUrlChange(this.value)">
 
         <div id="logo-preview"></div>
         <button onclick="saveSchoolConfig()" class="btn btn-primary" style="width:auto; margin-top:1rem;">Guardar Configuración</button>
@@ -604,6 +600,8 @@
     /**
      * Maneja el cambio de URL del logo (compatibilidad hacia atrás)
      */
+    // Función deshabilitada - ya no se permite cargar escudo por URL
+    /*
     function handleLogoUrlChange(url) {
       if (url && url.startsWith('http')) {
         // Limpiar datos de archivo si hay URL
@@ -615,6 +613,7 @@
         preview.innerHTML = `<p>Vista previa:</p><img src="${url}" class="photo-preview" onerror="this.style.display='none'" onload="this.style.display='block'">`;
       }
     }
+    */
 
     /**
      * Genera un avatar con iniciales para mostrar cuando no hay imagen
@@ -752,15 +751,8 @@
     async function saveSchoolConfig() {
       const name = document.getElementById('school-name').value.trim();
       
-      // Prioridad: archivo Base64 > URL manual
-      const base64Data = document.getElementById('school-logo-data')?.value || '';
-      const urlInput = document.getElementById('school-logo-url').value.trim();
-      
-      // Si hay datos de archivo, usarlos; si no, usar la URL
-      let logoData = base64Data;
-      if (!logoData && urlInput) {
-        logoData = urlInput;
-      }
+      // Solo usar datos de archivo Base64 (ya no se permite URL)
+      const logoData = document.getElementById('school-logo-data')?.value || '';
 
       try {
         const res = await fetch(`${API_URL}/config`, {
@@ -774,7 +766,7 @@
           schoolConfig = { school_name: name, school_logo_url: logoData };
           
           // Limpiar previsualización si se guardó correctamente
-          if (base64Data) {
+          if (logoData) {
             removeImage('school-logo-preview', 'school-logo-data');
           }
         } else {
