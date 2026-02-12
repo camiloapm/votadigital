@@ -349,14 +349,18 @@ async function handleElection(req, res) {
   return res.status(200).json({ success: true, status: action === 'open' ? 'open' : 'closed' });
 }
 
-// Import: Asigna listas secuenciales por grado-curso y genera access_code con formato GGCLL (ej: 06105)
+// Genera el access_code formato GGCLL
+function makeAccessCode(grade, course, list) {
+  return `${String(grade).padStart(2, '0')}${course}${String(list).padStart(2, '0')}`;
+}
+
+// Import: inserta estudiantes asignando list_number que no genere colisión de access_code
 async function importStudents(req, res) {
   const supabase = getSupabase();
 
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
   const { students } = req.body || {};
-  console.log('Recibidos datos:', students?.length || 0, 'estudiantes');
 
   if (!Array.isArray(students)) {
     return res.status(400).json({ error: 'Formato inválido: se esperaba un array de estudiantes' });
@@ -365,87 +369,135 @@ async function importStudents(req, res) {
     return res.status(400).json({ error: 'No hay estudiantes para importar' });
   }
 
-  // Agrupar por grado y curso
-  const groupedByGradeCourse = {};
-
+  // Filtrar y normalizar
+  const validStudents = [];
   students.forEach((s) => {
     const nombre = s.full_name;
     const grado = parseInt(s.grade, 10);
     const curso = parseInt(s.course, 10) || 1;
-
-    if (!nombre || !grado || isNaN(grado)) return;
+    if (!nombre || isNaN(grado) || grado < 0) return;
     if (curso < 1 || curso > 9) return;
-
-    const key = `${grado}-${curso}`;
-    if (!groupedByGradeCourse[key]) {
-      groupedByGradeCourse[key] = { grade: grado, course: curso, students: [] };
-    }
-
-    groupedByGradeCourse[key].students.push({
-      full_name: String(nombre).trim(),
-      grade: grado,
-      course: curso
-    });
+    validStudents.push({ full_name: String(nombre).trim(), grade: grado, course: curso });
   });
 
-  // Asignar lista 1..N por grupo y generar GGCLL
-  const studentsWithListNumber = [];
-
-  for (const group of Object.values(groupedByGradeCourse)) {
-    group.students.forEach((student, idx) => {
-      const listNumber = idx + 1;
-
-      const accessCode =
-        `${String(student.grade).padStart(2, '0')}` +
-        `${student.course}` +
-        `${String(listNumber).padStart(2, '0')}`;
-
-      studentsWithListNumber.push({
-        full_name: student.full_name,
-        grade: student.grade,
-        course: student.course,
-        list_number: listNumber,
-        access_code: accessCode
-      });
-    });
+  if (validStudents.length === 0) {
+    return res.status(400).json({ error: 'No hay estudiantes válidos para importar' });
   }
 
-  // Insertar
-  const batchSize = 50;
+  // Obtener TODOS los access_codes y list_numbers existentes de una sola consulta
+  const { data: existing, error: fetchError } = await supabase
+    .from('students')
+    .select('grade, course, list_number, access_code');
+
+  // Si falla la consulta, no podemos continuar de forma segura
+  if (fetchError) {
+    return res.status(500).json({ error: 'Error al consultar estudiantes existentes', details: fetchError.message });
+  }
+
+  // Construir Set de códigos usados y mapa de máximo list_number por grupo
+  const usedCodes = new Set();
+  const maxListPerGroup = {};
+
+  for (const s of (existing || [])) {
+    if (s.access_code) usedCodes.add(String(s.access_code));
+    const key = `${s.grade}-${s.course}`;
+    if ((s.list_number || 0) > (maxListPerGroup[key] || 0)) {
+      maxListPerGroup[key] = s.list_number;
+    }
+  }
+
+  // Agrupar nuevos por grado-curso
+  const groups = {};
+  for (const s of validStudents) {
+    const key = `${s.grade}-${s.course}`;
+    if (!groups[key]) groups[key] = { grade: s.grade, course: s.course, students: [] };
+    groups[key].students.push(s);
+  }
+
+  // Asignar list_number y access_code sin colisiones
+  const toInsert = [];
+
+  for (const group of Object.values(groups)) {
+    const key = `${group.grade}-${group.course}`;
+    let nextList = (maxListPerGroup[key] || 0) + 1;
+
+    for (const student of group.students) {
+      // Avanzar hasta encontrar un código libre
+      while (nextList <= 99 && usedCodes.has(makeAccessCode(group.grade, group.course, nextList))) {
+        nextList++;
+      }
+      if (nextList > 99) {
+        // Sin espacio — saltar este estudiante
+        continue;
+      }
+
+      const accessCode = makeAccessCode(group.grade, group.course, nextList);
+      usedCodes.add(accessCode); // Reservar para el resto del lote en memoria
+
+      toInsert.push({
+        full_name: student.full_name,
+        grade: group.grade,
+        course: group.course,
+        list_number: nextList,
+        access_code: accessCode,
+      });
+      nextList++;
+    }
+  }
+
+  if (toInsert.length === 0) {
+    return res.status(400).json({ error: 'No se pudieron asignar códigos disponibles para los estudiantes' });
+  }
+
+  // Insertar uno por uno para manejar errores individuales sin detener el lote
   let inserted = 0;
   const insertErrors = [];
 
-  for (let i = 0; i < studentsWithListNumber.length; i += batchSize) {
-    const batch = studentsWithListNumber.slice(i, i + batchSize);
-
-    try {
-      const { data, error } = await supabase
-        .from('students')
-        .insert(batch)
-        .select('id');
-
-      if (error) {
-        for (const student of batch) {
-          const { error: singleError } = await supabase.from('students').insert(student);
-          if (singleError) insertErrors.push(`${student.full_name}: ${singleError.message}`);
-          else inserted++;
+  for (const student of toInsert) {
+    const { error } = await supabase.from('students').insert(student);
+    if (error) {
+      // Si aún así hay duplicate key (condición de carrera), reintentar con siguiente código
+      if (error.code === '23505') {
+        // Buscar siguiente código libre y reintentar
+        const key = `${student.grade}-${student.course}`;
+        let retryList = student.list_number + 1;
+        let retried = false;
+        while (retryList <= 99) {
+          const retryCode = makeAccessCode(student.grade, student.course, retryList);
+          if (!usedCodes.has(retryCode)) {
+            const { error: retryError } = await supabase.from('students').insert({
+              ...student,
+              list_number: retryList,
+              access_code: retryCode,
+            });
+            if (!retryError) {
+              usedCodes.add(retryCode);
+              inserted++;
+              retried = true;
+              break;
+            }
+          }
+          retryList++;
+        }
+        if (!retried) {
+          insertErrors.push(`${student.full_name}: sin código disponible`);
         }
       } else {
-        inserted += data.length;
+        insertErrors.push(`${student.full_name}: ${error.message}`);
       }
-    } catch (err) {
-      insertErrors.push(`Batch ${i}: ${err.message}`);
+    } else {
+      inserted++;
     }
   }
 
   return res.status(200).json({
-    success: true,
+    success: inserted > 0,
     imported: inserted,
     total: students.length,
-    valid: studentsWithListNumber.length,
-    groups: Object.keys(groupedByGradeCourse).length,
+    valid: toInsert.length,
+    groups: Object.keys(groups).length,
     errors: insertErrors.slice(0, 10),
-    hasErrors: insertErrors.length > 0
+    hasErrors: insertErrors.length > 0,
   });
 }
 
