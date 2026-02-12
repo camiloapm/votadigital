@@ -108,6 +108,30 @@
     .filter-group label { font-size: 0.875rem; font-weight: 600; }
     .filter-group select { padding: 0.5rem; border: 2px solid #e2e8f0; border-radius: 0.375rem; }
 
+    /* Modal overlay */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 2000; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: white; border-radius: 0.75rem; padding: 2rem; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 1rem; }
+    .modal-header h3 { font-size: 1.5rem; color: #1e293b; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 0.375rem; transition: all 0.2s; }
+    .modal-close:hover { background: #f1f5f9; color: #1e293b; }
+    .modal-body { margin-bottom: 1.5rem; }
+    .modal-footer { display: flex; gap: 0.75rem; justify-content: flex-end; padding-top: 1rem; border-top: 2px solid #e2e8f0; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.9rem; }
+    .form-group input, .form-group select { width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 0.375rem; font-size: 1rem; transition: border-color 0.2s; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #3b82f6; }
+    .form-group small { display: block; margin-top: 0.25rem; color: #64748b; font-size: 0.85rem; }
+    .code-preview { background: #f1f5f9; padding: 1rem; border-radius: 0.5rem; text-align: center; margin-top: 1rem; border: 2px dashed #cbd5e1; }
+    .code-preview-label { font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem; }
+    .code-preview-value { font-family: monospace; font-size: 1.75rem; font-weight: bold; color: #3b82f6; letter-spacing: 0.1em; }
+
+    /* Botón flotante para agregar estudiante */
+    .floating-add-btn { position: fixed; bottom: 2rem; right: 2rem; width: 60px; height: 60px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 50%; font-size: 1.75rem; cursor: pointer; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4); transition: all 0.3s; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+    .floating-add-btn:hover { transform: scale(1.1); box-shadow: 0 15px 35px rgba(59, 130, 246, 0.5); }
+    .floating-add-btn:active { transform: scale(0.95); }
+
     /* Modal styles */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center; }
     .modal-overlay.active { display: flex; }
@@ -347,7 +371,85 @@
       </div>
 
       <div id="students-table-container"></div>
+
+      <!-- Botón flotante para agregar estudiante (solo visible en esta sección) -->
+      <button id="floating-add-student-btn" class="floating-add-btn" onclick="openAddStudentModal()" style="display: none;" title="Agregar estudiante">
+        ➕
+      </button>
     </section>
+
+    <!-- Modal para agregar estudiante manualmente -->
+    <div id="add-student-modal" class="modal-overlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>➕ Agregar Estudiante</h3>
+          <button class="modal-close" onclick="closeAddStudentModal()">✕</button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Nombre completo: *</label>
+            <input type="text" id="new-student-name" placeholder="Ej: Juan Pérez García" />
+            <small>Ingresa el nombre completo del estudiante</small>
+          </div>
+
+          <div class="form-group">
+            <label>Grado: *</label>
+            <select id="new-student-grade" onchange="updateCodePreview()">
+              <option value="">Selecciona un grado</option>
+              <option value="1">1°</option>
+              <option value="2">2°</option>
+              <option value="3">3°</option>
+              <option value="4">4°</option>
+              <option value="5">5°</option>
+              <option value="6">6°</option>
+              <option value="7">7°</option>
+              <option value="8">8°</option>
+              <option value="9">9°</option>
+              <option value="10">10°</option>
+              <option value="11">11°</option>
+              <option value="12">12°</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Curso: *</label>
+            <select id="new-student-course" onchange="updateCodePreview()">
+              <option value="">Selecciona un curso</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Número de lista: *</label>
+            <select id="new-student-list-mode" onchange="toggleListInput()">
+              <option value="auto">Autoasignar (siguiente disponible)</option>
+              <option value="manual">Ingresar manualmente</option>
+            </select>
+            <input type="number" id="new-student-list" min="1" max="99" placeholder="1-99" style="margin-top: 0.5rem; display: none;" onchange="updateCodePreview()" />
+            <small>El número de lista se usará para generar el código único</small>
+          </div>
+
+          <div class="code-preview">
+            <div class="code-preview-label">Código que se generará:</div>
+            <div class="code-preview-value" id="code-preview-display">-----</div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeAddStudentModal()">Cancelar</button>
+          <button class="btn btn-success" onclick="addStudentManually()">✅ Agregar Estudiante</button>
+        </div>
+      </div>
+    </div>
 
     <section id="sec-carnets" class="section">
       <h2>🎴 Generador de Carnets Electorales</h2>
@@ -755,6 +857,9 @@
       if (section === 'candidates') loadCandidates();
       if (section === 'school') loadSchoolConfig();
       if (section === 'carnets') initCarnetsSection();
+
+      // Mostrar/ocultar botón flotante
+      toggleFloatingButton(section);
     }
 
     // ========== TOAST NOTIFICATIONS ==========
@@ -1366,6 +1471,150 @@
         showToast(`${filteredStudents.length} códigos copiados al portapapeles`, 'success');
       });
     }
+
+    // ========== FUNCIONES PARA AGREGAR ESTUDIANTE MANUALMENTE ==========
+
+    function openAddStudentModal() {
+      document.getElementById('add-student-modal').classList.add('active');
+      // Limpiar formulario
+      document.getElementById('new-student-name').value = '';
+      document.getElementById('new-student-grade').value = '';
+      document.getElementById('new-student-course').value = '';
+      document.getElementById('new-student-list-mode').value = 'auto';
+      document.getElementById('new-student-list').value = '';
+      document.getElementById('new-student-list').style.display = 'none';
+      updateCodePreview();
+    }
+
+    function closeAddStudentModal() {
+      document.getElementById('add-student-modal').classList.remove('active');
+    }
+
+    function toggleListInput() {
+      const mode = document.getElementById('new-student-list-mode').value;
+      const listInput = document.getElementById('new-student-list');
+      
+      if (mode === 'manual') {
+        listInput.style.display = 'block';
+        listInput.required = true;
+      } else {
+        listInput.style.display = 'none';
+        listInput.required = false;
+        listInput.value = '';
+      }
+      updateCodePreview();
+    }
+
+    function updateCodePreview() {
+      const grade = document.getElementById('new-student-grade').value;
+      const course = document.getElementById('new-student-course').value;
+      const listMode = document.getElementById('new-student-list-mode').value;
+      const listNumber = document.getElementById('new-student-list').value;
+      
+      const previewDisplay = document.getElementById('code-preview-display');
+      
+      if (!grade || !course) {
+        previewDisplay.textContent = '-----';
+        previewDisplay.style.color = '#cbd5e1';
+        return;
+      }
+
+      // Generar preview del código
+      const gradeStr = grade.padStart(2, '0');
+      const courseStr = course;
+      const listStr = listMode === 'manual' && listNumber ? listNumber.padStart(2, '0') : '??';
+      
+      const codePreview = `${gradeStr}${courseStr}${listStr}`;
+      previewDisplay.textContent = codePreview;
+      previewDisplay.style.color = listStr === '??' ? '#f59e0b' : '#3b82f6';
+    }
+
+    async function addStudentManually() {
+      const name = document.getElementById('new-student-name').value.trim();
+      const grade = document.getElementById('new-student-grade').value;
+      const course = document.getElementById('new-student-course').value;
+      const listMode = document.getElementById('new-student-list-mode').value;
+      let listNumber = document.getElementById('new-student-list').value;
+
+      // Validaciones
+      if (!name) {
+        showToast('Ingresa el nombre del estudiante', 'error');
+        return;
+      }
+
+      if (!grade || !course) {
+        showToast('Selecciona el grado y curso', 'error');
+        return;
+      }
+
+      if (listMode === 'manual' && !listNumber) {
+        showToast('Ingresa el número de lista', 'error');
+        return;
+      }
+
+      // Si es autoasignar, obtener el siguiente número disponible
+      if (listMode === 'auto') {
+        const studentsInCourse = allStudents.filter(s => s.grade === parseInt(grade) && s.course === parseInt(course));
+        if (studentsInCourse.length === 0) {
+          listNumber = 1;
+        } else {
+          const maxList = Math.max(...studentsInCourse.map(s => s.list_number));
+          listNumber = maxList + 1;
+        }
+
+        if (listNumber > 99) {
+          showToast('No hay más números de lista disponibles para este curso (máximo 99)', 'error');
+          return;
+        }
+      }
+
+      // Preparar datos
+      const studentData = {
+        full_name: name,
+        grade: parseInt(grade),
+        course: parseInt(course),
+        list_number: parseInt(listNumber)
+      };
+
+      try {
+        const res = await fetch(`${API_URL}/admin/students/bulk`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-code': adminCode
+          },
+          body: JSON.stringify({
+            students: [studentData],
+            admin_code: adminCode
+          })
+        });
+
+        if (res.ok) {
+          const result = await res.json();
+          showToast(`✅ Estudiante agregado: ${name} (código ${studentData.grade.toString().padStart(2, '0')}${studentData.course}${studentData.list_number.toString().padStart(2, '0')})`, 'success');
+          closeAddStudentModal();
+          loadStudents(); // Recargar lista
+        } else {
+          const error = await res.json();
+          showToast(`Error: ${error.error || 'No se pudo agregar el estudiante'}`, 'error');
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        showToast('Error de conexión al agregar estudiante', 'error');
+      }
+    }
+
+    // Mostrar/ocultar botón flotante según la sección activa
+    function toggleFloatingButton(section) {
+      const floatingBtn = document.getElementById('floating-add-student-btn');
+      if (section === 'students') {
+        floatingBtn.style.display = 'flex';
+      } else {
+        floatingBtn.style.display = 'none';
+      }
+    }
+
+    // ========== FIN FUNCIONES AGREGAR ESTUDIANTE ==========
 
     async function deleteStudent(id) {
       if (!confirm('¿Eliminar este estudiante?')) return;
