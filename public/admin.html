@@ -1593,15 +1593,15 @@
           })
         });
 
-        if (res.ok) {
-          const result = await res.json();
-          // El código real se generó en el backend
+        const result = await res.json();
+
+        if (res.ok && result.success && result.imported > 0) {
           showToast(`✅ Estudiante agregado: ${name}`, 'success');
           closeAddStudentModal();
-          loadStudents(); // Recargar lista
+          loadStudents();
         } else {
-          const error = await res.json();
-          showToast(`Error: ${error.error || 'No se pudo agregar el estudiante'}`, 'error');
+          const errMsg = result.error || (result.errors && result.errors[0]) || 'No se pudo agregar el estudiante';
+          showToast(`Error: ${errMsg}`, 'error');
         }
       } catch (err) {
         console.error('Error:', err);
