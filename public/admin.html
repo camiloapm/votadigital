@@ -295,6 +295,57 @@
           <button onclick="clearStudents()" class="action-btn btn-danger" title="Elimina solo los estudiantes">🗑️ Eliminar Estudiantes</button>
         </div>
       </div>
+
+      <!-- Estadísticas de participación por curso -->
+      <div id="course-stats-container" style="margin-bottom: 1.5rem;"></div>
+
+      <!-- Filtros avanzados -->
+      <div class="card" style="background: #f8fafc; padding: 1.5rem;">
+        <h3 style="margin-bottom: 1rem; color: #1e293b;">🔍 Filtros</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #475569;">Estado de Voto:</label>
+            <select id="filter-vote-status" onchange="applyStudentFilters()" style="width: 100%; padding: 0.5rem; border: 2px solid #e2e8f0; border-radius: 0.375rem;">
+              <option value="all">📋 Todos</option>
+              <option value="voted">✅ Han votado</option>
+              <option value="pending">⏳ No han votado</option>
+            </select>
+          </div>
+          
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #475569;">Grado:</label>
+            <select id="filter-student-grade" onchange="applyStudentFilters()" style="width: 100%; padding: 0.5rem; border: 2px solid #e2e8f0; border-radius: 0.375rem;">
+              <option value="all">Todos los grados</option>
+            </select>
+          </div>
+          
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #475569;">Curso:</label>
+            <select id="filter-student-course" onchange="applyStudentFilters()" style="width: 100%; padding: 0.5rem; border: 2px solid #e2e8f0; border-radius: 0.375rem;">
+              <option value="all">Todos los cursos</option>
+            </select>
+          </div>
+          
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #475569;">Buscar por nombre:</label>
+            <input type="text" id="filter-student-name" placeholder="Escribe un nombre..." oninput="applyStudentFilters()" style="width: 100%; padding: 0.5rem; border: 2px solid #e2e8f0; border-radius: 0.375rem;">
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button onclick="clearStudentFilters()" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">🔄 Limpiar filtros</button>
+          <button onclick="exportFilteredStudents()" class="btn btn-success" style="padding: 0.5rem 1rem; font-size: 0.875rem;">📥 Exportar filtrados a Excel</button>
+          <button onclick="printFilteredCarnets()" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">🖨️ Imprimir carnets filtrados</button>
+          <button onclick="copyFilteredCodes()" class="btn btn-info" style="padding: 0.5rem 1rem; font-size: 0.875rem;">📋 Copiar códigos</button>
+        </div>
+      </div>
+
+      <!-- Contador de resultados filtrados -->
+      <div id="filter-counter" style="margin: 1rem 0; padding: 0.75rem; background: #dbeafe; border-left: 4px solid #3b82f6; border-radius: 0.375rem; font-weight: 600; color: #1e40af;">
+        Mostrando todos los estudiantes
+      </div>
+
       <div id="students-table-container"></div>
     </section>
 
@@ -1056,38 +1107,264 @@
       }
     }
 
+    // Variable global para almacenar todos los estudiantes
+    let allStudents = [];
+    let filteredStudents = [];
+
     async function loadStudents() {
       try {
         const res = await fetch(`${API_URL}/admin/students`, { headers: { 'x-admin-code': adminCode } });
         const data = await res.json();
 
-        const container = document.getElementById('students-table-container');
-        if (!data.students || data.students.length === 0) {
-          container.innerHTML = '<p>No hay estudiantes registrados</p>';
+        allStudents = data.students || [];
+        
+        if (allStudents.length === 0) {
+          document.getElementById('students-table-container').innerHTML = '<p>No hay estudiantes registrados</p>';
+          document.getElementById('course-stats-container').innerHTML = '';
           return;
         }
 
-        container.innerHTML = `
-          <table>
-            <thead><tr><th>Código</th><th>Nombre</th><th>Grado</th><th>Curso</th><th>Lista</th><th>Estado</th><th>Acción</th></tr></thead>
-            <tbody>
-              ${data.students.map(s => `
-                <tr>
-                  <td><code>${s.access_code}</code></td>
-                  <td>${s.full_name}</td>
-                  <td>${s.grade}°</td>
-                  <td>${s.course}</td>
-                  <td>${s.list_number}</td>
-                  <td>${s.has_voted ? '✓ Voteó' : 'Pendiente'}</td>
-                  <td><button onclick="deleteStudent('${s.id}')" class="btn btn-danger" style="padding:0.25rem 0.5rem; font-size:0.875rem;">Eliminar</button></td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        `;
+        // Cargar opciones de filtros
+        populateFilterOptions();
+        
+        // Mostrar estadísticas por curso
+        displayCourseStats();
+        
+        // Aplicar filtros (inicialmente muestra todos)
+        applyStudentFilters();
+        
       } catch (err) {
         console.error('Error students:', err);
       }
+    }
+
+    function populateFilterOptions() {
+      // Obtener grados únicos
+      const grades = [...new Set(allStudents.map(s => s.grade))].sort((a, b) => a - b);
+      const gradeSelect = document.getElementById('filter-student-grade');
+      gradeSelect.innerHTML = '<option value="all">Todos los grados</option>';
+      grades.forEach(g => {
+        gradeSelect.innerHTML += `<option value="${g}">${g}°</option>`;
+      });
+
+      // Obtener cursos únicos
+      const courses = [...new Set(allStudents.map(s => s.course))].sort((a, b) => a - b);
+      const courseSelect = document.getElementById('filter-student-course');
+      courseSelect.innerHTML = '<option value="all">Todos los cursos</option>';
+      courses.forEach(c => {
+        courseSelect.innerHTML += `<option value="${c}">Curso ${c}</option>`;
+      });
+    }
+
+    function displayCourseStats() {
+      // Agrupar por grado y curso
+      const courseGroups = {};
+      
+      allStudents.forEach(s => {
+        const key = `${s.grade}-${s.course}`;
+        if (!courseGroups[key]) {
+          courseGroups[key] = { grade: s.grade, course: s.course, total: 0, voted: 0 };
+        }
+        courseGroups[key].total++;
+        if (s.has_voted) courseGroups[key].voted++;
+      });
+
+      // Ordenar por grado y curso
+      const sortedCourses = Object.values(courseGroups).sort((a, b) => {
+        if (a.grade !== b.grade) return a.grade - b.grade;
+        return a.course - b.course;
+      });
+
+      const container = document.getElementById('course-stats-container');
+      container.innerHTML = `
+        <div class="card" style="background: white; border: 2px solid #e2e8f0;">
+          <h3 style="margin-bottom: 1rem; color: #1e293b;">📊 Participación por Curso</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem;">
+            ${sortedCourses.map(c => {
+              const percentage = c.total > 0 ? Math.round((c.voted / c.total) * 100) : 0;
+              const isLow = percentage < 50;
+              const bgColor = isLow ? '#fee2e2' : (percentage < 75 ? '#fef3c7' : '#dcfce7');
+              const textColor = isLow ? '#991b1b' : (percentage < 75 ? '#92400e' : '#166534');
+              const borderColor = isLow ? '#ef4444' : (percentage < 75 ? '#f59e0b' : '#22c55e');
+              
+              return `
+                <div style="padding: 0.75rem; background: ${bgColor}; border-left: 4px solid ${borderColor}; border-radius: 0.375rem;">
+                  <div style="font-weight: 600; color: ${textColor}; margin-bottom: 0.25rem;">${c.grade}-${c.course}</div>
+                  <div style="font-size: 0.875rem; color: ${textColor};">
+                    ${c.voted}/${c.total} votaron (${percentage}%)
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function applyStudentFilters() {
+      const voteStatus = document.getElementById('filter-vote-status').value;
+      const grade = document.getElementById('filter-student-grade').value;
+      const course = document.getElementById('filter-student-course').value;
+      const nameSearch = document.getElementById('filter-student-name').value.toLowerCase().trim();
+
+      filteredStudents = allStudents.filter(s => {
+        // Filtro de estado de voto
+        if (voteStatus === 'voted' && !s.has_voted) return false;
+        if (voteStatus === 'pending' && s.has_voted) return false;
+
+        // Filtro de grado
+        if (grade !== 'all' && s.grade !== parseInt(grade)) return false;
+
+        // Filtro de curso
+        if (course !== 'all' && s.course !== parseInt(course)) return false;
+
+        // Filtro de nombre
+        if (nameSearch && !s.full_name.toLowerCase().includes(nameSearch)) return false;
+
+        return true;
+      });
+
+      displayFilteredStudents();
+      updateFilterCounter();
+    }
+
+    function displayFilteredStudents() {
+      const container = document.getElementById('students-table-container');
+      
+      if (filteredStudents.length === 0) {
+        container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #64748b;">No se encontraron estudiantes con los filtros seleccionados.</p>';
+        return;
+      }
+
+      container.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Grado</th>
+              <th>Curso</th>
+              <th>Lista</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredStudents.map(s => {
+              const rowStyle = s.has_voted ? 'background: #dcfce7;' : '';
+              return `
+                <tr style="${rowStyle}">
+                  <td><code style="font-weight: 600; color: #3b82f6;">${s.access_code}</code></td>
+                  <td style="font-weight: 500;">${s.full_name}</td>
+                  <td>${s.grade}°</td>
+                  <td>${s.course}</td>
+                  <td>${s.list_number}</td>
+                  <td>${s.has_voted ? '<span style="color: #166534; font-weight: 600;">✅ Votó</span>' : '<span style="color: #64748b;">⏳ Pendiente</span>'}</td>
+                  <td><button onclick="deleteStudent('${s.id}')" class="btn btn-danger" style="padding:0.25rem 0.5rem; font-size:0.875rem;">Eliminar</button></td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function updateFilterCounter() {
+      const counter = document.getElementById('filter-counter');
+      const total = allStudents.length;
+      const filtered = filteredStudents.length;
+      
+      if (filtered === total) {
+        counter.innerHTML = `📋 Mostrando todos los estudiantes (${total})`;
+        counter.style.background = '#dbeafe';
+        counter.style.borderColor = '#3b82f6';
+        counter.style.color = '#1e40af';
+      } else {
+        counter.innerHTML = `🔍 Mostrando ${filtered} de ${total} estudiantes`;
+        counter.style.background = '#fef3c7';
+        counter.style.borderColor = '#f59e0b';
+        counter.style.color = '#92400e';
+      }
+    }
+
+    function clearStudentFilters() {
+      document.getElementById('filter-vote-status').value = 'all';
+      document.getElementById('filter-student-grade').value = 'all';
+      document.getElementById('filter-student-course').value = 'all';
+      document.getElementById('filter-student-name').value = '';
+      applyStudentFilters();
+    }
+
+    function exportFilteredStudents() {
+      if (filteredStudents.length === 0) {
+        showToast('No hay estudiantes para exportar', 'error');
+        return;
+      }
+
+      const wb = XLSX.utils.book_new();
+      const wsData = [
+        ['Código', 'Nombre', 'Grado', 'Curso', 'Lista', 'Ha Votado'],
+        ...filteredStudents.map(s => [
+          s.access_code,
+          s.full_name,
+          s.grade,
+          s.course,
+          s.list_number,
+          s.has_voted ? 'Sí' : 'No'
+        ])
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      XLSX.utils.book_append_sheet(wb, ws, 'Estudiantes');
+      XLSX.writeFile(wb, `estudiantes_filtrados_${new Date().toISOString().split('T')[0]}.xlsx`);
+      showToast('Archivo exportado correctamente', 'success');
+    }
+
+    function printFilteredCarnets() {
+      if (filteredStudents.length === 0) {
+        showToast('No hay estudiantes para imprimir carnets', 'error');
+        return;
+      }
+      
+      // Cambiar a la pestaña de carnets con los filtros aplicados
+      showSection('carnets', document.querySelector('[data-sec="carnets"]'));
+      
+      // Aplicar los mismos filtros en la sección de carnets
+      setTimeout(() => {
+        const voteStatus = document.getElementById('filter-vote-status').value;
+        const grade = document.getElementById('filter-student-grade').value;
+        const course = document.getElementById('filter-student-course').value;
+        
+        if (voteStatus !== 'all') document.getElementById('filter-status').value = voteStatus === 'voted' ? 'voted' : 'pending';
+        if (grade !== 'all') document.getElementById('filter-grade').value = grade;
+        if (course !== 'all') document.getElementById('filter-course').value = course;
+        
+        loadStudentsForCarnets();
+      }, 100);
+      
+      showToast('Cambiando a sección de carnets con filtros aplicados', 'success');
+    }
+
+    function copyFilteredCodes() {
+      if (filteredStudents.length === 0) {
+        showToast('No hay códigos para copiar', 'error');
+        return;
+      }
+
+      const codes = filteredStudents.map(s => `${s.full_name}: ${s.access_code}`).join('\n');
+      
+      navigator.clipboard.writeText(codes).then(() => {
+        showToast(`${filteredStudents.length} códigos copiados al portapapeles`, 'success');
+      }).catch(() => {
+        // Fallback para navegadores que no soportan clipboard API
+        const textarea = document.createElement('textarea');
+        textarea.value = codes;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast(`${filteredStudents.length} códigos copiados al portapapeles`, 'success');
+      });
     }
 
     async function deleteStudent(id) {
