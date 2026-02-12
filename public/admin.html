@@ -1568,30 +1568,34 @@
         }
       }
 
-      // Preparar datos
+      // Preparar datos - NO enviar list_number para que el backend lo genere automáticamente
       const studentData = {
         full_name: name,
         grade: parseInt(grade),
-        course: parseInt(course),
-        list_number: parseInt(listNumber)
+        course: parseInt(course)
       };
+      
+      // Si es manual, incluir el list_number específico (aunque el backend lo ignore por ahora)
+      if (listMode === 'manual') {
+        studentData.list_number = parseInt(listNumber);
+      }
 
       try {
-        const res = await fetch(`${API_URL}/admin/students/bulk`, {
+        const res = await fetch(`${API_URL}/admin/import`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'x-admin-code': adminCode
           },
           body: JSON.stringify({
-            students: [studentData],
-            admin_code: adminCode
+            students: [studentData]
           })
         });
 
         if (res.ok) {
           const result = await res.json();
-          showToast(`✅ Estudiante agregado: ${name} (código ${studentData.grade.toString().padStart(2, '0')}${studentData.course}${studentData.list_number.toString().padStart(2, '0')})`, 'success');
+          // El código real se generó en el backend
+          showToast(`✅ Estudiante agregado: ${name}`, 'success');
           closeAddStudentModal();
           loadStudents(); // Recargar lista
         } else {
