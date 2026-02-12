@@ -397,6 +397,7 @@
             <label>Grado: *</label>
             <select id="new-student-grade" onchange="updateCodePreview()">
               <option value="">Selecciona un grado</option>
+              <option value="0">0° (Transición)</option>
               <option value="1">1°</option>
               <option value="2">2°</option>
               <option value="3">3°</option>
@@ -1249,7 +1250,7 @@
       const gradeSelect = document.getElementById('filter-student-grade');
       gradeSelect.innerHTML = '<option value="all">Todos los grados</option>';
       grades.forEach(g => {
-        gradeSelect.innerHTML += `<option value="${g}">${g}°</option>`;
+        gradeSelect.innerHTML += `<option value="${g}">${g === 0 ? 'Transición (0°)' : g + '°'}</option>`;
       });
 
       // Obtener cursos únicos
@@ -1294,7 +1295,7 @@
               
               return `
                 <div style="padding: 0.75rem; background: ${bgColor}; border-left: 4px solid ${borderColor}; border-radius: 0.375rem;">
-                  <div style="font-weight: 600; color: ${textColor}; margin-bottom: 0.25rem;">${c.grade}-${c.course}</div>
+                  <div style="font-weight: 600; color: ${textColor}; margin-bottom: 0.25rem;">${c.grade === 0 ? 'Trans' : c.grade}-${c.course}</div>
                   <div style="font-size: 0.875rem; color: ${textColor};">
                     ${c.voted}/${c.total} votaron (${percentage}%)
                   </div>
@@ -1361,7 +1362,7 @@
                 <tr style="${rowStyle}">
                   <td><code style="font-weight: 600; color: #3b82f6;">${s.access_code}</code></td>
                   <td style="font-weight: 500;">${s.full_name}</td>
-                  <td>${s.grade}°</td>
+                  <td>${s.grade === 0 ? 'Trans.' : s.grade + '°'}</td>
                   <td>${s.course}</td>
                   <td>${s.list_number}</td>
                   <td>${s.has_voted ? '<span style="color: #166534; font-weight: 600;">✅ Votó</span>' : '<span style="color: #64748b;">⏳ Pendiente</span>'}</td>
@@ -1513,7 +1514,7 @@
       
       const previewDisplay = document.getElementById('code-preview-display');
       
-      if (!grade || !course) {
+      if (grade === '' || grade === null || !course) {
         previewDisplay.textContent = '-----';
         previewDisplay.style.color = '#cbd5e1';
         return;
@@ -1542,7 +1543,7 @@
         return;
       }
 
-      if (!grade || !course) {
+      if (grade === '' || grade === null || grade === undefined || !course) {
         showToast('Selecciona el grado y curso', 'error');
         return;
       }
@@ -1867,7 +1868,7 @@
         const gradeSelect = document.getElementById('filter-grade');
         const grades = [...new Set(data.students.map(s => s.grade))].sort((a,b) => a - b);
         gradeSelect.innerHTML = '<option value="all">Todos los grados</option>' + 
-          grades.map(g => `<option value="${g}">Grado ${g}°</option>`).join('');
+          grades.map(g => `<option value="${g}">${g === 0 ? 'Transición (0°)' : 'Grado ' + g + '°'}</option>`).join('');
         
         // Llenar filtros de curso
         const courseSelect = document.getElementById('filter-course');
@@ -1919,7 +1920,7 @@
           </div>
           <div class="carnet-info">
             <p><strong>Estudiante:</strong> ${s.full_name}</p>
-            <p><strong>Grado:</strong> ${s.grade}° | <strong>Curso:</strong> ${s.course}</p>
+            <p><strong>Grado:</strong> ${s.grade === 0 ? 'Transición' : s.grade + '°'} | <strong>Curso:</strong> ${s.course}</p>
             <p><strong>Lista:</strong> ${s.list_number}</p>
           </div>
           <div class="carnet-code">${s.access_code}</div>
@@ -2140,13 +2141,14 @@
         const grado = findField(['Grado', 'Grade', 'Nivel', 'Año', 'GRADO', 'Grado/Nivel', 'NIVEL']);
         const curso = findField(['Curso', 'Paralelo', 'Sección', 'Seccion', 'Course', 'CURSO', 'PARALELO', 'SECCION']);
 
+        const gradeVal = grado !== undefined && grado !== null && String(grado).trim() !== '' ? parseInt(grado) : null;
         return {
           full_name: nombre ? String(nombre).trim() : '',
-          grade: parseInt(grado) || 0,
+          grade: isNaN(gradeVal) ? null : gradeVal,
           course: parseInt(curso) || 1,
           list_number: 0
         };
-      }).filter(s => s.full_name && s.grade > 0);
+      }).filter(s => s.full_name && s.grade !== null && s.grade >= 0);
 
       excelData = mapped;
 
@@ -2190,10 +2192,10 @@
       try {
         const studentsToSend = excelData.map(s => ({
           full_name: String(s.full_name || '').trim(),
-          grade: parseInt(s.grade) || 0,
+          grade: parseInt(s.grade),
           course: parseInt(s.course) || 1,
           list_number: 0
-        })).filter(s => s.full_name && s.grade > 0);
+        })).filter(s => s.full_name && !isNaN(s.grade) && s.grade >= 0);
 
         const res = await fetch(`${API_URL}/admin/import`, {
           method: 'POST',
