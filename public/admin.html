@@ -2214,14 +2214,25 @@
           return;
         }
 
-        resultDiv.innerHTML = `<div style="background:#dcfce7; border:2px solid #22c55e; padding:1rem; border-radius:0.5rem; margin-top:1rem;">
-          <h4>✅ Importación exitosa</h4>
-          <p><strong>Importados:</strong> ${result.imported} estudiantes</p>
-          <p><strong>Grupos (Grado-Curso):</strong> ${result.groups}</p>
+        const skippedMsg = result.skipped > 0
+          ? `<p><strong>⚠️ Ya existían (omitidos):</strong> ${result.skipped} estudiantes</p>`
+          : '';
+        const importedColor = result.imported > 0 ? '#dcfce7' : '#fef3c7';
+        const importedBorder = result.imported > 0 ? '#22c55e' : '#f59e0b';
+        resultDiv.innerHTML = `<div style="background:${importedColor}; border:2px solid ${importedBorder}; padding:1rem; border-radius:0.5rem; margin-top:1rem;">
+          <h4>✅ Importación completada</h4>
+          <p><strong>✅ Nuevos importados:</strong> ${result.imported} estudiantes</p>
+          ${skippedMsg}
+          ${result.groups > 0 ? `<p><strong>Grupos (Grado-Curso):</strong> ${result.groups}</p>` : ''}
+          ${result.message ? `<p style="color:#92400e;">${result.message}</p>` : ''}
         </div>`;
-        showToast(`${result.imported} estudiantes importados`, 'success');
 
-        if (result.imported > 0) {
+        const toastMsg = result.imported > 0
+          ? `${result.imported} estudiantes importados${result.skipped > 0 ? `, ${result.skipped} omitidos (ya existían)` : ''}`
+          : `Sin cambios: los ${result.skipped} estudiantes ya estaban registrados`;
+        showToast(toastMsg, result.imported > 0 ? 'success' : 'warning');
+
+        if (result.imported > 0 || result.skipped > 0) {
           excelData = [];
           document.getElementById('btn-import').style.display = 'none';
           document.getElementById('excel-file').value = '';
