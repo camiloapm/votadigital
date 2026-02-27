@@ -233,13 +233,28 @@ async function handleConfig(req, res) {
 
     const { school_logo_url, school_name, voting_password } = req.body || {};
 
+    // Leer valores actuales para no pisar datos existentes con vacíos
+    const { data: current } = await supabase
+      .from('config')
+      .select('school_logo_url, school_name, voting_password')
+      .eq('id', 1)
+      .single();
+
+    const updates = {
+      // Mantener nombre actual si no viene uno nuevo
+      school_name: (school_name && school_name.trim() !== '') ? school_name.trim() : (current?.school_name || 'Colegio'),
+      // Solo actualizar logo si viene uno nuevo y no vacío; si no, conservar el actual
+      school_logo_url: (school_logo_url && school_logo_url.trim() !== '') ? school_logo_url : (current?.school_logo_url || null),
+    };
+
+    // Solo tocar voting_password si viene explícitamente en el body
+    if (voting_password !== undefined) {
+      updates.voting_password = voting_password;
+    }
+
     const { error } = await supabase
       .from('config')
-      .update({
-        school_logo_url: school_logo_url || null,
-        school_name: school_name || 'Colegio',
-        voting_password: voting_password !== undefined ? voting_password : undefined
-      })
+      .update(updates)
       .eq('id', 1);
 
     if (error) return res.status(500).json({ error: 'Error al actualizar' });
@@ -657,6 +672,7 @@ async function clearData(req, res) {
   await supabase.from('votes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   await supabase.from('students').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   await supabase.from('candidates').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  // Solo cerrar la votación — NUNCA borrar nombre/logo/contraseña del colegio
   await supabase.from('config').update({ election_status: 'closed' }).eq('id', 1);
 
   return res.status(200).json({ success: true, message: 'Datos eliminados' });
