@@ -1,710 +1,752 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Votación Escolar</title>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root{
+      --bg:#f0f4f8; --card:#ffffff; --text:#1e293b; --remember:#64748b;
+      --primary:#3b82f6; --primary-dark:#2563eb;
+      --ok:#10b981; --ok-dark:#059669; --warn:#f59e0b; --danger:#ef4444;
+      --border:#e2e8f0;
+      --shadow-sm:0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md:0 4px 12px rgba(0,0,0,0.1);
+      --shadow-lg:0 8px 24px rgba(0,0,0,0.12);
     }
-    
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-    
-    .container {
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      max-width: 600px;
-      width: 100%;
-      overflow: hidden;
-    }
-    
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 30px;
-      text-align: center;
-    }
-    
-    .header img {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      margin-bottom: 15px;
-      background: white;
-      padding: 5px;
-      object-fit: contain;
-    }
-    
-    .header h1 {
-      font-size: 28px;
-      margin-bottom: 10px;
-    }
-    
-    .status-badge {
-      display: inline-block;
-      padding: 8px 20px;
-      border-radius: 20px;
-      font-weight: bold;
-      font-size: 14px;
-      margin-top: 10px;
-    }
-    
-    .status-open {
-      background: #4CAF50;
-    }
-    
-    .status-closed {
-      background: #f44336;
-    }
-    
-    .content {
-      padding: 30px;
-    }
-    
-    .section {
-      display: none;
-    }
-    
-    .section.active {
-      display: block;
-    }
-    
-    .form-group {
-      margin-bottom: 20px;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #333;
-    }
-    
-    .form-group input {
-      width: 100%;
-      padding: 15px;
-      font-size: 18px;
-      border: 2px solid #ddd;
-      border-radius: 10px;
-      text-align: center;
-      letter-spacing: 5px;
-      transition: border-color 0.3s;
-    }
-    
-    .form-group input:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-    
-    .btn {
-      width: 100%;
-      padding: 15px;
-      font-size: 16px;
-      font-weight: 600;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.3s;
-      margin-bottom: 10px;
-    }
-    
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-    }
-    
-    .btn-secondary {
-      background: #f5f5f5;
-      color: #333;
-    }
-    
-    .btn-secondary:hover {
-      background: #e0e0e0;
-    }
-    
-    .btn-success {
-      background: #4CAF50;
-      color: white;
-    }
-    
-    .btn-danger {
-      background: #f44336;
-      color: white;
-    }
-    
-    .candidates-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 15px;
-      margin: 20px 0;
-    }
-    
-    .candidate-card {
-      border: 3px solid #ddd;
-      border-radius: 15px;
-      padding: 15px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    
-    .candidate-card:hover {
-      border-color: #667eea;
-      transform: translateY(-3px);
-    }
-    
-    .candidate-card.selected {
-      border-color: #4CAF50;
-      background: #e8f5e9;
-    }
-    
-    .candidate-card img {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-bottom: 10px;
-    }
-    
-    .candidate-card h3 {
-      font-size: 16px;
-      margin-bottom: 5px;
-    }
-    
-    .candidate-card p {
-      font-size: 12px;
-      color: #666;
-    }
-    
-    .student-info {
-      background: #f5f5f5;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-    
-    .student-info h3 {
-      color: #667eea;
-      margin-bottom: 10px;
-    }
-    
-    .message {
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      text-align: center;
-      font-weight: 600;
-    }
-    
-    .message.success {
-      background: #e8f5e9;
-      color: #2e7d32;
-    }
-    
-    .message.error {
-      background: #ffebee;
-      color: #c62828;
-    }
-    
-    .message.info {
-      background: #e3f2fd;
-      color: #1565c0;
-    }
-    
-    /* 🔐 MODAL DE CONTRASEÑA DE TERMINAL */
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    
-    .modal.active {
-      display: flex;
-    }
-    
-    .modal-content {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      max-width: 400px;
-      width: 90%;
-      text-align: center;
-    }
-    
-    .modal-content h2 {
-      color: #667eea;
-      margin-bottom: 15px;
-      font-size: 24px;
-    }
-    
-    .modal-content p {
-      color: #666;
-      margin-bottom: 20px;
-    }
-    
-    .modal-content .form-group input {
-      letter-spacing: 3px;
-    }
-    
-    .error-message {
-      color: #f44336;
-      margin-top: 10px;
-      font-weight: 600;
-      display: none;
-    }
-    
-    .button-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-    }
-    
-    .button-group .btn {
-      flex: 1;
-      margin-bottom: 0;
-    }
-    
-    .hidden {
-      display: none !important;
-    }
+    *{box-sizing:border-box; margin:0; padding:0;}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;padding:1rem;}
+    .app-container{max-width:900px;margin:0 auto;}
+
+    /* Header moderno */
+    .header{background:var(--card);border-radius:16px;padding:1rem 1.25rem;display:flex;gap:1rem;align-items:center;justify-content:space-between;box-shadow:var(--shadow-md);margin-bottom:1rem;}
+    .brand{display:flex;gap:.75rem;align-items:center;}
+    .logo{width:56px;height:56px;border-radius:12px;object-fit:contain;border:2px solid var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:4px;}
+    .title h1{font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:.15rem;}
+    .title p{color:var(--remember);font-size:.9rem;}
+    .badge{padding:.35rem .75rem;border-radius:999px;font-size:.85rem;font-weight:700;border:2px solid transparent;white-space:nowrap;transition:all .2s;}
+    .badge.open{color:#065f46;background:#ecfdf5;border-color:#86efac;}
+    .badge.closed{color:#991b1b;background:#fef2f2;border-color:#fecaca;}
+
+    /* Tarjetas modernas */
+    .card{background:var(--card);border-radius:16px;padding:1.25rem;box-shadow:var(--shadow-md);border:1px solid var(--border);margin-bottom:1rem;}
+    .card h2{font-size:1.1rem;font-weight:700;margin-bottom:.5rem;color:var(--text);}
+    .muted{color:var(--remember);font-size:.9rem;}
+    .hr{height:1px;background:linear-gradient(90deg,var(--border) 0%,transparent 100%);margin:1rem 0;}
+
+    /* Elementos de formulario */
+    .input{width:100%;padding:.85rem 1rem;border:2px solid var(--border);border-radius:10px;font-size:1rem;outline:none;transition:all .2s;}
+    .input:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(59,130,246,.12);}
+    .btn{border:none;border-radius:10px;padding:.8rem 1.25rem;font-weight:700;cursor:pointer;font-size:.95rem;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;}
+    .btn.primary{background:var(--primary);color:#fff;}
+    .btn.primary:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:0 3px 10px rgba(59,130,246,.3);}
+    .btn.secondary{background:#f1f5f9;color:var(--text);}
+    .btn.secondary:hover{background:#e2e8f0;}
+    .btn.success{background:var(--ok);color:#fff;}
+    .btn.success:hover{background:var(--ok-dark);transform:translateY(-1px);box-shadow:0 3px 10px rgba(16,185,129,.3);}
+    .btn:disabled{opacity:.6;cursor:not-allowed;transform:none !important;box-shadow:none !important;}
+
+    /* Alertas */
+    .alert{border-radius:10px;padding:.75rem 1rem;border:2px solid;margin-top:.75rem;font-size:.9rem;font-weight:500;}
+    .alert.ok{background:#ecfdf5;border-color:#86efac;color:#065f46;}
+    .alert.warn{background:#fffbeb;border-color:#fde68a;color:#92400e;}
+    .alert.danger{background:#fef2f2;border-color:#fecaca;color:#991b1d;}
+
+    /* Sección candidatos - inicialmente oculta */
+    #candidates-section{display:none;animation:fadeIn 0.4s ease;}
+    #candidates-section.visible{display:block;}
+
+    .candidates-title{font-size:1.1rem;font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:.4rem;}
+    .candidates-title span{font-size:1.3rem;}
+    .candidates{display:grid;grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));gap:1rem;}
+
+    /* Tarjeta de candidato */
+    .cand{background:#fff;border:2px solid var(--border);border-radius:14px;padding:1.25rem;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden;}
+    .cand::before{content:'';position:absolute;top:0;left:0;right:0;height:70px;background:linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);border-radius:12px 12px 0 0;margin:-1.25rem -1.25rem 0 -1.25rem;}
+    .cand:hover{border-color:#c7d2fe;transform:translateY(-3px);box-shadow:var(--shadow-lg);}
+    .cand.selected{border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,130,246,.2),var(--shadow-lg);transform:translateY(-3px);}
+    .cand.selected::before{background:linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);}
+    .cand.disabled{opacity:0.5;pointer-events:none;filter:grayscale(50%);}
+
+    /* Foto del candidato */
+    .cand-photo-container{position:relative;z-index:1;margin-bottom:.75rem;}
+    .cand img{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.12);background:#f8fafc;transition:all .3s;}
+    .cand:hover img{border-color:#bfdbfe;transform:scale(1.02);}
+    .cand.selected img{border-color:var(--primary);box-shadow:0 3px 12px rgba(59,130,246,.25);}
+
+    .cand .meta{position:relative;z-index:1;width:100%;}
+    .cand .name{font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:.3rem;line-height:1.3;}
+    .cand .party{display:inline-flex;align-items:center;gap:.3rem;background:linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);padding:.3rem .75rem;border-radius:16px;font-size:.8rem;font-weight:600;color:var(--remember);}
+    .cand .party-icon{font-size:.9rem;}
+
+    .selection-indicator{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .2s;opacity:0;}
+    .cand.selected .selection-indicator{opacity:1;background:var(--ok);border-color:var(--ok);color:#fff;}
+    .selection-indicator svg{width:14px;height:14px;}
+
+    /* Footer */
+    .footer{margin-top:1.5rem;color:var(--remember);font-size:.85rem;text-align:center;padding:.5rem;}
+    .codehint{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-weight:700;background:#f1f5f9;padding:.15rem .4rem;border-radius:5px;}
+
+    /* Sección siguiente estudiante */
+    .next-student-section{margin-top:1.25rem;padding-top:1.25rem;border-top:2px dashed var(--border);}
+    .next-student-btn{width:100%;background:linear-gradient(135deg, var(--ok) 0%, #34d399 100%);color:#fff;font-weight:700;padding:.9rem;border-radius:12px;border:none;cursor:pointer;font-size:1rem;transition:all .2s;box-shadow:0 3px 10px rgba(16,185,129,.3);}
+    .next-student-btn:hover{transform:translateY(-2px);box-shadow:0 5px 16px rgba(16,185,129,.4);}
+    .countdown-text{font-size:.85rem;color:var(--ok);text-align:center;margin-top:.5rem;font-weight:500;}
+
+    /* Animaciones */
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    .cand{animation:fadeIn 0.4s ease forwards;}
+
+    /* Student info box */
+    #student-box{padding:.9rem 1.1rem;border-radius:10px;margin-top:.75rem;}
+    #student-box strong{display:block;font-size:1rem;margin-bottom:.2rem;}
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <img id="schoolLogo" src="" alt="Escudo" style="display: none;">
-      <h1 id="schoolName">Votación Escolar</h1>
-      <div id="statusBadge" class="status-badge status-closed">Cargando estado...</div>
-    </div>
-    
-    <div class="content">
-      <!-- 🔐 MODAL DE CONTRASEÑA DE TERMINAL -->
-      <div id="terminalPasswordModal" class="modal">
-        <div class="modal-content">
-          <h2>🔐 Acceso a Terminal de Votación</h2>
-          <p>Ingresa la contraseña de este dispositivo para continuar</p>
-          
-          <div class="form-group">
-            <label>Contraseña del Terminal:</label>
-            <input type="password" id="terminalPassword" placeholder="••••••" maxlength="20">
-          </div>
-          
-          <div class="button-group">
-            <button onclick="verifyTerminalPassword()" class="btn btn-primary">
-              ✓ Acceder
-            </button>
-            <button onclick="clearTerminalAuth()" class="btn btn-secondary">
-              ✕ Salir
-            </button>
-          </div>
-          
-          <p id="terminalPasswordError" class="error-message"></p>
+  <div class="app-container">
+    <header class="header">
+      <div class="brand">
+        <img id="school-logo" class="logo" alt="Escudo del colegio" style="display:none">
+        <div class="title">
+          <h1 id="school-name">Votación Escolar</h1>
+          <p id="subtitle">Cargando estado...</p>
         </div>
       </div>
-      
-      <!-- SECCIÓN DE IDENTIFICACIÓN -->
-      <div id="identificationSection" class="section">
-        <div class="message info">
-          🎫 <strong>Identificación</strong><br>
-          Ingresa tu código de 5 dígitos para participar en la votación.
-        </div>
-        
-        <div class="form-group">
-          <label>Tu código</label>
-          <input type="text" id="accessCode" placeholder="00000" maxlength="5" pattern="\d*">
-        </div>
-        
-        <button onclick="verifyCode()" class="btn btn-primary">✓ Verificar</button>
-        <button onclick="showQRScanner()" class="btn btn-secondary">📱 Escanear QR</button>
-        <button onclick="clearCode()" class="btn btn-secondary">Limpiar</button>
-      </div>
-      
-      <!-- ESCÁNER QR -->
-      <div id="qrScannerSection" class="section">
-        <div class="message info">
-          📱 <strong>Escanear Código QR</strong><br>
-          Apunta la cámara hacia el código QR de tu estudiante
-        </div>
-        
-        <div id="qr-reader" style="width: 100%;"></div>
-        
-        <button onclick="stopQRScanner()" class="btn btn-secondary" style="margin-top: 15px;">
-          ✕ Cerrar Escáner
+      <div id="status-badge" class="badge">...</div>
+    </header>
+
+    <!-- Paso 1: Validación de código (siempre visible inicialmente) -->
+    <section class="card" aria-label="Acceso" id="access-section">
+      <h2>🎫 Identificación</h2>
+      <p class="muted">
+        Ingresa tu código de 5 dígitos para participar en la votación.
+      </p>
+      <div class="hr"></div>
+
+      <label class="muted" for="access-code" style="display:block;margin-bottom:.4rem;font-weight:500;">Tu código</label>
+      <input
+        id="access-code"
+        class="input"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        placeholder="Ej: 06105"
+        maxlength="5"
+      />
+      <div style="display:flex;gap:.6rem;margin-top:.75rem;flex-wrap:wrap;">
+        <button id="btn-verify" class="btn primary" type="button" style="flex:1;min-width:100px;">
+          ✓ Verificar
+        </button>
+        <button id="btn-scan-qr" class="btn" type="button" style="flex:1;min-width:100px;background:#8b5cf6;color:#fff;">
+          📱 Escanear QR
+        </button>
+        <button id="btn-clear" class="btn secondary" type="button" style="flex:1;min-width:90px;">
+          Limpiar
         </button>
       </div>
       
-      <!-- INFORMACIÓN DEL ESTUDIANTE -->
-      <div id="studentInfoSection" class="section">
-        <div class="student-info">
-          <h3>✅ Estudiante habilitado</h3>
-          <p><strong>Grado:</strong> <span id="studentGrade"></span> • <strong>Curso:</strong> <span id="studentCourse"></span></p>
-          <p><strong>Nombre:</strong> <span id="studentName"></span></p>
+      <!-- Modal para escáner QR -->
+      <div id="qr-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:var(--card);border-radius:16px;padding:1.5rem;max-width:500px;width:90%;position:relative;">
+          <button id="btn-close-qr" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--remember);">×</button>
+          <h3 style="margin-bottom:1rem;font-size:1.2rem;">📱 Escanear Código QR</h3>
+          <p class="muted" style="margin-bottom:1rem;">Apunta la cámara hacia el código QR de tu estudiante</p>
+          <div id="qr-reader" style="border-radius:12px;overflow:hidden;"></div>
+          <div id="qr-status" class="muted" style="text-align:center;margin-top:.75rem;font-weight:500;"></div>
         </div>
-        
-        <button onclick="showCandidates()" class="btn btn-primary">🗳️ Continuar a Votar</button>
-        <button onclick="clearCode()" class="btn btn-secondary">✕ Cambiar Estudiante</button>
       </div>
-      
-      <!-- CANDIDATOS -->
-      <div id="candidatesSection" class="section">
-        <div class="message info">
-          🗳️ <strong>Candidatos</strong><br>
-          Selecciona al candidato de tu preferencia.
+
+      <div id="access-alert" class="alert" style="display:none"></div>
+
+      <div id="student-box" class="alert ok" style="display:none;">
+        <strong>✅ Estudiante habilitado</strong>
+        <span id="student-name" style="font-size:1rem;font-weight:600;"></span>
+        <div class="muted" style="margin-top:.2rem;">
+          Grado <span id="student-grade"></span> • Curso <span id="student-course"></span>
         </div>
-        
-        <div id="candidatesGrid" class="candidates-grid">
-          <p>Cargando candidatos...</p>
-        </div>
-        
-        <div id="selectedCandidateInfo" class="message info hidden">
-          Candidato seleccionado: <strong id="selectedCandidateName"></strong>
-        </div>
-        
-        <button onclick="castVote()" id="castVoteBtn" class="btn btn-success" disabled>
-          ✓ Confirmar Voto
+      </div>
+    </section>
+
+    <!-- Paso 2: Candidatos + voto (oculto hasta verificar código) -->
+    <section class="card" aria-label="Votación" id="candidates-section">
+      <h2 class="candidates-title"><span>🗳️</span> Candidatos</h2>
+      <p class="muted" id="vote-instructions">
+        Selecciona al candidato de tu preferencia.
+      </p>
+      <div class="hr"></div>
+
+      <div id="candidates" class="candidates" aria-live="polite">
+        <div class="muted" style="text-align:center;padding:1.5rem;">Cargando candidatos...</div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div style="display:flex;flex-direction:column;gap:.6rem;">
+        <div class="muted" id="selection-text" style="font-weight:500;">Ningún candidato seleccionado.</div>
+        <button id="btn-vote" class="btn success" type="button" disabled style="font-size:1rem;padding:.9rem 1.25rem;">
+          🗳️ Confirmar Voto
         </button>
-        <button onclick="clearSelection()" class="btn btn-secondary">✕ Cambiar Selección</button>
       </div>
-      
-      <!-- VOTO CONFIRMADO -->
-      <div id="voteConfirmedSection" class="section">
-        <div class="message success">
-          ✅ <strong>¡Voto registrado correctamente!</strong><br>
-          Gracias por participar en la votación.
-        </div>
-        
-        <button onclick="nextStudent()" class="btn btn-primary">✓ Siguiente Estudiante</button>
+
+      <div id="vote-alert" class="alert" style="display:none"></div>
+
+      <!-- Sección para siguiente estudiante -->
+      <div id="next-student-section" class="next-student-section" style="display:none;">
+        <button id="btn-next-student" class="next-student-btn" type="button">
+          ✓ Siguiente Estudiante
+        </button>
+        <p id="countdown-text" class="countdown-text"></p>
       </div>
+    </section>
+
+    <div class="footer">
+      Si tienes dudas sobre tu código, consulta con tu profesor. |
+      <span class="codehint">Código: GGCLL</span> (Grado-Curso-Lista)
     </div>
   </div>
-  
+
   <script>
-    let currentAccessCode = '';
+    const API_URL = '/api';
+
+    // Estado en memoria
+    let electionOpen = false;
+    let verifiedStudent = null;
+    let verifiedCode = '';
+    let candidates = [];
     let selectedCandidateId = null;
+    let autoResetEnabled = true;
+    let countdownInterval = null;
     let html5QrCode = null;
-    
-    // === AUTENTICACIÓN DE TERMINAL ===
-    let terminalAuthenticated = false;
-    
-    // Verificar si ya está autenticado en este dispositivo
-    function checkTerminalAuth() {
-      const authData = localStorage.getItem('terminalAuth');
-      if (authData) {
-        const { timestamp, expires } = JSON.parse(authData);
-        if (Date.now() < expires) {
-          terminalAuthenticated = true;
-          return true;
-        }
-      }
-      return false;
-    }
-    
-    // Guardar autenticación (24 horas)
-    function saveTerminalAuth() {
-      localStorage.setItem('terminalAuth', JSON.stringify({
-        timestamp: Date.now(),
-        expires: Date.now() + (24 * 60 * 60 * 1000) // 24 horas
-      }));
-    }
-    
-    // Limpiar autenticación
-    function clearTerminalAuth() {
-      localStorage.removeItem('terminalAuth');
-      terminalAuthenticated = false;
-      showTerminalPasswordModal();
-    }
-    
-    // Mostrar modal de contraseña
-    function showTerminalPasswordModal() {
-      document.getElementById('terminalPasswordModal').classList.add('active');
-      document.getElementById('identificationSection').classList.remove('active');
-      document.getElementById('qrScannerSection').classList.remove('active');
-      document.getElementById('studentInfoSection').classList.remove('active');
-      document.getElementById('candidatesSection').classList.remove('active');
-      document.getElementById('voteConfirmedSection').classList.remove('active');
-    }
-    
-    // Verificar contraseña con el servidor
-    async function verifyTerminalPassword() {
-      const password = document.getElementById('terminalPassword').value;
-      const errorEl = document.getElementById('terminalPasswordError');
+
+    const $ = (id) => document.getElementById(id);
+
+    function showAlert(el, type, msg) {
+      el.className = `alert ${type}`;
+      el.textContent = msg;
+      el.style.display = 'block';
       
-      if (!password) {
-        errorEl.textContent = 'Ingresa la contraseña';
-        errorEl.style.display = 'block';
+      // Scroll suave hacia la alerta
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    function hideAlert(el){ el.style.display = 'none'; el.textContent=''; el.className='alert'; }
+
+    function onlyDigits(s){ return String(s || '').replace(/[^\d]/g, ''); }
+    function isValidCode(code){ return /^\d{5}$/.test(code); }
+
+    async function fetchJSON(path, options = {}) {
+      const res = await fetch(path, options);
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok, status: res.status, data };
+    }
+
+    // Generador de imagen placeholder con iniciales
+    function generatePlaceholder(name, size = 100) {
+      const initials = name ? name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '?';
+      const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+      const color = colors[name ? name.charCodeAt(0) % colors.length : 0];
+      
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+        <rect width="100%" height="100%" fill="${color}" rx="${size/2}"/>
+        <text x="50%" y="52%" text-anchor="middle" font-family="Arial, sans-serif" font-size="${size/2.5}" font-weight="bold" fill="#ffffff">${initials}</text>
+      </svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    // Generador de escudo placeholder
+    function generateSchoolLogoPlaceholder() {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+        <rect width="100%" height="100%" fill="#f1f5f9" rx="16"/>
+        <path d="M60 20 L90 40 L90 80 L60 100 L30 80 L30 40 Z" fill="#3b82f6" opacity="0.3"/>
+        <path d="M60 30 L80 45 L80 75 L60 90 L40 75 L40 45 Z" fill="#3b82f6" opacity="0.5"/>
+        <text x="60" y="65" text-anchor="middle" font-family="Arial" font-size="24" fill="#1e40af">★</text>
+      </svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    // Mostrar sección de candidatos
+    function showCandidatesSection() {
+      const section = $('candidates-section');
+      section.classList.add('visible');
+      section.style.display = 'block';
+      
+      // Scroll suave hacia los candidatos
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Ocultar sección de candidatos
+    function hideCandidatesSection() {
+      const section = $('candidates-section');
+      section.classList.remove('visible');
+      setTimeout(() => {
+        if (!section.classList.contains('visible')) {
+          section.style.display = 'none';
+        }
+      }, 400);
+    }
+
+    async function loadStatus() {
+      const { ok, data } = await fetchJSON(`${API_URL}/check-status`);
+      if (!ok) {
+        $('subtitle').textContent = 'Error al cargar';
+        $('status-badge').textContent = 'Error';
+        $('status-badge').className = 'badge closed';
+        electionOpen = false;
         return;
       }
+
+      electionOpen = data.open === true;
+
+      // Branding
+      if (data.school_name) $('school-name').textContent = data.school_name;
       
-      try {
-        const response = await fetch('/api/verify-terminal-password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password })
+      // Manejo del logo con object-fit: contain
+      const img = $('school-logo');
+      const logoUrl = data.school_logo || data.school_logo_url || '';
+      
+      if (logoUrl && logoUrl.trim() !== '') {
+        img.onload = function() {
+          img.style.display = 'block';
+        };
+        img.onerror = function() {
+          img.src = generateSchoolLogoPlaceholder();
+          img.style.display = 'block';
+        };
+        img.src = logoUrl;
+      } else {
+        img.src = generateSchoolLogoPlaceholder();
+        img.style.display = 'block';
+      }
+
+      // Estado
+      const badge = $('status-badge');
+      if (electionOpen) {
+        badge.textContent = '🟢 ABIERTA';
+        badge.className = 'badge open';
+        $('subtitle').textContent = 'Puedes votar ahora.';
+      } else {
+        badge.textContent = '🔴 CERRADA';
+        badge.className = 'badge closed';
+        $('subtitle').textContent = 'La votación está cerrada.';
+      }
+
+      // Mantener el estado del botón de votar según si hay un candidato seleccionado
+      // Solo deshabilitar el botón si NO hay un candidato seleccionado y la elección está abierta
+      if (!selectedCandidateId) {
+        $('btn-vote').disabled = true;
+      } else if (electionOpen) {
+        $('btn-vote').disabled = false;
+      }
+    }
+
+    function renderCandidates() {
+      const wrap = $('candidates');
+      wrap.innerHTML = '';
+
+      if (!candidates || candidates.length === 0) {
+        wrap.innerHTML = `<div class="muted" style="text-align:center;padding:1.5rem;">📋 No hay candidatos registrados.</div>`;
+        return;
+      }
+
+      for (const [index, c] of candidates.entries()) {
+        const div = document.createElement('div');
+        div.className = 'cand';
+        div.dataset.id = c.id;
+        div.style.animationDelay = `${index * 0.08}s`;
+
+        // Indicador de selección
+        const indicator = document.createElement('div');
+        indicator.className = 'selection-indicator';
+        indicator.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>`;
+        div.appendChild(indicator);
+
+        // Contenedor de foto
+        const photoContainer = document.createElement('div');
+        photoContainer.className = 'cand-photo-container';
+
+        const img = document.createElement('img');
+        img.alt = `Foto de ${c.name}`;
+        
+        if (c.photo_url && c.photo_url.trim() !== '') {
+          img.src = c.photo_url;
+          img.onerror = function() {
+            this.src = generatePlaceholder(c.name, 100);
+          };
+        } else {
+          img.src = generatePlaceholder(c.name, 100);
+        }
+
+        photoContainer.appendChild(img);
+        div.appendChild(photoContainer);
+
+        // Meta información
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+
+        const name = document.createElement('div');
+        name.className = 'name';
+        name.textContent = c.name || 'Candidato';
+
+        const party = document.createElement('div');
+        party.className = 'party';
+        if (c.party) {
+          party.innerHTML = `<span class="party-icon">📋</span> Lista ${c.party}`;
+        } else {
+          party.innerHTML = `<span class="party-icon">👤</span> Independiente`;
+        }
+
+        meta.appendChild(name);
+        meta.appendChild(party);
+        div.appendChild(meta);
+
+        div.addEventListener('click', () => {
+          if (!electionOpen) {
+            showAlert($('vote-alert'), 'warn', '⏰ La votación está cerrada.');
+            return;
+          }
+          if (!verifiedStudent) {
+            showAlert($('vote-alert'), 'warn', '🔑 Tu sesión ha expirado. Vuelve a verificar tu código.');
+            return;
+          }
+
+          selectedCandidateId = c.id;
+          document.querySelectorAll('.cand').forEach(x => x.classList.remove('selected'));
+          div.classList.add('selected');
+          $('selection-text').innerHTML = `<span style="color:var(--ok);">✓</span> Seleccionado: <strong>${c.name}</strong>${c.party ? ` (Lista ${c.party})` : ''}`;
+          hideAlert($('vote-alert'));
+          $('btn-vote').disabled = false;
+          
+          // Scroll suave al botón de votar
+          $('btn-vote').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
-        
-        const result = await response.json();
-        
-        if (result.valid) {
-          terminalAuthenticated = true;
-          saveTerminalAuth();
-          document.getElementById('terminalPasswordModal').classList.remove('active');
-          document.getElementById('identificationSection').classList.add('active');
-          document.getElementById('terminalPassword').value = '';
-          errorEl.style.display = 'none';
-        } else {
-          errorEl.textContent = result.error || 'Contraseña incorrecta';
-          errorEl.style.display = 'block';
-        }
-      } catch (error) {
-        errorEl.textContent = 'Error de conexión';
-        errorEl.style.display = 'block';
+
+        wrap.appendChild(div);
       }
     }
-    
-    // Permitir Enter en el campo de contraseña
-    document.getElementById('terminalPassword')?.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        verifyTerminalPassword();
+
+    async function loadCandidates() {
+      const { ok, data } = await fetchJSON(`${API_URL}/get-candidates`);
+      if (!ok) {
+        $('candidates').innerHTML = `<div class="muted" style="text-align:center;padding:1.5rem;">❌ Error al cargar candidatos.</div>`;
+        return;
       }
-    });
-    
-    // ================================
-    
-    async function loadConfig() {
-      try {
-        const response = await fetch('/api/check-status');
-        const data = await response.json();
-        
-        document.getElementById('schoolName').textContent = data.school_name || 'Votación Escolar';
-        
-        if (data.school_logo) {
-          const logo = document.getElementById('schoolLogo');
-          logo.src = data.school_logo;
-          logo.style.display = 'inline-block';
-        }
-        
-        const badge = document.getElementById('statusBadge');
-        if (data.open) {
-          badge.textContent = '✅ Votación Abierta';
-          badge.className = 'status-badge status-open';
-        } else {
-          badge.textContent = '❌ Votación Cerrada';
-          badge.className = 'status-badge status-closed';
-        }
-        
-        return data.open;
-      } catch (error) {
-        console.error('Error loading config:', error);
-        return false;
+      candidates = data.candidates || [];
+      renderCandidates();
+    }
+
+    function resetSessionUI() {
+      verifiedStudent = null;
+      verifiedCode = '';
+      selectedCandidateId = null;
+
+      $('student-box').style.display = 'none';
+      $('student-name').textContent = '';
+      $('student-grade').textContent = '';
+      $('student-course').textContent = '';
+
+      document.querySelectorAll('.cand').forEach(x => {
+        x.classList.remove('selected');
+        x.classList.remove('disabled');
+        x.style.pointerEvents = 'auto';
+        x.style.filter = 'none';
+      });
+      $('selection-text').textContent = 'Ningún candidato seleccionado.';
+      $('btn-vote').disabled = true;
+
+      hideAlert($('access-alert'));
+      hideAlert($('vote-alert'));
+
+      $('next-student-section').style.display = 'none';
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
       }
+      $('countdown-text').textContent = '';
     }
-    
-    function showSection(sectionId) {
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.getElementById(sectionId).classList.add('active');
+
+    function prepareForNextStudent() {
+      // Habilitar controles para el siguiente estudiante
+      $('access-code').disabled = false;
+      $('access-code').value = '';
+      $('access-code').focus();
+      $('btn-verify').disabled = false;
+      $('btn-verify').innerHTML = '✓ Verificar';
+      
+      // Reiniciar UI
+      resetSessionUI();
+      
+      // Ocultar sección de candidatos
+      hideCandidatesSection();
+      
+      $('vote-instructions').textContent = 'Selecciona al candidato de tu preferencia.';
     }
-    
+
     async function verifyCode() {
-      const code = document.getElementById('accessCode').value;
-      
-      if (!/^\d{5}$/.test(code)) {
-        alert('❌ Código inválido. Debe tener 5 dígitos.');
+      hideAlert($('access-alert'));
+      hideAlert($('vote-alert'));
+
+      if (!electionOpen) {
+        showAlert($('access-alert'), 'warn', '⏰ La votación está cerrada.');
         return;
       }
-      
-      try {
-        const response = await fetch('/api/verify-code', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ access_code: code })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok && data.valid) {
-          currentAccessCode = code;
-          document.getElementById('studentName').textContent = data.student.name;
-          document.getElementById('studentGrade').textContent = data.student.grade;
-          document.getElementById('studentCourse').textContent = data.student.course;
-          showSection('studentInfoSection');
-        } else {
-          alert('❌ ' + data.error);
-        }
-      } catch (error) {
-        alert('❌ Error de conexión');
+
+      const raw = $('access-code').value;
+      const code = onlyDigits(raw).slice(0, 5);
+      $('access-code').value = code;
+
+      if (!isValidCode(code)) {
+        showAlert($('access-alert'), 'danger', '❌ Código inválido. Debe tener 5 dígitos.');
+        return;
       }
-    }
-    
-    function clearCode() {
-      currentAccessCode = '';
-      document.getElementById('accessCode').value = '';
-      showSection('identificationSection');
-    }
-    
-    function showQRScanner() {
-      showSection('qrScannerSection');
+
+      $('btn-verify').disabled = true;
+      $('btn-verify').innerHTML = '⏳ Verificando...';
+
+      const { ok, data, status } = await fetchJSON(`${API_URL}/verify-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_code: code })
+      });
+
+      $('btn-verify').disabled = false;
+      $('btn-verify').innerHTML = '✓ Verificar';
+
+      if (!ok) {
+        const msg = data?.error ||
+          (status === 404 ? '🔍 Código no encontrado.' :
+           status === 403 ? '⚠️ Este código ya fue utilizado.' :
+           '❌ No se pudo verificar el código.');
+        showAlert($('access-alert'), status === 403 ? 'warn' : 'danger', msg);
+        verifiedStudent = null;
+        verifiedCode = '';
+        $('student-box').style.display = 'none';
+        $('btn-vote').disabled = true;
+        return;
+      }
+
+      verifiedStudent = data.student;
+      verifiedCode = code;
+
+      $('student-name').textContent = verifiedStudent?.name || '';
+      $('student-grade').textContent = verifiedStudent?.grade ?? '';
+      $('student-course').textContent = verifiedStudent?.course ?? '';
+      $('student-box').style.display = 'block';
+
+      showAlert($('access-alert'), 'ok', '✅ Código verificado. ¡Ya puedes votar!');
+      $('vote-instructions').textContent = '👇 Selecciona un candidato.';
       
-      html5QrCode = new Html5Qrcode('qr-reader');
+      // MOSTRAR SECCIÓN DE CANDIDATOS
+      showCandidatesSection();
+    }
+
+    async function castVote() {
+      hideAlert($('vote-alert'));
+
+      if (!electionOpen) {
+        showAlert($('vote-alert'), 'warn', '⏰ La votación está cerrada.');
+        return;
+      }
+      if (!verifiedStudent || !isValidCode(verifiedCode)) {
+        showAlert($('vote-alert'), 'warn', '🔑 Primero verifica tu código.');
+        return;
+      }
+      if (!selectedCandidateId) {
+        showAlert($('vote-alert'), 'warn', '👈 Selecciona un candidato.');
+        return;
+      }
+
+      const candidate = candidates.find(c => c.id === selectedCandidateId);
+      const confirmMsg = `¿Confirmas tu voto?\n\n👤 Estudiante: ${verifiedStudent.name}\n📚 Grado: ${verifiedStudent.grade}° - Curso: ${verifiedStudent.course}\n🗳️ Candidato: ${candidate?.name || 'Unknown'}\n${candidate?.party ? `📋 Lista: ${candidate.party}` : ''}`;
+      
+      if (!confirm(confirmMsg)) return;
+
+      $('btn-vote').disabled = true;
+      $('btn-vote').innerHTML = '⏳ Enviando voto...';
+
+      const { ok, data } = await fetchJSON(`${API_URL}/cast-vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_code: verifiedCode, candidate_id: selectedCandidateId })
+      });
+
+      $('btn-vote').innerHTML = '🗳️ Confirmar Voto';
+
+      if (!ok) {
+        const msg = data?.error || '❌ No se pudo registrar el voto.';
+        showAlert($('vote-alert'), 'danger', msg);
+        $('btn-vote').disabled = false;
+        return;
+      }
+
+      showAlert($('vote-alert'), 'ok', '🎉 ¡Voto registrado correctamente! Gracias por participar.');
+      
+      $('btn-vote').disabled = true;
+      $('btn-verify').disabled = true;
+      $('access-code').disabled = true;
+
+      document.querySelectorAll('.cand').forEach(x => {
+        x.classList.add('disabled');
+        x.style.pointerEvents = 'none';
+      });
+
+      showNextStudentSection();
+    }
+
+    function showNextStudentSection() {
+      const section = $('next-student-section');
+      section.style.display = 'block';
+      
+      let secondsLeft = 8;
+      
+      $('countdown-text').textContent = `⏱️ Esta pantalla se reiniciará automáticamente en ${secondsLeft} segundos...`;
+      
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+      }
+      
+      countdownInterval = setInterval(() => {
+        secondsLeft--;
+        if (secondsLeft > 0) {
+          $('countdown-text').textContent = `⏱️ Esta pantalla se reiniciará automáticamente en ${secondsLeft} segundos...`;
+        } else {
+          clearInterval(countdownInterval);
+          prepareForNextStudent();
+        }
+      }, 1000);
+    }
+
+    // Eventos
+    $('btn-verify').addEventListener('click', verifyCode);
+    $('btn-vote').addEventListener('click', castVote);
+    $('btn-next-student').addEventListener('click', prepareForNextStudent);
+
+    $('btn-clear').addEventListener('click', () => {
+      $('access-code').value = '';
+      $('access-code').disabled = false;
+      $('btn-verify').disabled = false;
+      $('btn-verify').innerHTML = '✓ Verificar';
+      resetSessionUI();
+      hideCandidatesSection();
+      $('vote-instructions').textContent = 'Selecciona al candidato de tu preferencia.';
+    });
+
+    $('access-code').addEventListener('input', () => {
+      const cleaned = onlyDigits($('access-code').value).slice(0, 5);
+      if ($('access-code').value !== cleaned) $('access-code').value = cleaned;
+    });
+
+    $('access-code').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') verifyCode();
+    });
+
+    // ==================== FUNCIONES QR ====================
+    
+    function openQRScanner() {
+      const modal = $('qr-modal');
+      modal.style.display = 'flex';
+      
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("qr-reader");
+      }
+      
+      $('qr-status').textContent = '📷 Iniciando cámara...';
+      
+      const config = {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0
+      };
       
       html5QrCode.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: 250 },
-        (decodedText) => {
-          const code = decodedText.match(/\d{5}/);
-          if (code) {
-            document.getElementById('accessCode').value = code[0];
-            stopQRScanner();
-            verifyCode();
-          }
-        },
-        (error) => {}
-      ).catch(err => {
-        alert('❌ Error al iniciar cámara: ' + err);
+        { facingMode: "environment" },
+        config,
+        onScanSuccess,
+        onScanError
+      ).then(() => {
+        $('qr-status').textContent = '🎯 Escanea el código QR';
+      }).catch(err => {
+        $('qr-status').textContent = '❌ Error al acceder a la cámara';
+        console.error('Error starting QR scanner:', err);
       });
     }
     
-    function stopQRScanner() {
-      if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-          document.getElementById('qr-reader').innerHTML = '';
-          html5QrCode = null;
-        });
-      }
-      showSection('identificationSection');
-    }
-    
-    async function showCandidates() {
-      try {
-        const response = await fetch('/api/get-candidates');
-        const data = await response.json();
-        
-        const grid = document.getElementById('candidatesGrid');
-        grid.innerHTML = '';
-        
-        if (data.candidates && data.candidates.length > 0) {
-          data.candidates.forEach(candidate => {
-            const card = document.createElement('div');
-            card.className = 'candidate-card';
-            card.onclick = () => selectCandidate(candidate.id, candidate.name, card);
-            
-            card.innerHTML = `
-              <img src="${candidate.photo_url || 'https://via.placeholder.com/80'}" alt="${candidate.name}">
-              <h3>${candidate.name}</h3>
-              <p>${candidate.party || 'Independiente'}</p>
-            `;
-            
-            grid.appendChild(card);
-          });
-        } else {
-          grid.innerHTML = '<p>No hay candidatos disponibles.</p>';
-        }
-        
-        showSection('candidatesSection');
-      } catch (error) {
-        alert('❌ Error al cargar candidatos');
-      }
-    }
-    
-    function selectCandidate(id, name, cardElement) {
-      selectedCandidateId = id;
+    function closeQRScanner() {
+      const modal = $('qr-modal');
+      modal.style.display = 'none';
       
-      document.querySelectorAll('.candidate-card').forEach(c => c.classList.remove('selected'));
-      cardElement.classList.add('selected');
-      
-      document.getElementById('selectedCandidateName').textContent = name;
-      document.getElementById('selectedCandidateInfo').classList.remove('hidden');
-      document.getElementById('castVoteBtn').disabled = false;
-    }
-    
-    function clearSelection() {
-      selectedCandidateId = null;
-      document.querySelectorAll('.candidate-card').forEach(c => c.classList.remove('selected'));
-      document.getElementById('selectedCandidateInfo').classList.add('hidden');
-      document.getElementById('castVoteBtn').disabled = true;
-    }
-    
-    async function castVote() {
-      if (!selectedCandidateId || !currentAccessCode) {
-        alert('❌ Datos incompletos');
-        return;
+      if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().catch(err => console.error('Error stopping scanner:', err));
       }
       
-      if (!confirm('¿Confirmas tu voto? Esta acción no se puede deshacer.')) {
-        return;
-      }
-      
-      try {
-        const response = await fetch('/api/cast-vote', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            access_code: currentAccessCode,
-            candidate_id: selectedCandidateId
-          })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok && data.success) {
-          showSection('voteConfirmedSection');
-        } else {
-          alert('❌ ' + data.error);
-        }
-      } catch (error) {
-        alert('❌ Error de conexión');
-      }
+      $('qr-status').textContent = '';
     }
     
-    function nextStudent() {
-      clearCode();
-      clearSelection();
-    }
-    
-    // Permitir Enter en el campo de código
-    document.getElementById('accessCode')?.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        verifyCode();
-      }
-    });
-    
-    // Inicializar app
-    async function initApp() {
-      const isOpen = await loadConfig();
+    function onScanSuccess(decodedText) {
+      // Extraer el código del QR
+      let code = '';
       
-      // Verificar autenticación de terminal
-      if (!checkTerminalAuth()) {
-        showTerminalPasswordModal();
+      // Si el QR contiene una URL con parámetro ?code=
+      if (decodedText.includes('?code=')) {
+        const url = new URL(decodedText);
+        code = url.searchParams.get('code');
       } else {
-        showSection('identificationSection');
+        // Si es solo el código
+        code = decodedText;
+      }
+      
+      code = onlyDigits(code).slice(0, 5);
+      
+      if (isValidCode(code)) {
+        $('access-code').value = code;
+        $('qr-status').textContent = `✅ Código detectado: ${code}`;
+        
+        // Cerrar escáner después de 1 segundo
+        setTimeout(() => {
+          closeQRScanner();
+          // Verificar automáticamente
+          verifyCode();
+        }, 1000);
       }
     }
     
-    initApp();
+    function onScanError(errorMessage) {
+      // No hacer nada con los errores normales de escaneo
+    }
+    
+    function checkURLForCode() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      
+      if (code) {
+        const cleanCode = onlyDigits(code).slice(0, 5);
+        if (isValidCode(cleanCode)) {
+          $('access-code').value = cleanCode;
+          // Limpiar la URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          // Verificar automáticamente después de un momento
+          setTimeout(() => {
+            verifyCode();
+          }, 500);
+        }
+      }
+    }
+    
+    // Event listeners para QR
+    $('btn-scan-qr').addEventListener('click', openQRScanner);
+    $('btn-close-qr').addEventListener('click', closeQRScanner);
+
+    // Init
+    (async function init(){
+      // Asegurar que la sección de candidatos esté oculta inicialmente
+      $('candidates-section').style.display = 'none';
+      
+      resetSessionUI();
+      await loadStatus();
+      await loadCandidates();
+      setInterval(loadStatus, 10000);
+      
+      // Verificar si hay código en la URL (desde QR)
+      checkURLForCode();
+    })();
   </script>
 </body>
 </html>
