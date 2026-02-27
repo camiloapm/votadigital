@@ -274,6 +274,40 @@
         <div id="logo-preview"></div>
         <button onclick="saveSchoolConfig()" class="btn btn-primary" style="width:auto; margin-top:1rem;">Guardar Configuración</button>
       </div>
+
+      <div class="card" style="margin-top:1.5rem;">
+        <h3>🔒 Contraseña de Terminales de Votación</h3>
+        <p style="margin-bottom: 1rem; color: #64748b;">
+          Configura una contraseña para activar los dispositivos (PC o celulares) que se usarán como terminales de votación.
+          Cuando un estudiante escanee el QR, el dispositivo pedirá esta contraseña antes de permitir votar.
+          <strong>Si dejas el campo vacío, no se requerirá contraseña.</strong>
+        </p>
+
+        <label for="voting-password-input">Contraseña de terminal:</label>
+        <div style="display:flex;gap:.6rem;align-items:center;margin-top:.5rem;">
+          <input
+            type="text"
+            id="voting-password-input"
+            placeholder="Ej: vota2025 (dejar vacío para desactivar)"
+            autocomplete="off"
+            style="flex:1;"
+          >
+          <button onclick="saveVotingPassword()" class="btn btn-primary" style="white-space:nowrap;width:auto;">
+            💾 Guardar
+          </button>
+        </div>
+        <div id="voting-password-status" style="margin-top:.6rem;font-size:.9rem;color:#64748b;"></div>
+
+        <div style="margin-top:1rem;padding:.9rem 1rem;background:#eff6ff;border:2px solid #bfdbfe;border-radius:10px;">
+          <p style="font-size:.9rem;color:#1e40af;font-weight:600;margin-bottom:.4rem;">📋 ¿Cómo funciona?</p>
+          <ul style="font-size:.88rem;color:#1e40af;padding-left:1.2rem;line-height:1.7;">
+            <li>El administrador activa cada terminal escribiendo esta contraseña.</li>
+            <li>Una vez activada, la terminal permanece habilitada durante toda la sesión del navegador.</li>
+            <li>Al cerrar el navegador o abrir una ventana nueva, se requiere la contraseña nuevamente.</li>
+            <li>Puedes cambiar la contraseña en cualquier momento desde aquí.</li>
+          </ul>
+        </div>
+      </div>
     </section>
 
     <section id="sec-candidates" class="section">
@@ -856,7 +890,7 @@
       if (section === 'results') loadFinalResults();
       if (section === 'students') loadStudents();
       if (section === 'candidates') loadCandidates();
-      if (section === 'school') loadSchoolConfig();
+      if (section === 'school') { loadSchoolConfig(); loadVotingPassword(); }
       if (section === 'carnets') initCarnetsSection();
 
       // Mostrar/ocultar botón flotante
@@ -918,6 +952,50 @@
       } catch (err) {
         console.error('Error cargando config:', err);
       }
+    }
+
+    async function saveVotingPassword() {
+      const password = document.getElementById('voting-password-input').value.trim();
+      const statusEl = document.getElementById('voting-password-status');
+
+      try {
+        const res = await fetch(`${API_URL}/config`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
+          body: JSON.stringify({ voting_password: password, admin_code: adminCode })
+        });
+
+        if (res.ok) {
+          if (password === '') {
+            statusEl.innerHTML = `<span style="color:#10b981;">✅ Contraseña eliminada. Las terminales ya no requerirán contraseña.</span>`;
+          } else {
+            statusEl.innerHTML = `<span style="color:#10b981;">✅ Contraseña guardada: <strong>${password}</strong></span>`;
+          }
+          showToast('Contraseña de terminal guardada', 'success');
+        } else {
+          statusEl.innerHTML = `<span style="color:#ef4444;">❌ Error al guardar la contraseña.</span>`;
+          showToast('Error al guardar contraseña', 'error');
+        }
+      } catch (err) {
+        statusEl.innerHTML = `<span style="color:#ef4444;">❌ Error de conexión.</span>`;
+      }
+    }
+
+    async function loadVotingPassword() {
+      try {
+        const res = await fetch(`${API_URL}/config`);
+        const data = await res.json();
+        const input = document.getElementById('voting-password-input');
+        const statusEl = document.getElementById('voting-password-status');
+        if (input) {
+          input.value = data.voting_password || '';
+          if (data.voting_password) {
+            statusEl.innerHTML = `<span style="color:#10b981;">🔒 Contraseña activa: <strong>${data.voting_password}</strong></span>`;
+          } else {
+            statusEl.innerHTML = `<span style="color:#64748b;">🔓 Sin contraseña — todas las terminales pueden votar sin activación.</span>`;
+          }
+        }
+      } catch (e) {}
     }
 
     async function saveSchoolConfig() {
