@@ -76,6 +76,7 @@ export default async function handler(req, res) {
       case 'verify-code': return await verifyCode(req, res);
       case 'cast-vote': return await castVote(req, res);
       case 'get-candidates': return await getCandidates(req, res);
+      case 'verify-terminal': return await verifyTerminal(req, res);
       case 'admin': return await handleAdmin(req, res, subEndpoint);
       case 'stats': return await getStats(req, res);
       case 'config': return await handleConfig(req, res);
@@ -174,13 +175,41 @@ async function getCandidates(req, res) {
   return res.status(200).json({ candidates: data });
 }
 
+async function verifyTerminal(req, res) {
+  const supabase = getSupabase();
+
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
+
+  const { voting_password } = req.body || {};
+  if (!voting_password) return res.status(400).json({ error: 'Contraseña requerida' });
+
+  const { data: config, error } = await supabase
+    .from('config')
+    .select('voting_password')
+    .eq('id', 1)
+    .single();
+
+  if (error || !config) return res.status(500).json({ error: 'Error al verificar contraseña' });
+
+  // Si no hay contraseña configurada, no se requiere activación
+  if (!config.voting_password || config.voting_password.trim() === '') {
+    return res.status(200).json({ valid: true, noPassword: true });
+  }
+
+  if (voting_password !== config.voting_password) {
+    return res.status(401).json({ error: 'Contraseña de terminal incorrecta' });
+  }
+
+  return res.status(200).json({ valid: true });
+}
+
 async function handleConfig(req, res) {
   const supabase = getSupabase();
 
   if (req.method === 'GET') {
     const { data, error } = await supabase
       .from('config')
-      .select('school_logo_url, school_name')
+      .select('school_logo_url, school_name, voting_password')
       .eq('id', 1)
       .single();
 
@@ -201,13 +230,14 @@ async function handleConfig(req, res) {
       return res.status(401).json({ error: 'No autorizado' });
     }
 
-    const { school_logo_url, school_name } = req.body || {};
+    const { school_logo_url, school_name, voting_password } = req.body || {};
 
     const { error } = await supabase
       .from('config')
       .update({
         school_logo_url: school_logo_url || null,
-        school_name: school_name || 'Colegio'
+        school_name: school_name || 'Colegio',
+        voting_password: voting_password !== undefined ? voting_password : undefined
       })
       .eq('id', 1);
 
