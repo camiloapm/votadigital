@@ -211,7 +211,6 @@
     // Estado en memoria
     let electionOpen = false;
     let verifiedStudent = null;
-    let votingPasswordValue = '';
     let verifiedCode = '';
     let candidates = [];
     let selectedCandidateId = null;
@@ -505,12 +504,7 @@
       const { ok, data, status } = await fetchJSON(`${API_URL}/verify-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        if (!votingPasswordValue) {
-        const pass = prompt("🔐 Ingrese la clave de votación:");
-        if (!pass) return;
-        votingPasswordValue = pass;
-      }
-      body: JSON.stringify({ access_code: code, voting_password: votingPasswordValue })
+        body: JSON.stringify({ access_code: code })
       });
 
       $('btn-verify').disabled = false;
