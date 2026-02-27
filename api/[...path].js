@@ -169,6 +169,7 @@ async function getCandidates(req, res) {
   const { data, error } = await supabase
     .from('candidates')
     .select('id, name, party, photo_url')
+    .order('sort_order', { ascending: true, nullsFirst: false })
     .order('name');
 
   if (error) return res.status(500).json({ error: 'Error al cargar candidatos' });
@@ -318,7 +319,7 @@ async function handleCandidates(req, res) {
   const supabase = getSupabase();
 
   if (req.method === 'GET') {
-    const { data, error } = await supabase.from('candidates').select('*').order('name');
+    const { data, error } = await supabase.from('candidates').select('*').order('sort_order', { ascending: true, nullsFirst: false }).order('name');
     if (error) return res.status(500).json({ error: 'Error al cargar candidatos' });
     return res.status(200).json({ candidates: data });
   }
@@ -338,11 +339,21 @@ async function handleCandidates(req, res) {
   }
 
   if (req.method === 'PUT') {
-    const { id, photo_url } = req.body || {};
+    const { id, photo_url, name, party, sort_order } = req.body || {};
     if (!id) return res.status(400).json({ error: 'ID requerido' });
 
-    const { error } = await supabase.from('candidates').update({ photo_url }).eq('id', id);
-    if (error) return res.status(500).json({ error: 'Error al actualizar foto' });
+    const updates = {};
+    if (photo_url !== undefined) updates.photo_url = photo_url;
+    if (name !== undefined && name.trim() !== '') updates.name = name.trim();
+    if (party !== undefined) updates.party = party.trim();
+    if (sort_order !== undefined) updates.sort_order = sort_order;
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: 'No hay campos para actualizar' });
+    }
+
+    const { error } = await supabase.from('candidates').update(updates).eq('id', id);
+    if (error) return res.status(500).json({ error: 'Error al actualizar candidato' });
 
     return res.status(200).json({ success: true });
   }
