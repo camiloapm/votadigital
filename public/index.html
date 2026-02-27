@@ -101,9 +101,51 @@
     /* Student info box */
     #student-box{padding:.9rem 1.1rem;border-radius:10px;margin-top:.75rem;}
     #student-box strong{display:block;font-size:1rem;margin-bottom:.2rem;}
+    /* Terminal activation overlay */
+    #terminal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);z-index:10000;display:flex;align-items:center;justify-content:center;padding:1rem;}
+    .terminal-box{background:#fff;border-radius:20px;padding:2rem;max-width:420px;width:100%;box-shadow:0 25px 60px rgba(0,0,0,.5);text-align:center;}
+    .terminal-box .lock-icon{font-size:3.5rem;margin-bottom:1rem;}
+    .terminal-box h2{font-size:1.4rem;font-weight:800;color:#1e293b;margin-bottom:.4rem;}
+    .terminal-box p{color:#64748b;font-size:.95rem;margin-bottom:1.5rem;}
+    .terminal-box .input-wrap{position:relative;margin-bottom:1rem;}
+    .terminal-box .input-wrap input{width:100%;padding:.9rem 1rem;border:2px solid #e2e8f0;border-radius:12px;font-size:1.1rem;text-align:center;letter-spacing:.2em;outline:none;transition:all .2s;}
+    .terminal-box .input-wrap input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.15);}
+    .terminal-box .input-wrap input.error{border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.15);}
+    .terminal-activate-btn{width:100%;padding:.9rem;border:none;border-radius:12px;background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px rgba(59,130,246,.4);}
+    .terminal-activate-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,.5);}
+    .terminal-activate-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none;}
+    .terminal-error{color:#dc2626;font-size:.9rem;margin-top:.5rem;font-weight:500;min-height:1.2em;}
+    .terminal-activated-banner{display:none;position:fixed;bottom:1rem;right:1rem;background:#10b981;color:#fff;padding:.5rem 1rem;border-radius:10px;font-size:.85rem;font-weight:600;z-index:9999;box-shadow:0 3px 10px rgba(16,185,129,.4);cursor:pointer;}
+    .terminal-activated-banner:hover{background:#059669;}
+
   </style>
 </head>
 <body>
+  <!-- Pantalla de activación de terminal -->
+  <div id="terminal-overlay">
+    <div class="terminal-box">
+      <div class="lock-icon">🔒</div>
+      <h2>Terminal de Votación</h2>
+      <p>Esta terminal requiere activación. Ingresa la contraseña para habilitarla.</p>
+      <div class="input-wrap">
+        <input
+          type="password"
+          id="terminal-password-input"
+          placeholder="Contraseña de terminal"
+          autocomplete="off"
+        />
+      </div>
+      <div id="terminal-error" class="terminal-error"></div>
+      <button class="terminal-activate-btn" id="btn-activate-terminal" type="button">
+        🔓 Activar Terminal
+      </button>
+    </div>
+  </div>
+
+  <!-- Banner de terminal activa (permite desactivar) -->
+  <div id="terminal-activated-banner" class="terminal-activated-banner" onclick="deactivateTerminal()" title="Clic para desactivar esta terminal">
+    ✅ Terminal activa — Clic para desactivar
+  </div>
   <div class="app-container">
     <header class="header">
       <div class="brand">
@@ -217,8 +259,117 @@
     let autoResetEnabled = true;
     let countdownInterval = null;
     let html5QrCode = null;
+    let terminalActivated = false;
 
     const $ = (id) => document.getElementById(id);
+
+    // ==================== ACTIVACIÓN DE TERMINAL ====================
+
+    async function checkTerminalActivation() {
+      // Verificar si ya está activada en esta sesión
+      const activated = sessionStorage.getItem('terminal_activated');
+      if (activated === 'true') {
+        activateTerminalUI();
+        return;
+      }
+
+      // Verificar si el sistema tiene contraseña configurada
+      try {
+        const res = await fetch(`${API_URL}/check-status`);
+        const data = await res.json().catch(() => ({}));
+        // Si la API responde bien, verificar si se necesita contraseña
+        // Hacemos una prueba de terminal vacía para ver si hay contraseña configurada
+        const testRes = await fetch(`${API_URL}/verify-terminal`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ voting_password: '' })
+        });
+        const testData = await testRes.json().catch(() => ({}));
+
+        // Si retorna noPassword:true, no hay contraseña configurada → activar directo
+        if (testData.noPassword === true) {
+          activateTerminalUI();
+          return;
+        }
+      } catch (e) {
+        // Si falla la red, mostrar overlay igual (seguridad por defecto)
+      }
+
+      // Mostrar overlay de activación
+      $('terminal-overlay').style.display = 'flex';
+      $('terminal-password-input').focus();
+    }
+
+    async function activateTerminal() {
+      const password = $('terminal-password-input').value;
+      const btn = $('btn-activate-terminal');
+      const errorEl = $('terminal-error');
+
+      errorEl.textContent = '';
+      $('terminal-password-input').classList.remove('error');
+
+      if (!password) {
+        errorEl.textContent = 'Ingresa la contraseña de terminal.';
+        $('terminal-password-input').classList.add('error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Verificando...';
+
+      try {
+        const res = await fetch(`${API_URL}/verify-terminal`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ voting_password: password })
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok && data.valid) {
+          sessionStorage.setItem('terminal_activated', 'true');
+          activateTerminalUI();
+        } else {
+          errorEl.textContent = data.error || '❌ Contraseña incorrecta.';
+          $('terminal-password-input').classList.add('error');
+          $('terminal-password-input').value = '';
+          $('terminal-password-input').focus();
+          btn.disabled = false;
+          btn.textContent = '🔓 Activar Terminal';
+        }
+      } catch (e) {
+        errorEl.textContent = '❌ Error de conexión. Intenta nuevamente.';
+        btn.disabled = false;
+        btn.textContent = '🔓 Activar Terminal';
+      }
+    }
+
+    function activateTerminalUI() {
+      terminalActivated = true;
+      $('terminal-overlay').style.display = 'none';
+      const banner = $('terminal-activated-banner');
+      banner.style.display = 'block';
+      setTimeout(() => { banner.style.display = 'none'; }, 5000);
+    }
+
+    function deactivateTerminal() {
+      if (!confirm('¿Desactivar esta terminal? Se mostrará la pantalla de contraseña nuevamente.')) return;
+      sessionStorage.removeItem('terminal_activated');
+      terminalActivated = false;
+      $('terminal-activated-banner').style.display = 'none';
+      $('terminal-overlay').style.display = 'flex';
+      $('terminal-password-input').value = '';
+      $('terminal-error').textContent = '';
+      $('terminal-password-input').classList.remove('error');
+      $('btn-activate-terminal').disabled = false;
+      $('btn-activate-terminal').textContent = '🔓 Activar Terminal';
+      $('terminal-password-input').focus();
+    }
+
+    // Eventos de terminal
+    $('btn-activate-terminal').addEventListener('click', activateTerminal);
+    $('terminal-password-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') activateTerminal();
+    });
 
     function showAlert(el, type, msg) {
       el.className = `alert ${type}`;
@@ -746,6 +897,9 @@
       
       // Verificar si hay código en la URL (desde QR)
       checkURLForCode();
+
+      // Verificar activación de terminal (al final, para que el resto cargue)
+      await checkTerminalActivation();
     })();
   </script>
 </body>
