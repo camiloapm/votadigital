@@ -631,14 +631,22 @@
   <!-- Área de impresión de carnets -->
   <div id="carnets-print-area" class="print-area"></div>
 
-  <!-- Modal para editar foto de candidato -->
+  <!-- Modal para editar candidato (foto, nombre, partido) -->
   <div id="edit-photo-modal" class="modal-overlay">
     <div class="modal">
       <div class="modal-header">
-        <h3>Editar Foto del Candidato</h3>
+        <h3>✏️ Editar Candidato</h3>
         <button class="modal-close" onclick="closeEditPhotoModal()">&times;</button>
       </div>
       <div id="edit-photo-content">
+
+        <label style="font-weight:600;display:block;margin-bottom:.25rem;">Nombre completo:</label>
+        <input type="text" id="edit-candidate-name" placeholder="Nombre del candidato" style="width:100%;padding:.65rem .9rem;border:2px solid #e2e8f0;border-radius:8px;font-size:.95rem;margin-bottom:.75rem;outline:none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
+
+        <label style="font-weight:600;display:block;margin-bottom:.25rem;">Partido / Lista (opcional):</label>
+        <input type="text" id="edit-candidate-party" placeholder="Ej: Lista 1" style="width:100%;padding:.65rem .9rem;border:2px solid #e2e8f0;border-radius:8px;font-size:.95rem;margin-bottom:.75rem;outline:none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
+
+        <label style="font-weight:600;display:block;margin-bottom:.25rem;">Foto del candidato:</label>
         <div class="file-upload-area" id="edit-candidate-photo-upload-area" onclick="document.getElementById('edit-candidate-photo-file').click()">
           <div class="file-upload-icon">📷</div>
           <div class="file-upload-text">Haz clic aquí para seleccionar una nueva foto</div>
@@ -661,7 +669,7 @@
         
         <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
           <button onclick="closeEditPhotoModal()" class="btn btn-secondary">Cancelar</button>
-          <button onclick="saveCandidatePhoto()" class="btn btn-primary">Guardar Foto</button>
+          <button onclick="saveCandidateEdit()" class="btn btn-primary">💾 Guardar Cambios</button>
         </div>
       </div>
     </div>
@@ -1849,103 +1857,167 @@
       }
     }
 
+    // Lista local de candidatos para manejar el orden sin recargar
+    let candidatesLocal = [];
+
     async function loadCandidates() {
       try {
         const res = await fetch(`${API_URL}/admin/candidates`, { headers: { 'x-admin-code': adminCode } });
         const data = await res.json();
-
-        const container = document.getElementById('candidates-list-admin');
-        if (!data.candidates || data.candidates.length === 0) {
-          container.innerHTML = '<p>No hay candidatos registrados</p>';
-          return;
-        }
-
-        container.innerHTML = `
-          <table>
-            <thead><tr><th>Foto</th><th>Nombre</th><th>Partido</th><th>Votos</th><th>Acciones</th></tr></thead>
-            <tbody>
-              ${data.candidates.map(c => `
-                <tr>
-                  <td>${c.photo_url ? `<img src="${c.photo_url}" class="candidate-photo" onerror="this.src='${generateInitialsAvatar(c.name, 60)}'">` : `<img src="${generateInitialsAvatar(c.name, 60)}" class="candidate-photo">`}</td>
-                  <td><strong>${c.name}</strong></td>
-                  <td>${c.party || '-'}</td>
-                  <td>${c.votes}</td>
-                  <td>
-                    <button onclick="openEditPhotoModal('${c.id}', '${c.photo_url || ''}')" class="btn btn-warning" style="padding:0.25rem 0.5rem; font-size:0.875rem; margin-right:0.25rem;">Foto</button>
-                    <button onclick="deleteCandidate('${c.id}')" class="btn btn-danger" style="padding:0.25rem 0.5rem; font-size:0.875rem;">Eliminar</button>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        `;
+        candidatesLocal = data.candidates || [];
+        renderCandidatesAdmin();
       } catch (err) {
         console.error('Error candidates:', err);
       }
     }
 
-    /**
-     * Abre el modal para editar la foto de un candidato
-     */
-    function openEditPhotoModal(candidateId, currentPhotoUrl) {
+    function renderCandidatesAdmin() {
+      const container = document.getElementById('candidates-list-admin');
+      if (!candidatesLocal || candidatesLocal.length === 0) {
+        container.innerHTML = '<p>No hay candidatos registrados</p>';
+        return;
+      }
+      const rows = candidatesLocal.map((c, i) => {
+        const upDisabled = i === 0 ? 'disabled' : '';
+        const downDisabled = i === candidatesLocal.length - 1 ? 'disabled' : '';
+        const upStyle = i === 0 ? 'background:#f1f5f9;color:#94a3b8;cursor:not-allowed;' : 'background:#e0f2fe;color:#0369a1;cursor:pointer;';
+        const downStyle = i === candidatesLocal.length - 1 ? 'background:#f1f5f9;color:#94a3b8;cursor:not-allowed;' : 'background:#e0f2fe;color:#0369a1;cursor:pointer;';
+        const photoHtml = c.photo_url
+          ? `<img src="${c.photo_url}" class="candidate-photo" onerror="this.src='${generateInitialsAvatar(c.name, 60)}'"`  + `>`
+          : `<img src="${generateInitialsAvatar(c.name, 60)}" class="candidate-photo">`;
+        const safeName = (c.name || '').replace(/'/g, "\\'");
+        const safeParty = (c.party || '').replace(/'/g, "\\'");
+        const safePhoto = (c.photo_url || '').replace(/'/g, "\\'");
+        return `<tr>
+          <td style="text-align:center;vertical-align:middle;">
+            <div style="display:flex;flex-direction:column;gap:2px;align-items:center;">
+              <button onclick="moveCandidateUp(${i})" ${upDisabled}
+                style="border:none;${upStyle}border-radius:4px;width:26px;height:22px;font-size:.85rem;font-weight:700;line-height:1;"
+                title="Subir">▲</button>
+              <button onclick="moveCandidateDown(${i})" ${downDisabled}
+                style="border:none;${downStyle}border-radius:4px;width:26px;height:22px;font-size:.85rem;font-weight:700;line-height:1;"
+                title="Bajar">▼</button>
+            </div>
+          </td>
+          <td>${photoHtml}</td>
+          <td><strong>${c.name}</strong></td>
+          <td>${c.party || '<span style="color:#94a3b8">—</span>'}</td>
+          <td style="text-align:center;">${c.votes || 0}</td>
+          <td>
+            <button onclick="openEditCandidateModal('${c.id}','${safeName}','${safeParty}','${safePhoto}')"
+              class="btn btn-warning" style="padding:0.25rem 0.55rem;font-size:0.8rem;margin-right:0.25rem;">✏️ Editar</button>
+            <button onclick="deleteCandidate('${c.id}')"
+              class="btn btn-danger" style="padding:0.25rem 0.55rem;font-size:0.8rem;">🗑️</button>
+          </td>
+        </tr>`;
+      }).join('');
+
+      container.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40px;">Orden</th>
+              <th style="width:65px;">Foto</th>
+              <th>Nombre</th>
+              <th>Partido/Lista</th>
+              <th style="width:60px;">Votos</th>
+              <th style="width:165px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+
+    async function moveCandidateUp(index) {
+      if (index === 0) return;
+      [candidatesLocal[index - 1], candidatesLocal[index]] = [candidatesLocal[index], candidatesLocal[index - 1]];
+      renderCandidatesAdmin();
+      await saveCandidateOrder();
+    }
+
+    async function moveCandidateDown(index) {
+      if (index === candidatesLocal.length - 1) return;
+      [candidatesLocal[index], candidatesLocal[index + 1]] = [candidatesLocal[index + 1], candidatesLocal[index]];
+      renderCandidatesAdmin();
+      await saveCandidateOrder();
+    }
+
+    async function saveCandidateOrder() {
+      try {
+        await Promise.all(candidatesLocal.map((c, i) =>
+          fetch(`${API_URL}/admin/candidates`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
+            body: JSON.stringify({ id: c.id, sort_order: i, admin_code: adminCode })
+          })
+        ));
+        showToast('Orden guardado', 'success');
+      } catch {
+        showToast('Error al guardar orden', 'error');
+      }
+    }
+
+    function openEditCandidateModal(candidateId, name, party, currentPhotoUrl) {
       document.getElementById('edit-candidate-id').value = candidateId;
+      document.getElementById('edit-candidate-name').value = name || '';
+      document.getElementById('edit-candidate-party').value = party || '';
       document.getElementById('edit-candidate-photo-data').value = '';
       document.getElementById('edit-candidate-photo-preview').style.display = 'none';
       document.getElementById('edit-photo-error').textContent = '';
-      
-      // Si hay una foto actual, mostrarla
+
       if (currentPhotoUrl) {
         const previewContainer = document.getElementById('edit-candidate-photo-preview');
         const previewImg = document.getElementById('edit-candidate-photo-img');
         previewImg.src = currentPhotoUrl;
-        previewImg.onerror = function() {
-          previewImg.src = generateInitialsAvatar('C', 150);
-        };
-        document.getElementById('edit-candidate-photo-filename').textContent = 'Foto actual (URL)';
-        document.getElementById('edit-candidate-photo-filesize').textContent = 'N/A';
+        previewImg.onerror = function() { previewImg.src = generateInitialsAvatar('C', 150); };
+        document.getElementById('edit-candidate-photo-filename').textContent = 'Foto actual';
+        document.getElementById('edit-candidate-photo-filesize').textContent = '';
         previewContainer.style.display = 'flex';
       }
-      
+
       document.getElementById('edit-photo-modal').classList.add('active');
     }
 
-    /**
-     * Cierra el modal de edición de foto
-     */
+    function openEditPhotoModal(candidateId, currentPhotoUrl) {
+      const cand = candidatesLocal.find(c => c.id === candidateId) || {};
+      openEditCandidateModal(candidateId, cand.name || '', cand.party || '', currentPhotoUrl);
+    }
+
     function closeEditPhotoModal() {
       document.getElementById('edit-photo-modal').classList.remove('active');
     }
 
-    /**
-     * Guarda la nueva foto del candidato
-     */
-    async function saveCandidatePhoto() {
+    async function saveCandidateEdit() {
       const candidateId = document.getElementById('edit-candidate-id').value;
+      const name = document.getElementById('edit-candidate-name').value.trim();
+      const party = document.getElementById('edit-candidate-party').value.trim();
       const photoData = document.getElementById('edit-candidate-photo-data').value;
-      
-      if (!photoData) {
-        showToast('Selecciona una imagen primero', 'warning');
-        return;
-      }
+
+      if (!name) { showToast('El nombre es obligatorio', 'warning'); return; }
+
+      const payload = { id: candidateId, name, party, admin_code: adminCode };
+      if (photoData) payload.photo_url = photoData;
 
       try {
         const res = await fetch(`${API_URL}/admin/candidates`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
-          body: JSON.stringify({ id: candidateId, photo_url: photoData, admin_code: adminCode })
+          body: JSON.stringify(payload)
         });
-        
+
         if (res.ok) {
-          showToast('Foto actualizada correctamente', 'success');
+          showToast('Candidato actualizado', 'success');
           closeEditPhotoModal();
           loadCandidates();
         } else {
-          showToast('Error al actualizar foto', 'error');
+          showToast('Error al actualizar candidato', 'error');
         }
       } catch {
         showToast('Error de conexión', 'error');
       }
     }
+
+    async function saveCandidatePhoto() { await saveCandidateEdit(); }
 
     async function addCandidate() {
       const name = document.getElementById('new-candidate-name').value.trim();
