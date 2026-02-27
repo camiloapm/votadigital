@@ -112,12 +112,29 @@ async function checkStatus(req, res) {
   });
 }
 
+
 async function verifyCode(req, res) {
   const supabase = getSupabase();
 
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
-  const { access_code } = req.body || {};
+  const { access_code, voting_password } = req.body || {};
+
+  const { data: config } = await supabase
+    .from('config')
+    .select('voting_password_enabled, voting_password')
+    .eq('id', 1)
+    .single();
+
+  if (config?.voting_password_enabled) {
+    if (!voting_password) {
+      return res.status(401).json({ error: 'Clave de votación requerida' });
+    }
+    if (voting_password !== config.voting_password) {
+      return res.status(401).json({ error: 'Clave incorrecta' });
+    }
+  }
+
   if (!access_code || !/^\d{5}$/.test(access_code)) {
     return res.status(400).json({ error: 'Código inválido (debe tener 5 dígitos)' });
   }
@@ -136,6 +153,7 @@ async function verifyCode(req, res) {
     student: { name: student.full_name, grade: student.grade, course: student.course }
   });
 }
+
 
 async function castVote(req, res) {
   const supabase = getSupabase();
