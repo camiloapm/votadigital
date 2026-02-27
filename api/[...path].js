@@ -6,28 +6,28 @@ let supabase = null;
 function getSupabase() {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
+  
   if (!supabaseUrl || !supabaseKey) {
     throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
   }
-
+  
   if (!supabase) {
     supabase = createClient(supabaseUrl, supabaseKey, {
       auth: { autoRefreshToken: false, persistSession: false }
     });
   }
-
+  
   return supabase;
 }
 
 export default async function handler(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
-
+  
   // Health check (NO depende de Supabase)
   if (url.pathname === '/api/health' || url.pathname === '/api/health/') {
     return res.status(200).json({ ok: true });
   }
-
+  
   // Preflight CORS
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-admin-code');
     return res.status(200).end();
   }
-
+  
   // ======== RUTAS EXPLÍCITAS (FIX 404 ADMIN) ========
   if (url.pathname === '/api/admin/login' || url.pathname === '/api/admin/login/') {
     return await handleAdmin(req, res, 'login');
@@ -64,12 +64,12 @@ export default async function handler(req, res) {
   if (url.pathname === '/api/admin/clear-students' || url.pathname === '/api/admin/clear-students/') {
     return await handleAdmin(req, res, 'clear-students');
   }
-
+  
   // ======== ROUTER GENERAL ========
   const pathParts = url.pathname.replace('/api/', '').split('/').filter(Boolean);
   const endpoint = pathParts[0];
   const subEndpoint = pathParts[1];
-
+  
   try {
     switch (endpoint) {
       case 'check-status': return await checkStatus(req, res);
@@ -81,6 +81,10 @@ export default async function handler(req, res) {
       case 'config': return await handleConfig(req, res);
       case 'results': return await getFinalResults(req, res);
       case 'monitor': return await getMonitorData(req, res);
+      // === NUEVOS ENDPOINTS PARA CONTRASEÑA DE TERMINAL ===
+      case 'verify-terminal-password': return await verifyTerminalPassword(req, res);
+      case 'update-terminal-password': return await updateTerminalPassword(req, res);
+      // =====================================================
       default: return res.status(404).json({ error: 'Endpoint no encontrado' });
     }
   } catch (error) {
@@ -95,42 +99,45 @@ export default async function handler(req, res) {
 
 async function checkStatus(req, res) {
   const supabase = getSupabase();
-
+  
   const { data, error } = await supabase
     .from('config')
-    .select('election_status, school_logo_url, school_name')
+    .select('election_status, school_logo_url, school_name, voting_password')
     .eq('id', 1)
     .single();
-
+  
   if (error) return res.status(500).json({ error: 'Error al consultar estado' });
-
+  
   return res.status(200).json({
     open: data.election_status === 'open',
     status: data.election_status,
     school_logo: data.school_logo_url,
-    school_name: data.school_name
+    school_name: data.school_name,
+    passwordEnabled: !!data.voting_password && data.voting_password !== ''
   });
 }
 
 async function verifyCode(req, res) {
   const supabase = getSupabase();
-
+  
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
-
+  
   const { access_code } = req.body || {};
+  
   if (!access_code || !/^\d{5}$/.test(access_code)) {
     return res.status(400).json({ error: 'Código inválido (debe tener 5 dígitos)' });
   }
-
+  
   const { data: student, error } = await supabase
     .from('students')
     .select('id, full_name, grade, course, has_voted')
     .eq('access_code', access_code)
     .single();
-
+  
   if (error || !student) return res.status(404).json({ error: 'Código no encontrado' });
+  
   if (student.has_voted) return res.status(403).json({ error: 'Este código ya ha sido utilizado' });
-
+  
   return res.status(200).json({
     valid: true,
     student: { name: student.full_name, grade: student.grade, course: student.course }
@@ -139,22 +146,24 @@ async function verifyCode(req, res) {
 
 async function castVote(req, res) {
   const supabase = getSupabase();
-
+  
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
-
+  
   const { access_code, candidate_id } = req.body || {};
+  
   if (!access_code || !candidate_id) return res.status(400).json({ error: 'Datos incompletos' });
-
+  
   const { data, error } = await supabase.rpc('cast_vote', {
     p_access_code: access_code,
     p_candidate_id: candidate_id
   });
-
+  
   if (error) return res.status(500).json({ error: 'Error al procesar voto', details: error.message });
-
+  
   const result = data;
+  
   if (!result.success) return res.status(400).json({ error: result.error });
-
+  
   return res.status(200).json({
     success: true,
     message: 'Voto registrado correctamente',
@@ -164,45 +173,47 @@ async function castVote(req, res) {
 
 async function getCandidates(req, res) {
   const supabase = getSupabase();
-
+  
   const { data, error } = await supabase
     .from('candidates')
     .select('id, name, party, photo_url')
     .order('name');
-
+  
   if (error) return res.status(500).json({ error: 'Error al cargar candidatos' });
+  
   return res.status(200).json({ candidates: data });
 }
 
 async function handleConfig(req, res) {
   const supabase = getSupabase();
-
+  
   if (req.method === 'GET') {
     const { data, error } = await supabase
       .from('config')
       .select('school_logo_url, school_name')
       .eq('id', 1)
       .single();
-
+    
     if (error) return res.status(500).json({ error: 'Error' });
+    
     return res.status(200).json(data);
   }
-
+  
   if (req.method === 'POST') {
     const adminCode = req.headers['x-admin-code'];
-
+    
     const { data: config, error: cfgErr } = await supabase
       .from('config')
       .select('admin_code')
       .eq('id', 1)
       .single();
-
+    
     if (cfgErr || !config || adminCode !== config.admin_code) {
       return res.status(401).json({ error: 'No autorizado' });
     }
-
+    
     const { school_logo_url, school_name } = req.body || {};
-
+    
     const { error } = await supabase
       .from('config')
       .update({
@@ -210,12 +221,84 @@ async function handleConfig(req, res) {
         school_name: school_name || 'Colegio'
       })
       .eq('id', 1);
-
+    
     if (error) return res.status(500).json({ error: 'Error al actualizar' });
+    
     return res.status(200).json({ success: true });
   }
-
+  
   return res.status(405).json({ error: 'Método no permitido' });
+}
+
+// =====================================================
+// NUEVOS ENDPOINTS PARA CONTRASEÑA DE TERMINAL
+// =====================================================
+
+async function verifyTerminalPassword(req, res) {
+  const supabase = getSupabase();
+  
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
+  
+  const { password } = req.body || {};
+  
+  if (!password) {
+    return res.status(400).json({ error: 'Contraseña requerida' });
+  }
+  
+  const { data: config, error } = await supabase
+    .from('config')
+    .select('voting_password')
+    .eq('id', 1)
+    .single();
+  
+  if (error || !config) {
+    return res.status(500).json({ error: 'Error de configuración' });
+  }
+  
+  // Si no hay contraseña configurada, permitir acceso
+  if (!config.voting_password || config.voting_password === '') {
+    return res.status(200).json({ valid: true, message: 'Sin contraseña configurada' });
+  }
+  
+  // Verificar contraseña
+  if (password === config.voting_password) {
+    return res.status(200).json({ valid: true, message: 'Contraseña correcta' });
+  }
+  
+  return res.status(401).json({ valid: false, error: 'Contraseña incorrecta' });
+}
+
+async function updateTerminalPassword(req, res) {
+  const supabase = getSupabase();
+  
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
+  
+  const adminCode = req.headers['x-admin-code'];
+  const { password } = req.body || {};
+  
+  // Verificar admin
+  const { data: config, error: cfgErr } = await supabase
+    .from('config')
+    .select('admin_code')
+    .eq('id', 1)
+    .single();
+  
+  if (cfgErr || !config || adminCode !== config.admin_code) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+  
+  // Actualizar contraseña (puede ser vacía para desactivar)
+  const { error } = await supabase
+    .from('config')
+    .update({ voting_password: password || '' })
+    .eq('id', 1);
+  
+  if (error) return res.status(500).json({ error: 'Error al actualizar' });
+  
+  return res.status(200).json({ 
+    success: true, 
+    message: password ? 'Contraseña actualizada' : 'Contraseña eliminada' 
+  });
 }
 
 // =====================================================
@@ -224,25 +307,25 @@ async function handleConfig(req, res) {
 
 async function handleAdmin(req, res, subEndpoint) {
   const supabase = getSupabase();
-
+  
   // LOGIN: NO bloquea (solo confirma que backend responde)
   if (subEndpoint === 'login') {
     return res.status(200).json({ success: true });
   }
-
+  
   // Para TODO lo demás, sí validamos admin_code
   const adminCode = req.headers['x-admin-code'] || req.body?.admin_code;
-
+  
   const { data: config, error } = await supabase
     .from('config')
     .select('admin_code')
     .eq('id', 1)
     .single();
-
+  
   if (error || !config || adminCode !== config.admin_code) {
     return res.status(401).json({ error: 'Código de administrador inválido' });
   }
-
+  
   switch (subEndpoint) {
     case 'students': return await handleStudents(req, res);
     case 'candidates': return await handleCandidates(req, res);
@@ -258,7 +341,7 @@ async function handleAdmin(req, res, subEndpoint) {
 
 async function handleStudents(req, res) {
   const supabase = getSupabase();
-
+  
   if (req.method === 'GET') {
     const { data, error } = await supabase
       .from('students')
@@ -266,86 +349,99 @@ async function handleStudents(req, res) {
       .order('grade')
       .order('course')
       .order('list_number');
-
+    
     if (error) return res.status(500).json({ error: 'Error al cargar estudiantes' });
+    
     return res.status(200).json({ students: data });
   }
-
+  
   if (req.method === 'DELETE') {
     const { id } = req.body || {};
+    
     if (!id) return res.status(400).json({ error: 'ID requerido' });
-
+    
     const { error } = await supabase.from('students').delete().eq('id', id);
+    
     if (error) return res.status(500).json({ error: 'Error al eliminar' });
-
+    
     return res.status(200).json({ success: true });
   }
-
+  
   return res.status(405).json({ error: 'Método no permitido' });
 }
 
 async function handleCandidates(req, res) {
   const supabase = getSupabase();
-
+  
   if (req.method === 'GET') {
     const { data, error } = await supabase.from('candidates').select('*').order('name');
+    
     if (error) return res.status(500).json({ error: 'Error al cargar candidatos' });
+    
     return res.status(200).json({ candidates: data });
   }
-
+  
   if (req.method === 'POST') {
     const { name, party, photo_url } = req.body || {};
+    
     if (!name) return res.status(400).json({ error: 'Nombre requerido' });
-
+    
     const { data, error } = await supabase
       .from('candidates')
       .insert([{ name, party: party || '', photo_url: photo_url || '' }])
       .select()
       .single();
-
+    
     if (error) return res.status(500).json({ error: 'Error al crear candidato' });
+    
     return res.status(200).json({ candidate: data });
   }
-
+  
   if (req.method === 'PUT') {
     const { id, photo_url } = req.body || {};
+    
     if (!id) return res.status(400).json({ error: 'ID requerido' });
-
+    
     const { error } = await supabase.from('candidates').update({ photo_url }).eq('id', id);
+    
     if (error) return res.status(500).json({ error: 'Error al actualizar foto' });
-
+    
     return res.status(200).json({ success: true });
   }
-
+  
   if (req.method === 'DELETE') {
     const { id } = req.body || {};
+    
     if (!id) return res.status(400).json({ error: 'ID requerido' });
-
+    
     await supabase.from('votes').delete().eq('candidate_id', id);
-
+    
     const { error } = await supabase.from('candidates').delete().eq('id', id);
+    
     if (error) return res.status(500).json({ error: 'Error al eliminar' });
-
+    
     return res.status(200).json({ success: true });
   }
-
+  
   return res.status(405).json({ error: 'Método no permitido' });
 }
 
 async function handleElection(req, res) {
   const supabase = getSupabase();
-
+  
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
-
+  
   const { action } = req.body || {};
+  
   if (!['open', 'close'].includes(action)) return res.status(400).json({ error: 'Acción inválida' });
-
+  
   const { error } = await supabase
     .from('config')
     .update({ election_status: action === 'open' ? 'open' : 'closed' })
     .eq('id', 1);
-
+  
   if (error) return res.status(500).json({ error: 'Error al cambiar estado' });
+  
   return res.status(200).json({ success: true, status: action === 'open' ? 'open' : 'closed' });
 }
 
@@ -357,69 +453,76 @@ function makeAccessCode(grade, course, list) {
 // Import: inserta estudiantes asignando list_number que no genere colisión de access_code
 async function importStudents(req, res) {
   const supabase = getSupabase();
-
+  
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
-
+  
   const { students } = req.body || {};
-
+  
   if (!Array.isArray(students)) {
     return res.status(400).json({ error: 'Formato inválido: se esperaba un array de estudiantes' });
   }
+  
   if (students.length === 0) {
     return res.status(400).json({ error: 'No hay estudiantes para importar' });
   }
-
+  
   // Filtrar y normalizar
   const validStudents = [];
   students.forEach((s) => {
     const nombre = s.full_name;
     const grado = parseInt(s.grade, 10);
     const curso = parseInt(s.course, 10) || 1;
+    
     if (!nombre || isNaN(grado) || grado < 0) return;
     if (curso < 1 || curso > 9) return;
+    
     validStudents.push({ full_name: String(nombre).trim(), grade: grado, course: curso });
   });
-
+  
   if (validStudents.length === 0) {
     return res.status(400).json({ error: 'No hay estudiantes válidos para importar' });
   }
-
+  
   // Obtener TODOS los estudiantes existentes de una sola consulta
   const { data: existing, error: fetchError } = await supabase
     .from('students')
     .select('full_name, grade, course, list_number, access_code');
-
+  
   if (fetchError) {
     return res.status(500).json({ error: 'Error al consultar estudiantes existentes', details: fetchError.message });
   }
-
+  
   // Construir Set de códigos usados, mapa de máximo list_number por grupo
   // y Set de "nombre|grado|curso" para detectar duplicados
   const usedCodes = new Set();
   const maxListPerGroup = {};
   const existingStudentKeys = new Set();
-
+  
   for (const s of (existing || [])) {
     if (s.access_code) usedCodes.add(String(s.access_code));
+    
     const key = `${s.grade}-${s.course}`;
     if ((s.list_number || 0) > (maxListPerGroup[key] || 0)) {
       maxListPerGroup[key] = s.list_number;
     }
+    
     const studentKey = `${String(s.full_name).trim().toLowerCase()}|${s.grade}|${s.course}`;
     existingStudentKeys.add(studentKey);
   }
-
+  
   // Filtrar estudiantes que ya existen (mismo nombre + grado + curso)
   let skipped = 0;
   const newStudents = validStudents.filter(s => {
     const studentKey = `${s.full_name.toLowerCase()}|${s.grade}|${s.course}`;
+    
     if (existingStudentKeys.has(studentKey)) {
       skipped++;
       return false;
     }
+    
     return true;
   });
-
+  
   if (newStudents.length === 0) {
     return res.status(200).json({
       success: true,
@@ -433,7 +536,7 @@ async function importStudents(req, res) {
       hasErrors: false,
     });
   }
-
+  
   // Agrupar solo los nuevos por grado-curso
   const groups = {};
   for (const s of newStudents) {
@@ -441,27 +544,27 @@ async function importStudents(req, res) {
     if (!groups[key]) groups[key] = { grade: s.grade, course: s.course, students: [] };
     groups[key].students.push(s);
   }
-
+  
   // Asignar list_number y access_code sin colisiones
   const toInsert = [];
-
   for (const group of Object.values(groups)) {
     const key = `${group.grade}-${group.course}`;
     let nextList = (maxListPerGroup[key] || 0) + 1;
-
+    
     for (const student of group.students) {
       // Avanzar hasta encontrar un código libre
       while (nextList <= 99 && usedCodes.has(makeAccessCode(group.grade, group.course, nextList))) {
         nextList++;
       }
+      
       if (nextList > 99) {
         // Sin espacio — saltar este estudiante
         continue;
       }
-
+      
       const accessCode = makeAccessCode(group.grade, group.course, nextList);
       usedCodes.add(accessCode); // Reservar para el resto del lote en memoria
-
+      
       toInsert.push({
         full_name: student.full_name,
         grade: group.grade,
@@ -469,20 +572,22 @@ async function importStudents(req, res) {
         list_number: nextList,
         access_code: accessCode,
       });
+      
       nextList++;
     }
   }
-
+  
   if (toInsert.length === 0) {
     return res.status(400).json({ error: 'No se pudieron asignar códigos disponibles para los estudiantes' });
   }
-
+  
   // Insertar uno por uno para manejar errores individuales sin detener el lote
   let inserted = 0;
   const insertErrors = [];
-
+  
   for (const student of toInsert) {
     const { error } = await supabase.from('students').insert(student);
+    
     if (error) {
       // Si aún así hay duplicate key (condición de carrera), reintentar con siguiente código
       if (error.code === '23505') {
@@ -490,14 +595,17 @@ async function importStudents(req, res) {
         const key = `${student.grade}-${student.course}`;
         let retryList = student.list_number + 1;
         let retried = false;
+        
         while (retryList <= 99) {
           const retryCode = makeAccessCode(student.grade, student.course, retryList);
+          
           if (!usedCodes.has(retryCode)) {
             const { error: retryError } = await supabase.from('students').insert({
               ...student,
               list_number: retryList,
               access_code: retryCode,
             });
+            
             if (!retryError) {
               usedCodes.add(retryCode);
               inserted++;
@@ -505,8 +613,10 @@ async function importStudents(req, res) {
               break;
             }
           }
+          
           retryList++;
         }
+        
         if (!retried) {
           insertErrors.push(`${student.full_name}: sin código disponible`);
         }
@@ -517,7 +627,7 @@ async function importStudents(req, res) {
       inserted++;
     }
   }
-
+  
   return res.status(200).json({
     success: inserted > 0 || skipped > 0,
     imported: inserted,
@@ -532,27 +642,28 @@ async function importStudents(req, res) {
 
 async function resetCodes(req, res) {
   const supabase = getSupabase();
-
+  
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
-
+  
   const { data: students, error: fetchError } = await supabase
     .from('students')
     .select('id, grade, course, list_number');
-
+  
   if (fetchError) return res.status(500).json({ error: 'Error al cargar estudiantes' });
-
+  
   let updated = 0;
-
+  
   for (const student of students) {
     const newCode =
       `${String(student.grade).padStart(2, '0')}` +
       `${student.course}` +
       `${String(student.list_number).padStart(2, '0')}`;
-
+    
     const { error } = await supabase.from('students').update({ access_code: newCode }).eq('id', student.id);
+    
     if (!error) updated++;
   }
-
+  
   return res.status(200).json({ success: true, message: `${updated} códigos regenerados` });
 }
 
@@ -560,41 +671,41 @@ async function resetCodes(req, res) {
 // Restablece los votos a cero sin eliminar estudiantes ni candidatos
 async function resetVotes(req, res) {
   const supabase = getSupabase();
-
+  
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
-
+  
   try {
     // 1. Restablecer has_voted a FALSE para todos los estudiantes
     const { error: studentsError } = await supabase
       .from('students')
       .update({ has_voted: false })
       .neq('id', '00000000-0000-0000-0000-000000000000');
-
+    
     if (studentsError) {
       return res.status(500).json({ error: 'Error al restablecer estudiantes', details: studentsError.message });
     }
-
+    
     // 2. Restablecer votes a 0 para todos los candidatos
     const { error: candidatesError } = await supabase
       .from('candidates')
       .update({ votes: 0 })
       .neq('id', '00000000-0000-0000-0000-000000000000');
-
+    
     if (candidatesError) {
       return res.status(500).json({ error: 'Error al restablecer candidatos', details: candidatesError.message });
     }
-
+    
     // 3. Eliminar todos los registros de votos (histórico)
     const { error: votesError } = await supabase
       .from('votes')
       .delete()
       .neq('id', '00000000-0000-0000-0000-000000000000');
-
+    
     if (votesError) {
       console.warn('Warning: No se pudieron eliminar los registros históricos de votos:', votesError.message);
       // No fallamos por esto, ya que los votos se restablecieron
     }
-
+    
     return res.status(200).json({ 
       success: true, 
       message: 'Votación restablecida correctamente. Los estudiantes pueden volver a votar.' 
@@ -607,28 +718,29 @@ async function resetVotes(req, res) {
 
 async function clearData(req, res) {
   const supabase = getSupabase();
-
+  
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
-
+  
   const { confirm } = req.body || {};
+  
   if (confirm !== 'ELIMINAR TODO') return res.status(400).json({ error: 'Confirmación requerida' });
-
+  
   await supabase.from('votes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   await supabase.from('students').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   await supabase.from('candidates').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   await supabase.from('config').update({ election_status: 'closed' }).eq('id', 1);
-
+  
   return res.status(200).json({ success: true, message: 'Datos eliminados' });
 }
 
 async function clearStudents(req, res) {
   const supabase = getSupabase();
-
+  
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
-
+  
   // Eliminar solo estudiantes (NO candidatos, NO votos, NO config)
   await supabase.from('students').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-
+  
   return res.status(200).json({ success: true, message: 'Estudiantes eliminados' });
 }
 
@@ -638,26 +750,26 @@ async function clearStudents(req, res) {
 
 async function getStats(req, res) {
   const supabase = getSupabase();
-
+  
   const adminCode = req.headers['x-admin-code'];
-
+  
   const { data: config } = await supabase
     .from('config')
     .select('admin_code')
     .eq('id', 1)
     .single();
-
+  
   if (!config || adminCode !== config.admin_code) return res.status(401).json({ error: 'No autorizado' });
-
-  const { count: totalStudents } = await supabase.from('students').select('*', { count: 'exact', head: true });
-  const { count: votedStudents } = await supabase.from('students').select('*', { count: 'exact', head: true }).eq('has_voted', true);
-
+  
+  const { count: totalStudents } = await supabase.from('students').select('', { count: 'exact', head: true });
+  const { count: votedStudents } = await supabase.from('students').select('', { count: 'exact', head: true }).eq('has_voted', true);
   const { data: totalVotes } = await supabase.from('candidates').select('votes');
+  
   const sumVotes = totalVotes?.reduce((a, b) => a + (b.votes || 0), 0) || 0;
-
-  const { data: byGrade } = await supabase.from('participation_by_grade').select('*');
-  const { data: results } = await supabase.from('election_results').select('*');
-
+  
+  const { data: byGrade } = await supabase.from('participation_by_grade').select('');
+  const { data: results } = await supabase.from('election_results').select('');
+  
   return res.status(200).json({
     general: {
       totalStudents: totalStudents || 0,
@@ -672,54 +784,61 @@ async function getStats(req, res) {
 
 async function getMonitorData(req, res) {
   const supabase = getSupabase();
-
+  
   const adminCode = req.headers['x-admin-code'];
+  
   const { data: config } = await supabase.from('config').select('admin_code').eq('id', 1).single();
+  
   if (!config || adminCode !== config.admin_code) return res.status(401).json({ error: 'No autorizado' });
-
+  
   try {
     const { data: students } = await supabase
       .from('students')
       .select('grade, course, has_voted')
       .order('grade')
       .order('course');
-
+    
     const monitorData = {};
+    
     students.forEach(s => {
       const key = `${s.grade}-${s.course}`;
+      
       if (!monitorData[key]) {
         monitorData[key] = { grade: s.grade, course: s.course, total: 0, voted: 0 };
       }
+      
       monitorData[key].total++;
       if (s.has_voted) monitorData[key].voted++;
     });
-
+    
     const courses = Object.values(monitorData).map(c => ({
       ...c,
       pending: c.total - c.voted,
       participation: c.total > 0 ? Math.round((c.voted / c.total) * 100) : 0
     }));
-
+    
     const gradeSummary = {};
+    
     courses.forEach(c => {
       if (!gradeSummary[c.grade]) {
         gradeSummary[c.grade] = { grade: c.grade, total: 0, voted: 0 };
       }
+      
       gradeSummary[c.grade].total += c.total;
       gradeSummary[c.grade].voted += c.voted;
     });
-
+    
     const grades = Object.values(gradeSummary).map(g => ({
       ...g,
       pending: g.total - g.voted,
       participation: g.total > 0 ? Math.round((g.voted / g.total) * 100) : 0
     })).sort((a, b) => a.grade - b.grade);
-
+    
     const totalGeneral = grades.reduce(
       (acc, g) => ({ total: acc.total + g.total, voted: acc.voted + g.voted }),
       { total: 0, voted: 0 }
     );
-
+    
     return res.status(200).json({
       courses: courses.sort((a, b) => a.grade - b.grade || a.course - b.course),
       grades: grades,
@@ -738,11 +857,11 @@ async function getMonitorData(req, res) {
 
 async function getFinalResults(req, res) {
   const supabase = getSupabase();
-
+  
   try {
     const { data: totalVotes } = await supabase.from('candidates').select('votes');
     const sumVotes = totalVotes?.reduce((a, b) => a + (b.votes || 0), 0) || 0;
-
+    
     if (sumVotes === 0) {
       return res.status(200).json({
         message: 'No hay votos registrados aún',
@@ -752,14 +871,14 @@ async function getFinalResults(req, res) {
         participation: 0
       });
     }
-
+    
     const { data: results } = await supabase.from('election_results').select('*');
     const { count: totalStudents } = await supabase.from('students').select('*', { count: 'exact', head: true });
     const { count: votedStudents } = await supabase.from('students').select('*', { count: 'exact', head: true }).eq('has_voted', true);
-
+    
     const maxVotes = Math.max(...results.map(r => r.votes));
     const winners = results.filter(r => r.votes === maxVotes && r.votes > 0);
-
+    
     return res.status(200).json({
       results: results || [],
       totalVotes: sumVotes,
