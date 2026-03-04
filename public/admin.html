@@ -2225,55 +2225,56 @@
         <head>
           <title>Impresión de Carnets Electorales</title>
           <style>
-            @page { size: auto; margin: 15mm; }
-            body { font-family: Arial, sans-serif; padding: 1rem; }
-            .carnet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12mm; }
+            @page { size: A4; margin: 10mm; }
+            body { font-family: Arial, sans-serif; padding: 0.5rem; }
+            .carnet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; }
             .carnet { 
               border: 2px solid #1e293b; 
-              border-radius: 0.5rem; 
-              padding: 10px; 
+              border-radius: 0.4rem; 
+              padding: 7px; 
               background: white;
               page-break-inside: avoid;
               width: 100%;
+              box-sizing: border-box;
             }
-            .carnet-header { display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 8px; }
-            .carnet-logo { width: 50px; height: 50px; border-radius: 50%; object-fit: contain; padding: 5px; background: #fff; border: 1px solid #e2e8f0; }
-            .carnet-title { font-weight: bold; font-size: 0.75rem; color: #1e293b; }
-            .carnet-subtitle { font-size: 0.65rem; color: #64748b; }
-            .carnet-info { font-size: 0.7rem; }
+            .carnet-header { display: flex; align-items: center; gap: 6px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 6px; }
+            .carnet-logo { width: 38px; height: 38px; border-radius: 50%; object-fit: contain; padding: 3px; background: #fff; border: 1px solid #e2e8f0; }
+            .carnet-title { font-weight: bold; font-size: 0.62rem; color: #1e293b; }
+            .carnet-subtitle { font-size: 0.55rem; color: #64748b; }
+            .carnet-info { font-size: 0.6rem; }
             .carnet-code { 
               font-family: monospace; 
-              font-size: 1.1rem; 
+              font-size: 0.9rem; 
               font-weight: bold; 
               color: #3b82f6; 
               text-align: center; 
-              padding: 4px; 
+              padding: 3px; 
               background: #f1f5f9; 
-              border-radius: 0.25rem; 
-              margin-top: 4px; 
+              border-radius: 0.2rem; 
+              margin-top: 3px; 
             }
             .carnet-qr-container {
               display: flex;
               justify-content: center;
-              margin: 6px 0;
+              margin: 4px 0;
             }
             .carnet-qr-container img,
             .carnet-qr-container canvas {
               border: 2px solid #e2e8f0;
-              border-radius: 0.25rem;
-              max-width: 100px;
+              border-radius: 0.2rem;
+              max-width: 75px;
               height: auto;
             }
             .carnet-footer { 
-              font-size: 0.6rem; 
+              font-size: 0.5rem; 
               color: #94a3b8; 
               text-align: center; 
-              margin-top: 6px; 
-              padding-top: 4px; 
+              margin-top: 4px; 
+              padding-top: 3px; 
               border-top: 1px dashed #e2e8f0; 
             }
             @media print {
-              .carnet-grid { grid-template-columns: repeat(2, 1fr); gap: 10mm; }
+              .carnet-grid { grid-template-columns: repeat(3, 1fr); gap: 5mm; }
               .carnet { width: 100%; }
             }
           </style>
