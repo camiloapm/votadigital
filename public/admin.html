@@ -189,7 +189,6 @@
       <button data-sec="monitor">Monitoreo</button>
       <button data-sec="results">Resultados</button>
       <button data-sec="school">Colegio</button>
-      <button data-sec="election-type">🗳️ Tipo de Elección</button>
       <button data-sec="candidates">Candidatos</button>
       <button data-sec="students">Estudiantes</button>
       <button data-sec="carnets">Carnets</button>
@@ -311,89 +310,12 @@
       </div>
     </section>
 
-    <!-- ===== SECCIÓN TIPO DE ELECCIÓN ===== -->
-    <section id="sec-election-type" class="section">
-      <h2>🗳️ Tipo de Elección</h2>
-      <p style="color:#64748b;margin-bottom:1.5rem;">Define qué cargos se elegirán y cómo se presentarán al estudiante. Solo se puede cambiar cuando la votación está <strong>cerrada</strong>.</p>
-
-      <div id="election-type-locked-notice" style="display:none;background:#fef2f2;border:2px solid #fecaca;border-radius:.5rem;padding:1rem;margin-bottom:1rem;color:#991b1b;font-weight:600;">
-        🔒 La votación está abierta. Ciérrala primero para cambiar estas opciones.
-      </div>
-
-      <div class="card" style="margin-bottom:1.5rem;">
-        <h3>¿Qué cargos se eligen?</h3>
-        <p style="color:#64748b;font-size:.9rem;margin-bottom:1rem;">Selecciona qué cargo(s) se votarán en esta elección.</p>
-        <div style="display:flex;flex-direction:column;gap:.75rem;" id="election-mode-options">
-          <label style="display:flex;align-items:flex-start;gap:.75rem;cursor:pointer;padding:.9rem 1rem;border:2px solid #e2e8f0;border-radius:.5rem;transition:all .2s;" id="mode-label-personero">
-            <input type="radio" name="election-mode" value="personero" style="margin-top:.25rem;accent-color:#3b82f6;">
-            <div>
-              <div style="font-weight:700;color:#1e293b;">🏛️ Solo Personero</div>
-              <div style="font-size:.85rem;color:#64748b;">El estudiante vota únicamente por candidatos a Personero.</div>
-            </div>
-          </label>
-          <label style="display:flex;align-items:flex-start;gap:.75rem;cursor:pointer;padding:.9rem 1rem;border:2px solid #e2e8f0;border-radius:.5rem;transition:all .2s;" id="mode-label-contralor">
-            <input type="radio" name="election-mode" value="contralor" style="margin-top:.25rem;accent-color:#8b5cf6;">
-            <div>
-              <div style="font-weight:700;color:#1e293b;">🔍 Solo Contralor</div>
-              <div style="font-size:.85rem;color:#64748b;">El estudiante vota únicamente por candidatos a Contralor.</div>
-            </div>
-          </label>
-          <label style="display:flex;align-items:flex-start;gap:.75rem;cursor:pointer;padding:.9rem 1rem;border:2px solid #e2e8f0;border-radius:.5rem;transition:all .2s;" id="mode-label-ambos">
-            <input type="radio" name="election-mode" value="ambos" style="margin-top:.25rem;accent-color:#10b981;">
-            <div>
-              <div style="font-weight:700;color:#1e293b;">🏛️🔍 Personero + Contralor</div>
-              <div style="font-size:.85rem;color:#64748b;">El estudiante vota por ambos cargos.</div>
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <!-- Opciones de flujo: solo visibles en modo "ambos" -->
-      <div class="card" id="voting-flow-card" style="display:none;margin-bottom:1.5rem;">
-        <h3>¿Cómo votar en modo "Ambos"?</h3>
-        <p style="color:#64748b;font-size:.9rem;margin-bottom:1rem;">Elige cómo el estudiante verá las opciones cuando debe votar por los dos cargos.</p>
-        <div style="display:flex;flex-direction:column;gap:.75rem;">
-          <label style="display:flex;align-items:flex-start;gap:.75rem;cursor:pointer;padding:.9rem 1rem;border:2px solid #e2e8f0;border-radius:.5rem;" id="flow-label-sequential">
-            <input type="radio" name="voting-flow" value="sequential" style="margin-top:.25rem;accent-color:#3b82f6;">
-            <div>
-              <div style="font-weight:700;color:#1e293b;">📋 Secuencial (recomendado)</div>
-              <div style="font-size:.85rem;color:#64748b;">Primero elige Personero, confirma, y luego elige Contralor. Más claro y sin errores.</div>
-            </div>
-          </label>
-          <label style="display:flex;align-items:flex-start;gap:.75rem;cursor:pointer;padding:.9rem 1rem;border:2px solid #e2e8f0;border-radius:.5rem;" id="flow-label-simultaneous">
-            <input type="radio" name="voting-flow" value="simultaneous" style="margin-top:.25rem;accent-color:#10b981;">
-            <div>
-              <div style="font-weight:700;color:#1e293b;">⚡ Simultáneo</div>
-              <div style="font-size:.85rem;color:#64748b;">Elige Personero y Contralor en la misma pantalla y confirma ambos a la vez.</div>
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <button onclick="saveElectionType()" class="btn btn-primary" id="btn-save-election-type">💾 Guardar Configuración</button>
-      <div id="election-type-status" style="margin-top:.75rem;font-size:.9rem;"></div>
-
-      <div class="card" style="margin-top:2rem;background:#eff6ff;border:2px solid #bfdbfe;">
-        <h4 style="color:#1e40af;margin-bottom:.5rem;">💡 Recuerda</h4>
-        <ul style="font-size:.875rem;color:#1e40af;padding-left:1.2rem;line-height:1.9;">
-          <li>Los candidatos a <strong>Personero</strong> y <strong>Contralor</strong> son independientes. Agrégalos por separado en la sección "Candidatos".</li>
-          <li>Puedes agregar candidatos a cualquier cargo en la sección <strong>Candidatos</strong>.</li>
-          <li>Esta configuración solo se puede cambiar con la votación <strong>cerrada</strong>.</li>
-        </ul>
-      </div>
-    </section>
-
     <section id="sec-candidates" class="section">
       <h2>Gestión de Candidatos</h2>
       <div class="card">
         <h3>Agregar Candidato</h3>
         <input type="text" id="new-candidate-name" placeholder="Nombre completo">
         <input type="text" id="new-candidate-party" placeholder="Partido/Lista (opcional)">
-        <label style="display:block;font-weight:600;margin:.5rem 0 .25rem;">Cargo:</label>
-        <select id="new-candidate-role" style="width:100%;padding:.75rem;border:2px solid #e2e8f0;border-radius:.375rem;margin-bottom:.5rem;font-size:1rem;">
-          <option value="personero">🏛️ Personero</option>
-          <option value="contralor">🔍 Contralor</option>
-        </select>
 
         <label>Foto del candidato:</label>
         <div class="file-upload-area" id="candidate-photo-upload-area" onclick="document.getElementById('new-candidate-photo-file').click()">
@@ -419,14 +341,7 @@
 
         <button onclick="addCandidate()" class="btn btn-primary" style="width:auto;">Agregar Candidato</button>
       </div>
-      <div id="candidates-list-admin">
-        <div style="display:flex;gap:.5rem;margin:1rem 0;flex-wrap:wrap;">
-          <button onclick="filterCandidatesView('all')" id="cand-tab-all" class="btn btn-primary" style="padding:.4rem .9rem;font-size:.85rem;">Todos</button>
-          <button onclick="filterCandidatesView('personero')" id="cand-tab-personero" class="btn btn-secondary" style="padding:.4rem .9rem;font-size:.85rem;">🏛️ Personeros</button>
-          <button onclick="filterCandidatesView('contralor')" id="cand-tab-contralor" class="btn btn-secondary" style="padding:.4rem .9rem;font-size:.85rem;">🔍 Contralores</button>
-        </div>
-        <div id="candidates-list-inner"></div>
-      </div>
+      <div id="candidates-list-admin"></div>
     </section>
 
     <section id="sec-students" class="section">
@@ -731,12 +646,6 @@
         <label style="font-weight:600;display:block;margin-bottom:.25rem;">Partido / Lista (opcional):</label>
         <input type="text" id="edit-candidate-party" placeholder="Ej: Lista 1" style="width:100%;padding:.65rem .9rem;border:2px solid #e2e8f0;border-radius:8px;font-size:.95rem;margin-bottom:.75rem;outline:none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
 
-        <label style="font-weight:600;display:block;margin-bottom:.25rem;">Cargo:</label>
-        <select id="edit-candidate-role" style="width:100%;padding:.65rem .9rem;border:2px solid #e2e8f0;border-radius:8px;font-size:.95rem;margin-bottom:.75rem;">
-          <option value="personero">🏛️ Personero</option>
-          <option value="contralor">🔍 Contralor</option>
-        </select>
-
         <label style="font-weight:600;display:block;margin-bottom:.25rem;">Foto del candidato:</label>
         <div class="file-upload-area" id="edit-candidate-photo-upload-area" onclick="document.getElementById('edit-candidate-photo-file').click()">
           <div class="file-upload-icon">📷</div>
@@ -990,7 +899,6 @@
       if (section === 'students') loadStudents();
       if (section === 'candidates') loadCandidates();
       if (section === 'school') { loadSchoolConfig(); loadVotingPassword(); }
-      if (section === 'election-type') loadElectionTypeSettings();
       if (section === 'carnets') initCarnetsSection();
 
       // Mostrar/ocultar botón flotante
@@ -1018,116 +926,6 @@
         const data = await res.json();
         updateElectionButton(!!data.open);
       } catch {}
-    }
-
-    // ===== TIPO DE ELECCIÓN =====
-    async function loadElectionTypeSettings() {
-      try {
-        const res = await fetch(`${API_URL}/config`);
-        const data = await res.json();
-        const mode = data.election_mode || 'personero';
-        const flow = data.voting_flow || 'sequential';
-
-        // Marcar radio de modo
-        document.querySelectorAll('input[name="election-mode"]').forEach(r => { r.checked = r.value === mode; });
-        // Marcar radio de flujo
-        document.querySelectorAll('input[name="voting-flow"]').forEach(r => { r.checked = r.value === flow; });
-
-        // Mostrar/ocultar card de flujo
-        document.getElementById('voting-flow-card').style.display = mode === 'ambos' ? 'block' : 'none';
-
-        // Actualizar estilos de labels
-        updateModeLabelStyles(mode);
-        updateFlowLabelStyles(flow);
-
-        // Si la votación está abierta, bloquear cambios
-        checkElectionTypelock();
-      } catch (err) {
-        console.error('Error loading election type settings:', err);
-      }
-    }
-
-    async function checkElectionTypelock() {
-      try {
-        const res = await fetch(`${API_URL}/check-status`);
-        const data = await res.json();
-        const locked = data.open === true;
-        const notice = document.getElementById('election-type-locked-notice');
-        const btn = document.getElementById('btn-save-election-type');
-        const radios = document.querySelectorAll('#election-mode-options input, #voting-flow-card input');
-        if (locked) {
-          notice.style.display = 'block';
-          btn.disabled = true;
-          radios.forEach(r => r.disabled = true);
-        } else {
-          notice.style.display = 'none';
-          btn.disabled = false;
-          radios.forEach(r => r.disabled = false);
-        }
-      } catch {}
-    }
-
-    function updateModeLabelStyles(selectedMode) {
-      ['personero','contralor','ambos'].forEach(m => {
-        const lbl = document.getElementById(`mode-label-${m}`);
-        if (lbl) lbl.style.borderColor = m === selectedMode ? '#3b82f6' : '#e2e8f0';
-        if (lbl) lbl.style.background = m === selectedMode ? '#eff6ff' : '#fff';
-      });
-    }
-
-    function updateFlowLabelStyles(selectedFlow) {
-      ['sequential','simultaneous'].forEach(f => {
-        const lbl = document.getElementById(`flow-label-${f}`);
-        if (lbl) lbl.style.borderColor = f === selectedFlow ? '#3b82f6' : '#e2e8f0';
-        if (lbl) lbl.style.background = f === selectedFlow ? '#eff6ff' : '#fff';
-      });
-    }
-
-    // Mostrar/ocultar card de flujo al cambiar modo
-    document.addEventListener('change', (e) => {
-      if (e.target.name === 'election-mode') {
-        const flowCard = document.getElementById('voting-flow-card');
-        if (flowCard) flowCard.style.display = e.target.value === 'ambos' ? 'block' : 'none';
-        updateModeLabelStyles(e.target.value);
-      }
-      if (e.target.name === 'voting-flow') {
-        updateFlowLabelStyles(e.target.value);
-      }
-    });
-
-    async function saveElectionType() {
-      const modeEl = document.querySelector('input[name="election-mode"]:checked');
-      const flowEl = document.querySelector('input[name="voting-flow"]:checked');
-      if (!modeEl) { showToast('Selecciona un tipo de elección', 'warning'); return; }
-
-      const mode = modeEl.value;
-      const flow = flowEl ? flowEl.value : 'sequential';
-      const statusEl = document.getElementById('election-type-status');
-      statusEl.textContent = '⏳ Guardando...';
-      statusEl.style.color = '#64748b';
-
-      try {
-        const r1 = await fetch(`${API_URL}/admin/election-mode`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
-          body: JSON.stringify({ mode, admin_code: adminCode })
-        });
-        if (!r1.ok) { const d = await r1.json(); showToast(d.error || 'Error al guardar modo', 'error'); statusEl.textContent = ''; return; }
-
-        if (mode === 'ambos') {
-          const r2 = await fetch(`${API_URL}/admin/voting-flow`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
-            body: JSON.stringify({ flow, admin_code: adminCode })
-          });
-          if (!r2.ok) { showToast('Modo guardado pero error al guardar flujo', 'warning'); }
-        }
-
-        showToast('✅ Configuración de elección guardada', 'success');
-        statusEl.textContent = `✅ Configurado: ${mode === 'personero' ? '🏛️ Solo Personero' : mode === 'contralor' ? '🔍 Solo Contralor' : '🏛️🔍 Personero + Contralor'}${mode === 'ambos' ? ` (${flow === 'sequential' ? 'Secuencial' : 'Simultáneo'})` : ''}`;
-        statusEl.style.color = '#059669';
-      } catch (err) {
-        showToast('Error de conexión', 'error');
-        statusEl.textContent = '';
-      }
     }
 
     async function loadSchoolConfig() {
@@ -1364,35 +1162,41 @@
           return;
         }
 
-        const mode = data.election_mode || 'personero';
-
-        function buildWinnerHTML(winners, isTie, label) {
-          if (!winners || winners.length === 0) return '';
-          if (isTie) return `<div class="winner-card"><div class="winner-trophy">🏆</div><h3>¡EMPATE! ${label}</h3><p>Ganadores con ${winners[0].votes} votos:</p><h2>${winners.map(w => w.name).join(' / ')}</h2></div>`;
-          return `<div class="winner-card"><div class="winner-trophy">🏆</div><h3>¡GANADOR! ${label}</h3><h2>${winners[0].name}</h2><p style="font-size:1.25rem; margin-top:0.5rem;">${winners[0].votes} votos${winners[0].percentage ? ' (' + winners[0].percentage + '%)' : ''}</p></div>`;
+        let winnerHTML = '';
+        if (data.winners && data.winners.length > 0) {
+          if (data.isTie) {
+            winnerHTML = `<div class="winner-card"><div class="winner-trophy">🏆</div><h3>¡EMPATE!</h3><p>Ganadores con ${data.winners[0].votes} votos:</p><h2>${data.winners.map(w => w.name).join(' / ')}</h2></div>`;
+          } else {
+            winnerHTML = `<div class="winner-card"><div class="winner-trophy">🏆</div><h3>¡GANADOR!</h3><h2>${data.winners[0].name}</h2><p style="font-size:1.25rem; margin-top:0.5rem;">${data.winners[0].votes} votos (${data.winners[0].percentage}%)</p></div>`;
+          }
         }
 
-        function buildResultsTable(results) {
-          if (!results || results.length === 0) return '<p style="color:#64748b;padding:.5rem;">Sin candidatos.</p>';
-          return `<table><thead><tr><th>Pos.</th><th>Candidato</th><th>Partido/Lista</th><th>Votos</th><th>%</th></tr></thead><tbody>${results.map((r, i) => `<tr style="${i===0?'background:#fef3c7;font-weight:bold;':''}"><td>${i+1}°</td><td>${r.name}</td><td>${r.party||'-'}</td><td>${r.votes}</td><td><strong>${r.percentage||0}%</strong></td></tr>`).join('')}</tbody></table>`;
-        }
-
-        let html = '';
-
-        if (mode === 'personero' || mode === 'ambos') {
-          html += buildWinnerHTML(data.winners, data.isTie, 'Personero');
-          html += `<h3 style="margin:1rem 0 .5rem;color:#1e40af;">🏛️ Resultados Personero</h3>`;
-          html += buildResultsTable(data.personero || data.results);
-        }
-        if (mode === 'contralor' || mode === 'ambos') {
-          html += buildWinnerHTML(data.winnersContralor, data.isTieContralor, 'Contralor');
-          html += `<h3 style="margin:1.5rem 0 .5rem;color:#5b21b6;">🔍 Resultados Contralor</h3>`;
-          html += buildResultsTable(data.contralor || (mode==='contralor' ? data.results : []));
-        }
-
-        html += `<div class="card" style="margin-top:2rem; text-align:center;"><h3>Estadísticas</h3><div class="stats-grid" style="margin-top:1rem;"><div class="stat-card"><div class="stat-number">${data.totalVotes}</div><div class="stat-label">Total Votos</div></div><div class="stat-card"><div class="stat-number">${data.totalStudents}</div><div class="stat-label">Electores</div></div><div class="stat-card"><div class="stat-number">${data.totalVoted}</div><div class="stat-label">Votantes</div></div><div class="stat-card"><div class="stat-number">${data.participation}%</div><div class="stat-label">Participación</div></div></div></div>`;
-
-        container.innerHTML = html;
+        container.innerHTML = winnerHTML + `
+          <h3>Resultados Detallados</h3>
+          <table>
+            <thead><tr><th>Posición</th><th>Candidato</th><th>Partido/Lista</th><th>Votos</th><th>%</th></tr></thead>
+            <tbody>
+              ${(data.results || []).map((r, index) => `
+                <tr style="${index === 0 ? 'background:#fef3c7; font-weight:bold;' : ''}">
+                  <td>${index+1}°</td>
+                  <td>${r.name}</td>
+                  <td>${r.party || '-'}</td>
+                  <td>${r.votes}</td>
+                  <td><strong>${r.percentage}%</strong></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="card" style="margin-top:2rem; text-align:center;">
+            <h3>Estadísticas</h3>
+            <div class="stats-grid" style="margin-top:1rem;">
+              <div class="stat-card"><div class="stat-number">${data.totalVotes}</div><div class="stat-label">Total Votos</div></div>
+              <div class="stat-card"><div class="stat-number">${data.totalStudents}</div><div class="stat-label">Electores</div></div>
+              <div class="stat-card"><div class="stat-number">${data.totalVoted}</div><div class="stat-label">Votantes</div></div>
+              <div class="stat-card"><div class="stat-number">${data.participation}%</div><div class="stat-label">Participación</div></div>
+            </div>
+          </div>
+        `;
       } catch (err) {
         console.error('Error resultados:', err);
         document.getElementById('final-results-content').innerHTML = '<p style="color:#ef4444; text-align:center;">Error al cargar resultados.</p>';
@@ -2068,34 +1872,22 @@
     }
 
     function renderCandidatesAdmin() {
-      const container = document.getElementById('candidates-list-inner');
-      if (!container) return;
+      const container = document.getElementById('candidates-list-admin');
       if (!candidatesLocal || candidatesLocal.length === 0) {
-        container.innerHTML = '<p style="color:#64748b;padding:1rem;">No hay candidatos registrados</p>';
+        container.innerHTML = '<p>No hay candidatos registrados</p>';
         return;
       }
-      const activeFilter = window._candFilter || 'all';
-      const filtered = activeFilter === 'all' ? candidatesLocal : candidatesLocal.filter(c => (c.role || 'personero') === activeFilter);
-      if (filtered.length === 0) {
-        container.innerHTML = `<p style="color:#64748b;padding:1rem;">No hay candidatos de ${activeFilter === 'personero' ? 'Personero' : 'Contralor'} registrados.</p>`;
-        return;
-      }
-      const rows = filtered.map((c) => {
-        const i = candidatesLocal.indexOf(c);
+      const rows = candidatesLocal.map((c, i) => {
         const upDisabled = i === 0 ? 'disabled' : '';
         const downDisabled = i === candidatesLocal.length - 1 ? 'disabled' : '';
         const upStyle = i === 0 ? 'background:#f1f5f9;color:#94a3b8;cursor:not-allowed;' : 'background:#e0f2fe;color:#0369a1;cursor:pointer;';
         const downStyle = i === candidatesLocal.length - 1 ? 'background:#f1f5f9;color:#94a3b8;cursor:not-allowed;' : 'background:#e0f2fe;color:#0369a1;cursor:pointer;';
         const photoHtml = c.photo_url
-          ? `<img src="${c.photo_url}" class="candidate-photo" onerror="this.src='${generateInitialsAvatar(c.name, 60)}'">` 
+          ? `<img src="${c.photo_url}" class="candidate-photo" onerror="this.src='${generateInitialsAvatar(c.name, 60)}'"`  + `>`
           : `<img src="${generateInitialsAvatar(c.name, 60)}" class="candidate-photo">`;
         const safeName = (c.name || '').replace(/'/g, "\\'");
         const safeParty = (c.party || '').replace(/'/g, "\\'");
         const safePhoto = (c.photo_url || '').replace(/'/g, "\\'");
-        const safeRole = (c.role || 'personero');
-        const roleBadge = safeRole === 'contralor'
-          ? `<span style="background:#ede9fe;color:#5b21b6;border-radius:999px;padding:.15rem .5rem;font-size:.75rem;font-weight:700;">🔍 Contralor</span>`
-          : `<span style="background:#dbeafe;color:#1e40af;border-radius:999px;padding:.15rem .5rem;font-size:.75rem;font-weight:700;">🏛️ Personero</span>`;
         return `<tr>
           <td style="text-align:center;vertical-align:middle;">
             <div style="display:flex;flex-direction:column;gap:2px;align-items:center;">
@@ -2108,11 +1900,11 @@
             </div>
           </td>
           <td>${photoHtml}</td>
-          <td><strong>${c.name}</strong><br>${roleBadge}</td>
+          <td><strong>${c.name}</strong></td>
           <td>${c.party || '<span style="color:#94a3b8">—</span>'}</td>
           <td style="text-align:center;">${c.votes || 0}</td>
           <td>
-            <button onclick="openEditCandidateModal('${c.id}','${safeName}','${safeParty}','${safePhoto}','${safeRole}')"
+            <button onclick="openEditCandidateModal('${c.id}','${safeName}','${safeParty}','${safePhoto}')"
               class="btn btn-warning" style="padding:0.25rem 0.55rem;font-size:0.8rem;margin-right:0.25rem;">✏️ Editar</button>
             <button onclick="deleteCandidate('${c.id}')"
               class="btn btn-danger" style="padding:0.25rem 0.55rem;font-size:0.8rem;">🗑️</button>
@@ -2126,7 +1918,7 @@
             <tr>
               <th style="width:40px;">Orden</th>
               <th style="width:65px;">Foto</th>
-              <th>Nombre / Cargo</th>
+              <th>Nombre</th>
               <th>Partido/Lista</th>
               <th style="width:60px;">Votos</th>
               <th style="width:165px;">Acciones</th>
@@ -2134,15 +1926,6 @@
           </thead>
           <tbody>${rows}</tbody>
         </table>`;
-    }
-
-    function filterCandidatesView(filter) {
-      window._candFilter = filter;
-      ['all','personero','contralor'].forEach(f => {
-        const btn = document.getElementById('cand-tab-' + f);
-        if (btn) { btn.className = f === filter ? 'btn btn-primary' : 'btn btn-secondary'; btn.style.cssText = 'padding:.4rem .9rem;font-size:.85rem;'; }
-      });
-      renderCandidatesAdmin();
     }
 
     async function moveCandidateUp(index) {
@@ -2174,16 +1957,13 @@
       }
     }
 
-    function openEditCandidateModal(candidateId, name, party, currentPhotoUrl, role) {
+    function openEditCandidateModal(candidateId, name, party, currentPhotoUrl) {
       document.getElementById('edit-candidate-id').value = candidateId;
       document.getElementById('edit-candidate-name').value = name || '';
       document.getElementById('edit-candidate-party').value = party || '';
       document.getElementById('edit-candidate-photo-data').value = '';
       document.getElementById('edit-candidate-photo-preview').style.display = 'none';
       document.getElementById('edit-photo-error').textContent = '';
-      // Set role in edit modal if it exists
-      const roleEl = document.getElementById('edit-candidate-role');
-      if (roleEl) roleEl.value = role || 'personero';
 
       if (currentPhotoUrl) {
         const previewContainer = document.getElementById('edit-candidate-photo-preview');
@@ -2217,8 +1997,6 @@
 
       const payload = { id: candidateId, name, party, admin_code: adminCode };
       if (photoData) payload.photo_url = photoData;
-      const roleEl = document.getElementById('edit-candidate-role');
-      if (roleEl) payload.role = roleEl.value;
 
       try {
         const res = await fetch(`${API_URL}/admin/candidates`, {
@@ -2250,13 +2028,12 @@
 
       // Usar Base64 si hay archivo, sino usar URL legacy (vacío por defecto)
       const photo_url = photoData || document.getElementById('new-candidate-photo-url-legacy')?.value || '';
-      const role = document.getElementById('new-candidate-role')?.value || 'personero';
 
       try {
         const res = await fetch(`${API_URL}/admin/candidates`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-admin-code': adminCode },
-          body: JSON.stringify({ name, party, photo_url, role, admin_code: adminCode })
+          body: JSON.stringify({ name, party, photo_url, admin_code: adminCode })
         });
 
         if (res.ok) {

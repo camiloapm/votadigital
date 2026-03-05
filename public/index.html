@@ -10,7 +10,6 @@
       --bg:#f0f4f8; --card:#ffffff; --text:#1e293b; --remember:#64748b;
       --primary:#3b82f6; --primary-dark:#2563eb;
       --ok:#10b981; --ok-dark:#059669; --warn:#f59e0b; --danger:#ef4444;
-      --contralor:#8b5cf6; --contralor-dark:#7c3aed;
       --border:#e2e8f0;
       --shadow-sm:0 1px 3px rgba(0,0,0,0.08);
       --shadow-md:0 4px 12px rgba(0,0,0,0.1);
@@ -20,6 +19,7 @@
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;padding:1rem;}
     .app-container{max-width:900px;margin:0 auto;}
 
+    /* Header moderno */
     .header{background:var(--card);border-radius:16px;padding:1rem 1.25rem;display:flex;gap:1rem;align-items:center;justify-content:space-between;box-shadow:var(--shadow-md);margin-bottom:1rem;}
     .brand{display:flex;gap:.75rem;align-items:center;}
     .logo{width:56px;height:56px;border-radius:12px;object-fit:contain;border:2px solid var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:4px;}
@@ -29,11 +29,13 @@
     .badge.open{color:#065f46;background:#ecfdf5;border-color:#86efac;}
     .badge.closed{color:#991b1b;background:#fef2f2;border-color:#fecaca;}
 
+    /* Tarjetas modernas */
     .card{background:var(--card);border-radius:16px;padding:1.25rem;box-shadow:var(--shadow-md);border:1px solid var(--border);margin-bottom:1rem;}
     .card h2{font-size:1.1rem;font-weight:700;margin-bottom:.5rem;color:var(--text);}
     .muted{color:var(--remember);font-size:.9rem;}
     .hr{height:1px;background:linear-gradient(90deg,var(--border) 0%,transparent 100%);margin:1rem 0;}
 
+    /* Elementos de formulario */
     .input{width:100%;padding:.85rem 1rem;border:2px solid var(--border);border-radius:10px;font-size:1rem;outline:none;transition:all .2s;}
     .input:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(59,130,246,.12);}
     .btn{border:none;border-radius:10px;padding:.8rem 1.25rem;font-weight:700;cursor:pointer;font-size:.95rem;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;}
@@ -43,28 +45,15 @@
     .btn.secondary:hover{background:#e2e8f0;}
     .btn.success{background:var(--ok);color:#fff;}
     .btn.success:hover{background:var(--ok-dark);transform:translateY(-1px);box-shadow:0 3px 10px rgba(16,185,129,.3);}
-    .btn.contralor{background:var(--contralor);color:#fff;}
-    .btn.contralor:hover{background:var(--contralor-dark);transform:translateY(-1px);}
     .btn:disabled{opacity:.6;cursor:not-allowed;transform:none !important;box-shadow:none !important;}
 
+    /* Alertas */
     .alert{border-radius:10px;padding:.75rem 1rem;border:2px solid;margin-top:.75rem;font-size:.9rem;font-weight:500;}
     .alert.ok{background:#ecfdf5;border-color:#86efac;color:#065f46;}
     .alert.warn{background:#fffbeb;border-color:#fde68a;color:#92400e;}
     .alert.danger{background:#fef2f2;border-color:#fecaca;color:#991b1d;}
 
-    /* Indicador de pasos para modo "ambos" */
-    .steps-indicator{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem;background:#f8fafc;border-radius:12px;margin-bottom:1rem;border:2px solid var(--border);}
-    .step{display:flex;align-items:center;gap:.35rem;padding:.4rem .8rem;border-radius:8px;font-size:.85rem;font-weight:700;transition:all .3s;}
-    .step.done{background:#ecfdf5;color:#065f46;border:2px solid #86efac;}
-    .step.active{background:#dbeafe;color:#1e40af;border:2px solid #93c5fd;}
-    .step.pending{background:#f1f5f9;color:#94a3b8;border:2px solid #e2e8f0;}
-    .step-divider{color:#cbd5e1;font-size:1.2rem;}
-
-    /* Role badge */
-    .role-badge{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .65rem;border-radius:999px;font-size:.8rem;font-weight:700;margin-bottom:.5rem;}
-    .role-badge.personero{background:#dbeafe;color:#1e40af;border:1.5px solid #93c5fd;}
-    .role-badge.contralor{background:#ede9fe;color:#5b21b6;border:1.5px solid #c4b5fd;}
-
+    /* Sección candidatos - inicialmente oculta */
     #candidates-section{display:none;animation:fadeIn 0.4s ease;}
     #candidates-section.visible{display:block;}
 
@@ -72,43 +61,47 @@
     .candidates-title span{font-size:1.3rem;}
     .candidates{display:grid;grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));gap:1rem;}
 
+    /* Tarjeta de candidato */
     .cand{background:#fff;border:2px solid var(--border);border-radius:14px;padding:1.25rem;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden;}
     .cand::before{content:'';position:absolute;top:0;left:0;right:0;height:70px;background:linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);border-radius:12px 12px 0 0;margin:-1.25rem -1.25rem 0 -1.25rem;}
-    .cand.contralor-card::before{background:linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);}
     .cand:hover{border-color:#c7d2fe;transform:translateY(-3px);box-shadow:var(--shadow-lg);}
     .cand.selected{border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,130,246,.2),var(--shadow-lg);transform:translateY(-3px);}
-    .cand.contralor-card.selected{border-color:var(--contralor);box-shadow:0 0 0 3px rgba(139,92,246,.2),var(--shadow-lg);}
     .cand.selected::before{background:linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);}
     .cand.disabled{opacity:0.5;pointer-events:none;filter:grayscale(50%);}
 
+    /* Foto del candidato */
     .cand-photo-container{position:relative;z-index:1;margin-bottom:.75rem;}
     .cand img{width:120px;height:140px;border-radius:10px;object-fit:cover;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.12);background:#f8fafc;transition:all .3s;}
     .cand:hover img{border-color:#bfdbfe;transform:scale(1.02);}
     .cand.selected img{border-color:var(--primary);box-shadow:0 3px 12px rgba(59,130,246,.25);}
-    .cand.contralor-card.selected img{border-color:var(--contralor);}
 
     .cand .meta{position:relative;z-index:1;width:100%;}
     .cand .name{font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:.3rem;line-height:1.3;}
     .cand .party{display:inline-flex;align-items:center;gap:.3rem;background:linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);padding:.3rem .75rem;border-radius:16px;font-size:.8rem;font-weight:600;color:var(--remember);}
+    .cand .party-icon{font-size:.9rem;}
 
     .selection-indicator{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .2s;opacity:0;}
     .cand.selected .selection-indicator{opacity:1;background:var(--ok);border-color:var(--ok);color:#fff;}
     .selection-indicator svg{width:14px;height:14px;}
 
+    /* Footer */
     .footer{margin-top:1.5rem;color:var(--remember);font-size:.85rem;text-align:center;padding:.5rem;}
     .codehint{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-weight:700;background:#f1f5f9;padding:.15rem .4rem;border-radius:5px;}
 
+    /* Sección siguiente estudiante */
     .next-student-section{margin-top:1.25rem;padding-top:1.25rem;border-top:2px dashed var(--border);}
     .next-student-btn{width:100%;background:linear-gradient(135deg, var(--ok) 0%, #34d399 100%);color:#fff;font-weight:700;padding:.9rem;border-radius:12px;border:none;cursor:pointer;font-size:1rem;transition:all .2s;box-shadow:0 3px 10px rgba(16,185,129,.3);}
     .next-student-btn:hover{transform:translateY(-2px);box-shadow:0 5px 16px rgba(16,185,129,.4);}
     .countdown-text{font-size:.85rem;color:var(--ok);text-align:center;margin-top:.5rem;font-weight:500;}
 
+    /* Animaciones */
     @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
     .cand{animation:fadeIn 0.4s ease forwards;}
 
+    /* Student info box */
     #student-box{padding:.9rem 1.1rem;border-radius:10px;margin-top:.75rem;}
     #student-box strong{display:block;font-size:1rem;margin-bottom:.2rem;}
-
+    /* Terminal activation overlay */
     #terminal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);z-index:10000;display:flex;align-items:center;justify-content:center;padding:1rem;}
     .terminal-box{background:#fff;border-radius:20px;padding:2rem;max-width:420px;width:100%;box-shadow:0 25px 60px rgba(0,0,0,.5);text-align:center;}
     .terminal-box .lock-icon{font-size:3.5rem;margin-bottom:1rem;}
@@ -124,26 +117,35 @@
     .terminal-error{color:#dc2626;font-size:.9rem;margin-top:.5rem;font-weight:500;min-height:1.2em;}
     .terminal-activated-banner{display:none;position:fixed;bottom:1rem;right:1rem;background:#10b981;color:#fff;padding:.5rem 1rem;border-radius:10px;font-size:.85rem;font-weight:600;z-index:9999;box-shadow:0 3px 10px rgba(16,185,129,.4);cursor:pointer;}
     .terminal-activated-banner:hover{background:#059669;}
+
   </style>
 </head>
 <body>
+  <!-- Pantalla de activación de terminal -->
   <div id="terminal-overlay">
     <div class="terminal-box">
       <div class="lock-icon">🔒</div>
       <h2>Terminal de Votación</h2>
       <p>Esta terminal requiere activación. Ingresa la contraseña para habilitarla.</p>
       <div class="input-wrap">
-        <input type="password" id="terminal-password-input" placeholder="Contraseña de terminal" autocomplete="off"/>
+        <input
+          type="password"
+          id="terminal-password-input"
+          placeholder="Contraseña de terminal"
+          autocomplete="off"
+        />
       </div>
       <div id="terminal-error" class="terminal-error"></div>
-      <button class="terminal-activate-btn" id="btn-activate-terminal" type="button">🔓 Activar Terminal</button>
+      <button class="terminal-activate-btn" id="btn-activate-terminal" type="button">
+        🔓 Activar Terminal
+      </button>
     </div>
   </div>
 
+  <!-- Banner de terminal activa (permite desactivar) -->
   <div id="terminal-activated-banner" class="terminal-activated-banner" onclick="deactivateTerminal()" title="Clic para desactivar esta terminal">
     ✅ Terminal activa — Clic para desactivar
   </div>
-
   <div class="app-container">
     <header class="header">
       <div class="brand">
@@ -156,21 +158,36 @@
       <div id="status-badge" class="badge">...</div>
     </header>
 
-    <!-- Identificación -->
-    <section class="card" id="access-section">
+    <!-- Paso 1: Validación de código (siempre visible inicialmente) -->
+    <section class="card" aria-label="Acceso" id="access-section">
       <h2>🎫 Identificación</h2>
-      <p class="muted">Ingresa tu código de 5 dígitos para participar en la votación.</p>
+      <p class="muted">
+        Ingresa tu código de 5 dígitos para participar en la votación.
+      </p>
       <div class="hr"></div>
 
       <label class="muted" for="access-code" style="display:block;margin-bottom:.4rem;font-weight:500;">Tu código</label>
-      <input id="access-code" class="input" inputmode="numeric" autocomplete="one-time-code" placeholder="Ej: 06105" maxlength="5"/>
+      <input
+        id="access-code"
+        class="input"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        placeholder="Ej: 06105"
+        maxlength="5"
+      />
       <div style="display:flex;gap:.6rem;margin-top:.75rem;flex-wrap:wrap;">
-        <button id="btn-verify" class="btn primary" type="button" style="flex:1;min-width:100px;">✓ Verificar</button>
-        <button id="btn-scan-qr" class="btn" type="button" style="flex:1;min-width:100px;background:#8b5cf6;color:#fff;">📱 Escanear QR</button>
-        <button id="btn-clear" class="btn secondary" type="button" style="flex:1;min-width:90px;">Limpiar</button>
+        <button id="btn-verify" class="btn primary" type="button" style="flex:1;min-width:100px;">
+          ✓ Verificar
+        </button>
+        <button id="btn-scan-qr" class="btn" type="button" style="flex:1;min-width:100px;background:#8b5cf6;color:#fff;">
+          📱 Escanear QR
+        </button>
+        <button id="btn-clear" class="btn secondary" type="button" style="flex:1;min-width:90px;">
+          Limpiar
+        </button>
       </div>
-
-      <!-- Modal QR -->
+      
+      <!-- Modal para escáner QR -->
       <div id="qr-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;">
         <div style="background:var(--card);border-radius:16px;padding:1.5rem;max-width:500px;width:90%;position:relative;">
           <button id="btn-close-qr" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--remember);">×</button>
@@ -182,31 +199,22 @@
       </div>
 
       <div id="access-alert" class="alert" style="display:none"></div>
+
       <div id="student-box" class="alert ok" style="display:none;">
         <strong>✅ Estudiante habilitado</strong>
         <span id="student-name" style="font-size:1rem;font-weight:600;"></span>
-        <div class="muted" style="margin-top:.2rem;">Grado <span id="student-grade"></span> • Curso <span id="student-course"></span></div>
-        <!-- Indicador de votos ya emitidos en modo ambos -->
-        <div id="vote-status-info" style="display:none;margin-top:.5rem;font-size:.85rem;"></div>
+        <div class="muted" style="margin-top:.2rem;">
+          Grado <span id="student-grade"></span> • Curso <span id="student-course"></span>
+        </div>
       </div>
     </section>
 
-    <!-- Sección de candidatos -->
-    <section class="card" id="candidates-section">
-      <!-- Indicador de pasos (solo en modo ambos) -->
-      <div id="steps-indicator" class="steps-indicator" style="display:none;">
-        <div class="step" id="step-personero">
-          <span>🏛️</span> Personero
-        </div>
-        <div class="step-divider">→</div>
-        <div class="step" id="step-contralor">
-          <span>🔍</span> Contralor
-        </div>
-      </div>
-
-      <h2 class="candidates-title" id="vote-title"><span>🗳️</span> <span id="vote-title-text">Candidatos</span></h2>
-      <div id="current-role-badge"></div>
-      <p class="muted" id="vote-instructions">Selecciona al candidato de tu preferencia.</p>
+    <!-- Paso 2: Candidatos + voto (oculto hasta verificar código) -->
+    <section class="card" aria-label="Votación" id="candidates-section">
+      <h2 class="candidates-title"><span>🗳️</span> Candidatos</h2>
+      <p class="muted" id="vote-instructions">
+        Selecciona al candidato de tu preferencia.
+      </p>
       <div class="hr"></div>
 
       <div id="candidates" class="candidates" aria-live="polite">
@@ -224,9 +232,11 @@
 
       <div id="vote-alert" class="alert" style="display:none"></div>
 
-      <!-- Siguiente estudiante -->
+      <!-- Sección para siguiente estudiante -->
       <div id="next-student-section" class="next-student-section" style="display:none;">
-        <button id="btn-next-student" class="next-student-btn" type="button">✓ Siguiente Estudiante</button>
+        <button id="btn-next-student" class="next-student-btn" type="button">
+          ✓ Siguiente Estudiante
+        </button>
         <p id="countdown-text" class="countdown-text"></p>
       </div>
     </section>
@@ -240,34 +250,52 @@
   <script>
     const API_URL = '/api';
 
+    // Estado en memoria
     let electionOpen = false;
-    let electionMode = 'personero';   // 'personero' | 'contralor' | 'ambos'
-    let votingFlow = 'sequential';    // 'sequential' | 'simultaneous'
     let verifiedStudent = null;
     let verifiedCode = '';
-    let candidatesPersonero = [];
-    let candidatesContralor = [];
-    let currentRole = 'personero';    // El rol que se está votando ahora
+    let candidates = [];
     let selectedCandidateId = null;
+    let autoResetEnabled = true;
     let countdownInterval = null;
     let html5QrCode = null;
     let terminalActivated = false;
 
-    // Para modo simultaneous
-    let selectedPersoneroId = null;
-    let selectedContraloristaId = null;
-
     const $ = (id) => document.getElementById(id);
 
-    // ==================== TERMINAL ====================
+    // ==================== ACTIVACIÓN DE TERMINAL ====================
+
     async function checkTerminalActivation() {
+      // Verificar si ya está activada en esta sesión
       const activated = sessionStorage.getItem('terminal_activated');
-      if (activated === 'true') { activateTerminalUI(); return; }
+      if (activated === 'true') {
+        activateTerminalUI();
+        return;
+      }
+
+      // Verificar si el sistema tiene contraseña configurada
       try {
-        const testRes = await fetch(`${API_URL}/verify-terminal`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ voting_password: '' }) });
+        const res = await fetch(`${API_URL}/check-status`);
+        const data = await res.json().catch(() => ({}));
+        // Si la API responde bien, verificar si se necesita contraseña
+        // Hacemos una prueba de terminal vacía para ver si hay contraseña configurada
+        const testRes = await fetch(`${API_URL}/verify-terminal`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ voting_password: '' })
+        });
         const testData = await testRes.json().catch(() => ({}));
-        if (testData.noPassword === true) { activateTerminalUI(); return; }
-      } catch (e) {}
+
+        // Si retorna noPassword:true, no hay contraseña configurada → activar directo
+        if (testData.noPassword === true) {
+          activateTerminalUI();
+          return;
+        }
+      } catch (e) {
+        // Si falla la red, mostrar overlay igual (seguridad por defecto)
+      }
+
+      // Mostrar overlay de activación
       $('terminal-overlay').style.display = 'flex';
       $('terminal-password-input').focus();
     }
@@ -276,16 +304,43 @@
       const password = $('terminal-password-input').value;
       const btn = $('btn-activate-terminal');
       const errorEl = $('terminal-error');
+
       errorEl.textContent = '';
       $('terminal-password-input').classList.remove('error');
-      if (!password) { errorEl.textContent = 'Ingresa la contraseña de terminal.'; $('terminal-password-input').classList.add('error'); return; }
-      btn.disabled = true; btn.textContent = '⏳ Verificando...';
+
+      if (!password) {
+        errorEl.textContent = 'Ingresa la contraseña de terminal.';
+        $('terminal-password-input').classList.add('error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Verificando...';
+
       try {
-        const res = await fetch(`${API_URL}/verify-terminal`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ voting_password: password }) });
+        const res = await fetch(`${API_URL}/verify-terminal`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ voting_password: password })
+        });
         const data = await res.json().catch(() => ({}));
-        if (res.ok && data.valid) { sessionStorage.setItem('terminal_activated', 'true'); activateTerminalUI(); }
-        else { errorEl.textContent = data.error || '❌ Contraseña incorrecta.'; $('terminal-password-input').classList.add('error'); $('terminal-password-input').value = ''; $('terminal-password-input').focus(); btn.disabled = false; btn.textContent = '🔓 Activar Terminal'; }
-      } catch (e) { errorEl.textContent = '❌ Error de conexión.'; btn.disabled = false; btn.textContent = '🔓 Activar Terminal'; }
+
+        if (res.ok && data.valid) {
+          sessionStorage.setItem('terminal_activated', 'true');
+          activateTerminalUI();
+        } else {
+          errorEl.textContent = data.error || '❌ Contraseña incorrecta.';
+          $('terminal-password-input').classList.add('error');
+          $('terminal-password-input').value = '';
+          $('terminal-password-input').focus();
+          btn.disabled = false;
+          btn.textContent = '🔓 Activar Terminal';
+        }
+      } catch (e) {
+        errorEl.textContent = '❌ Error de conexión. Intenta nuevamente.';
+        btn.disabled = false;
+        btn.textContent = '🔓 Activar Terminal';
+      }
     }
 
     function activateTerminalUI() {
@@ -297,7 +352,7 @@
     }
 
     function deactivateTerminal() {
-      if (!confirm('¿Desactivar esta terminal?')) return;
+      if (!confirm('¿Desactivar esta terminal? Se mostrará la pantalla de contraseña nuevamente.')) return;
       sessionStorage.removeItem('terminal_activated');
       terminalActivated = false;
       $('terminal-activated-banner').style.display = 'none';
@@ -310,158 +365,208 @@
       $('terminal-password-input').focus();
     }
 
+    // Eventos de terminal
     $('btn-activate-terminal').addEventListener('click', activateTerminal);
-    $('terminal-password-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') activateTerminal(); });
+    $('terminal-password-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') activateTerminal();
+    });
 
-    // ==================== UTILIDADES ====================
-    function showAlert(el, type, msg) { el.className = `alert ${type}`; el.textContent = msg; el.style.display = 'block'; el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-    function hideAlert(el) { el.style.display = 'none'; el.textContent = ''; el.className = 'alert'; }
-    function onlyDigits(s) { return String(s || '').replace(/[^\d]/g, ''); }
-    function isValidCode(code) { return /^\d{5}$/.test(code); }
-    async function fetchJSON(path, options = {}) { const res = await fetch(path, options); const data = await res.json().catch(() => ({})); return { ok: res.ok, status: res.status, data }; }
+    function showAlert(el, type, msg) {
+      el.className = `alert ${type}`;
+      el.textContent = msg;
+      el.style.display = 'block';
+      
+      // Scroll suave hacia la alerta
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    function hideAlert(el){ el.style.display = 'none'; el.textContent=''; el.className='alert'; }
 
+    function onlyDigits(s){ return String(s || '').replace(/[^\d]/g, ''); }
+    function isValidCode(code){ return /^\d{5}$/.test(code); }
+
+    async function fetchJSON(path, options = {}) {
+      const res = await fetch(path, options);
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok, status: res.status, data };
+    }
+
+    // Generador de imagen placeholder con iniciales
     function generatePlaceholder(name, size = 100) {
       const initials = name ? name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '?';
       const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
       const color = colors[name ? name.charCodeAt(0) % colors.length : 0];
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${Math.round(size*1.4)}" viewBox="0 0 ${size} ${Math.round(size*1.4)}"><rect width="100%" height="100%" fill="${color}" rx="10"/><text x="50%" y="52%" text-anchor="middle" font-family="Arial, sans-serif" font-size="${size/2.5}" font-weight="bold" fill="#ffffff">${initials}</text></svg>`;
+      
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${Math.round(size*1.4)}" viewBox="0 0 ${size} ${Math.round(size*1.4)}">
+        <rect width="100%" height="100%" fill="${color}" rx="10"/>
+        <text x="50%" y="52%" text-anchor="middle" font-family="Arial, sans-serif" font-size="${size/2.5}" font-weight="bold" fill="#ffffff">${initials}</text>
+      </svg>`;
       return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
     }
 
+    // Generador de escudo placeholder
     function generateSchoolLogoPlaceholder() {
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect width="100%" height="100%" fill="#f1f5f9" rx="16"/><path d="M60 20 L90 40 L90 80 L60 100 L30 80 L30 40 Z" fill="#3b82f6" opacity="0.3"/><path d="M60 30 L80 45 L80 75 L60 90 L40 75 L40 45 Z" fill="#3b82f6" opacity="0.5"/><text x="60" y="65" text-anchor="middle" font-family="Arial" font-size="24" fill="#1e40af">★</text></svg>`;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+        <rect width="100%" height="100%" fill="#f1f5f9" rx="16"/>
+        <path d="M60 20 L90 40 L90 80 L60 100 L30 80 L30 40 Z" fill="#3b82f6" opacity="0.3"/>
+        <path d="M60 30 L80 45 L80 75 L60 90 L40 75 L40 45 Z" fill="#3b82f6" opacity="0.5"/>
+        <text x="60" y="65" text-anchor="middle" font-family="Arial" font-size="24" fill="#1e40af">★</text>
+      </svg>`;
       return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
     }
 
+    // Mostrar sección de candidatos
     function showCandidatesSection() {
       const section = $('candidates-section');
       section.classList.add('visible');
       section.style.display = 'block';
+      
+      // Scroll suave hacia los candidatos
       section.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
+    // Ocultar sección de candidatos
     function hideCandidatesSection() {
       const section = $('candidates-section');
       section.classList.remove('visible');
-      setTimeout(() => { if (!section.classList.contains('visible')) section.style.display = 'none'; }, 400);
+      setTimeout(() => {
+        if (!section.classList.contains('visible')) {
+          section.style.display = 'none';
+        }
+      }, 400);
     }
 
-    // ==================== ESTADO DE ELECCIÓN ====================
     async function loadStatus() {
       const { ok, data } = await fetchJSON(`${API_URL}/check-status`);
-      if (!ok) { $('subtitle').textContent = 'Error al cargar'; $('status-badge').textContent = 'Error'; $('status-badge').className = 'badge closed'; electionOpen = false; return; }
-
-      electionOpen = data.open === true;
-      electionMode = data.election_mode || 'personero';
-      votingFlow = data.voting_flow || 'sequential';
-
-      if (data.school_name) $('school-name').textContent = data.school_name;
-      const img = $('school-logo');
-      const logoUrl = data.school_logo || data.school_logo_url || '';
-      if (logoUrl && logoUrl.trim() !== '') { img.onload = () => { img.style.display = 'block'; }; img.onerror = () => { img.src = generateSchoolLogoPlaceholder(); img.style.display = 'block'; }; img.src = logoUrl; }
-      else { img.src = generateSchoolLogoPlaceholder(); img.style.display = 'block'; }
-
-      const badge = $('status-badge');
-      if (electionOpen) { badge.textContent = '🟢 ABIERTA'; badge.className = 'badge open'; $('subtitle').textContent = 'Puedes votar ahora.'; }
-      else { badge.textContent = '🔴 CERRADA'; badge.className = 'badge closed'; $('subtitle').textContent = 'La votación está cerrada.'; }
-
-      if (!selectedCandidateId) $('btn-vote').disabled = true;
-      else if (electionOpen) $('btn-vote').disabled = false;
-    }
-
-    // ==================== CANDIDATOS ====================
-    async function loadCandidates() {
-      // Cargar según el modo
-      if (electionMode === 'personero') {
-        const { ok, data } = await fetchJSON(`${API_URL}/get-candidates?role=personero`);
-        candidatesPersonero = ok ? (data.candidates || []) : [];
-        // Fallback: si no hay candidatos con rol, traer todos
-        if (candidatesPersonero.length === 0) {
-          const { ok: ok2, data: data2 } = await fetchJSON(`${API_URL}/get-candidates`);
-          candidatesPersonero = ok2 ? (data2.candidates || []) : [];
-        }
-        candidatesContralor = [];
-      } else if (electionMode === 'contralor') {
-        const { ok, data } = await fetchJSON(`${API_URL}/get-candidates?role=contralor`);
-        candidatesContralor = ok ? (data.candidates || []) : [];
-        if (candidatesContralor.length === 0) {
-          const { ok: ok2, data: data2 } = await fetchJSON(`${API_URL}/get-candidates`);
-          candidatesContralor = ok2 ? (data2.candidates || []) : [];
-        }
-        candidatesPersonero = [];
-      } else {
-        // ambos
-        const [r1, r2] = await Promise.all([
-          fetchJSON(`${API_URL}/get-candidates?role=personero`),
-          fetchJSON(`${API_URL}/get-candidates?role=contralor`)
-        ]);
-        candidatesPersonero = r1.ok ? (r1.data.candidates || []) : [];
-        candidatesContralor = r2.ok ? (r2.data.candidates || []) : [];
-      }
-    }
-
-    function getCandidatesForRole(role) {
-      return role === 'contralor' ? candidatesContralor : candidatesPersonero;
-    }
-
-    function renderCandidates(role) {
-      const wrap = $('candidates');
-      wrap.innerHTML = '';
-      const list = getCandidatesForRole(role);
-      const isContralor = role === 'contralor';
-
-      if (!list || list.length === 0) {
-        wrap.innerHTML = `<div class="muted" style="text-align:center;padding:1.5rem;">📋 No hay candidatos registrados para este cargo.</div>`;
+      if (!ok) {
+        $('subtitle').textContent = 'Error al cargar';
+        $('status-badge').textContent = 'Error';
+        $('status-badge').className = 'badge closed';
+        electionOpen = false;
         return;
       }
 
-      for (const [index, c] of list.entries()) {
+      electionOpen = data.open === true;
+
+      // Branding
+      if (data.school_name) $('school-name').textContent = data.school_name;
+      
+      // Manejo del logo con object-fit: contain
+      const img = $('school-logo');
+      const logoUrl = data.school_logo || data.school_logo_url || '';
+      
+      if (logoUrl && logoUrl.trim() !== '') {
+        img.onload = function() {
+          img.style.display = 'block';
+        };
+        img.onerror = function() {
+          img.src = generateSchoolLogoPlaceholder();
+          img.style.display = 'block';
+        };
+        img.src = logoUrl;
+      } else {
+        img.src = generateSchoolLogoPlaceholder();
+        img.style.display = 'block';
+      }
+
+      // Estado
+      const badge = $('status-badge');
+      if (electionOpen) {
+        badge.textContent = '🟢 ABIERTA';
+        badge.className = 'badge open';
+        $('subtitle').textContent = 'Puedes votar ahora.';
+      } else {
+        badge.textContent = '🔴 CERRADA';
+        badge.className = 'badge closed';
+        $('subtitle').textContent = 'La votación está cerrada.';
+      }
+
+      // Mantener el estado del botón de votar según si hay un candidato seleccionado
+      // Solo deshabilitar el botón si NO hay un candidato seleccionado y la elección está abierta
+      if (!selectedCandidateId) {
+        $('btn-vote').disabled = true;
+      } else if (electionOpen) {
+        $('btn-vote').disabled = false;
+      }
+    }
+
+    function renderCandidates() {
+      const wrap = $('candidates');
+      wrap.innerHTML = '';
+
+      if (!candidates || candidates.length === 0) {
+        wrap.innerHTML = `<div class="muted" style="text-align:center;padding:1.5rem;">📋 No hay candidatos registrados.</div>`;
+        return;
+      }
+
+      for (const [index, c] of candidates.entries()) {
         const div = document.createElement('div');
-        div.className = 'cand' + (isContralor ? ' contralor-card' : '');
+        div.className = 'cand';
         div.dataset.id = c.id;
         div.style.animationDelay = `${index * 0.08}s`;
 
+        // Indicador de selección
         const indicator = document.createElement('div');
         indicator.className = 'selection-indicator';
         indicator.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>`;
         div.appendChild(indicator);
 
+        // Contenedor de foto
         const photoContainer = document.createElement('div');
         photoContainer.className = 'cand-photo-container';
+
         const img = document.createElement('img');
         img.alt = `Foto de ${c.name}`;
-        if (c.photo_url && c.photo_url.trim() !== '') { img.src = c.photo_url; img.onerror = function() { this.src = generatePlaceholder(c.name, 100); }; }
-        else { img.src = generatePlaceholder(c.name, 100); }
+        
+        if (c.photo_url && c.photo_url.trim() !== '') {
+          img.src = c.photo_url;
+          img.onerror = function() {
+            this.src = generatePlaceholder(c.name, 100);
+          };
+        } else {
+          img.src = generatePlaceholder(c.name, 100);
+        }
+
         photoContainer.appendChild(img);
         div.appendChild(photoContainer);
 
+        // Meta información
         const meta = document.createElement('div');
         meta.className = 'meta';
+
         const name = document.createElement('div');
         name.className = 'name';
         name.textContent = c.name || 'Candidato';
+
         const party = document.createElement('div');
         party.className = 'party';
-        party.innerHTML = c.party ? `<span>📋</span> Lista ${c.party}` : `<span>👤</span> Independiente`;
+        if (c.party) {
+          party.innerHTML = `<span class="party-icon">📋</span> Lista ${c.party}`;
+        } else {
+          party.innerHTML = `<span class="party-icon">👤</span> Independiente`;
+        }
+
         meta.appendChild(name);
         meta.appendChild(party);
         div.appendChild(meta);
 
         div.addEventListener('click', () => {
-          if (!electionOpen) { showAlert($('vote-alert'), 'warn', '⏰ La votación está cerrada.'); return; }
-          if (!verifiedStudent) { showAlert($('vote-alert'), 'warn', '🔑 Tu sesión ha expirado. Vuelve a verificar tu código.'); return; }
-
-          selectedCandidateId = c.id;
-          if (votingFlow === 'simultaneous' && electionMode === 'ambos') {
-            if (role === 'personero') selectedPersoneroId = c.id;
-            else selectedContraloristaId = c.id;
+          if (!electionOpen) {
+            showAlert($('vote-alert'), 'warn', '⏰ La votación está cerrada.');
+            return;
+          }
+          if (!verifiedStudent) {
+            showAlert($('vote-alert'), 'warn', '🔑 Tu sesión ha expirado. Vuelve a verificar tu código.');
+            return;
           }
 
+          selectedCandidateId = c.id;
           document.querySelectorAll('.cand').forEach(x => x.classList.remove('selected'));
           div.classList.add('selected');
           $('selection-text').innerHTML = `<span style="color:var(--ok);">✓</span> Seleccionado: <strong>${c.name}</strong>${c.party ? ` (Lista ${c.party})` : ''}`;
           hideAlert($('vote-alert'));
           $('btn-vote').disabled = false;
+          
+          // Scroll suave al botón de votar
           $('btn-vote').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
 
@@ -469,177 +574,87 @@
       }
     }
 
-    // ==================== ACTUALIZAR UI SEGÚN MODO ====================
-    function updateVoteUI() {
-      const stepsEl = $('steps-indicator');
-      const roleBadgeEl = $('current-role-badge');
-      const btnVote = $('btn-vote');
-
-      if (electionMode === 'ambos' && votingFlow === 'sequential') {
-        stepsEl.style.display = 'flex';
-        // Actualizar pasos
-        const sp = $('step-personero');
-        const sc = $('step-contralor');
-        if (currentRole === 'personero') {
-          sp.className = 'step active';
-          sc.className = 'step pending';
-        } else {
-          sp.className = 'step done';
-          sc.className = 'step active';
-        }
-        // Badge del rol actual
-        roleBadgeEl.innerHTML = currentRole === 'personero'
-          ? `<span class="role-badge personero">🏛️ Votando: Personero</span>`
-          : `<span class="role-badge contralor">🔍 Votando: Contralor</span>`;
-        $('vote-title-text').textContent = currentRole === 'personero' ? 'Candidatos a Personero' : 'Candidatos a Contralor';
-        $('vote-instructions').textContent = currentRole === 'personero'
-          ? '👇 Selecciona el candidato a Personero de tu preferencia.'
-          : '👇 Selecciona el candidato a Contralor de tu preferencia.';
-        btnVote.className = 'btn ' + (currentRole === 'contralor' ? 'contralor' : 'success');
-        btnVote.innerHTML = `🗳️ Confirmar Voto (${currentRole === 'personero' ? 'Personero' : 'Contralor'})`;
-        renderCandidates(currentRole);
-
-      } else if (electionMode === 'ambos' && votingFlow === 'simultaneous') {
-        stepsEl.style.display = 'none';
-        roleBadgeEl.innerHTML = `<span class="role-badge personero">🏛️ Personero</span> <span style="color:#94a3b8;">+</span> <span class="role-badge contralor">🔍 Contralor</span>`;
-        $('vote-title-text').textContent = 'Candidatos';
-        $('vote-instructions').textContent = 'Selecciona un candidato a Personero Y uno a Contralor.';
-        renderSimultaneous();
-        btnVote.className = 'btn success';
-        btnVote.innerHTML = '🗳️ Confirmar Ambos Votos';
-
-      } else if (electionMode === 'contralor') {
-        stepsEl.style.display = 'none';
-        roleBadgeEl.innerHTML = `<span class="role-badge contralor">🔍 Votando: Contralor</span>`;
-        $('vote-title-text').textContent = 'Candidatos a Contralor';
-        $('vote-instructions').textContent = '👇 Selecciona el candidato a Contralor de tu preferencia.';
-        btnVote.className = 'btn contralor';
-        btnVote.innerHTML = '🗳️ Confirmar Voto (Contralor)';
-        renderCandidates('contralor');
-
-      } else {
-        // solo personero
-        stepsEl.style.display = 'none';
-        roleBadgeEl.innerHTML = '';
-        $('vote-title-text').textContent = 'Candidatos a Personero';
-        $('vote-instructions').textContent = '👇 Selecciona el candidato a Personero de tu preferencia.';
-        btnVote.className = 'btn success';
-        btnVote.innerHTML = '🗳️ Confirmar Voto';
-        renderCandidates('personero');
+    async function loadCandidates() {
+      const { ok, data } = await fetchJSON(`${API_URL}/get-candidates`);
+      if (!ok) {
+        $('candidates').innerHTML = `<div class="muted" style="text-align:center;padding:1.5rem;">❌ Error al cargar candidatos.</div>`;
+        return;
       }
+      candidates = data.candidates || [];
+      renderCandidates();
+    }
 
+    function resetSessionUI() {
+      verifiedStudent = null;
+      verifiedCode = '';
       selectedCandidateId = null;
-      $('selection-text').textContent = 'Ningún candidato seleccionado.';
-      btnVote.disabled = true;
-    }
 
-    function renderSimultaneous() {
-      const wrap = $('candidates');
-      wrap.innerHTML = '';
+      $('student-box').style.display = 'none';
+      $('student-name').textContent = '';
+      $('student-grade').textContent = '';
+      $('student-course').textContent = '';
 
-      // Sección personero
-      const h1 = document.createElement('div');
-      h1.style.cssText = 'grid-column:1/-1;font-weight:700;font-size:1rem;color:#1e40af;padding:.5rem 0;border-bottom:2px solid #dbeafe;margin-bottom:.5rem;';
-      h1.innerHTML = `<span class="role-badge personero">🏛️ Personero</span>`;
-      wrap.appendChild(h1);
-
-      for (const [i, c] of candidatesPersonero.entries()) {
-        wrap.appendChild(createCandCard(c, 'personero', i));
-      }
-
-      // Sección contralor
-      const h2 = document.createElement('div');
-      h2.style.cssText = 'grid-column:1/-1;font-weight:700;font-size:1rem;color:#5b21b6;padding:.75rem 0 .5rem;border-bottom:2px solid #ede9fe;margin-bottom:.5rem;margin-top:.5rem;';
-      h2.innerHTML = `<span class="role-badge contralor">🔍 Contralor</span>`;
-      wrap.appendChild(h2);
-
-      for (const [i, c] of candidatesContralor.entries()) {
-        wrap.appendChild(createCandCard(c, 'contralor', i));
-      }
-
-      // Actualizar botón según selección
-      updateSimultaneousBtn();
-    }
-
-    function createCandCard(c, role, index) {
-      const div = document.createElement('div');
-      div.className = 'cand' + (role === 'contralor' ? ' contralor-card' : '');
-      div.dataset.id = c.id;
-      div.dataset.role = role;
-      div.style.animationDelay = `${index * 0.08}s`;
-
-      const indicator = document.createElement('div');
-      indicator.className = 'selection-indicator';
-      indicator.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>`;
-      div.appendChild(indicator);
-
-      const photoContainer = document.createElement('div');
-      photoContainer.className = 'cand-photo-container';
-      const img = document.createElement('img');
-      img.alt = `Foto de ${c.name}`;
-      img.src = (c.photo_url && c.photo_url.trim() !== '') ? c.photo_url : generatePlaceholder(c.name, 100);
-      if (c.photo_url && c.photo_url.trim() !== '') img.onerror = function() { this.src = generatePlaceholder(c.name, 100); };
-      photoContainer.appendChild(img);
-      div.appendChild(photoContainer);
-
-      const meta = document.createElement('div');
-      meta.className = 'meta';
-      const name = document.createElement('div');
-      name.className = 'name';
-      name.textContent = c.name || 'Candidato';
-      const party = document.createElement('div');
-      party.className = 'party';
-      party.innerHTML = c.party ? `<span>📋</span> Lista ${c.party}` : `<span>👤</span> Independiente`;
-      meta.appendChild(name);
-      meta.appendChild(party);
-      div.appendChild(meta);
-
-      div.addEventListener('click', () => {
-        if (!electionOpen || !verifiedStudent) return;
-        // Deseleccionar otros del mismo rol
-        document.querySelectorAll(`.cand[data-role="${role}"]`).forEach(x => x.classList.remove('selected'));
-        div.classList.add('selected');
-        if (role === 'personero') selectedPersoneroId = c.id;
-        else selectedContraloristaId = c.id;
-        hideAlert($('vote-alert'));
-        updateSimultaneousBtn();
+      document.querySelectorAll('.cand').forEach(x => {
+        x.classList.remove('selected');
+        x.classList.remove('disabled');
+        x.style.pointerEvents = 'auto';
+        x.style.filter = 'none';
       });
+      $('selection-text').textContent = 'Ningún candidato seleccionado.';
+      $('btn-vote').disabled = true;
 
-      return div;
-    }
+      hideAlert($('access-alert'));
+      hideAlert($('vote-alert'));
 
-    function updateSimultaneousBtn() {
-      const btn = $('btn-vote');
-      const hasBoth = selectedPersoneroId && selectedContraloristaId;
-      btn.disabled = !hasBoth;
-      if (hasBoth) {
-        const p = candidatesPersonero.find(c => c.id === selectedPersoneroId);
-        const co = candidatesContralor.find(c => c.id === selectedContraloristaId);
-        $('selection-text').innerHTML = `✓ Personero: <strong>${p?.name}</strong> | Contralor: <strong>${co?.name}</strong>`;
-      } else {
-        const needP = !selectedPersoneroId;
-        const needC = !selectedContraloristaId;
-        $('selection-text').textContent = needP && needC ? 'Selecciona un candidato de cada cargo.' : needP ? 'Falta seleccionar Personero.' : 'Falta seleccionar Contralor.';
+      $('next-student-section').style.display = 'none';
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
       }
+      $('countdown-text').textContent = '';
     }
 
-    // ==================== VERIFICAR CÓDIGO ====================
+    function prepareForNextStudent() {
+      // Habilitar controles para el siguiente estudiante
+      $('access-code').disabled = false;
+      $('access-code').value = '';
+      $('access-code').focus();
+      $('btn-verify').disabled = false;
+      $('btn-verify').innerHTML = '✓ Verificar';
+      
+      // Reiniciar UI
+      resetSessionUI();
+      
+      // Ocultar sección de candidatos
+      hideCandidatesSection();
+      
+      $('vote-instructions').textContent = 'Selecciona al candidato de tu preferencia.';
+    }
+
     async function verifyCode() {
       hideAlert($('access-alert'));
       hideAlert($('vote-alert'));
 
-      if (!electionOpen) { showAlert($('access-alert'), 'warn', '⏰ La votación está cerrada.'); return; }
+      if (!electionOpen) {
+        showAlert($('access-alert'), 'warn', '⏰ La votación está cerrada.');
+        return;
+      }
 
       const raw = $('access-code').value;
       const code = onlyDigits(raw).slice(0, 5);
       $('access-code').value = code;
-      if (!isValidCode(code)) { showAlert($('access-alert'), 'danger', '❌ Código inválido. Debe tener 5 dígitos.'); return; }
+
+      if (!isValidCode(code)) {
+        showAlert($('access-alert'), 'danger', '❌ Código inválido. Debe tener 5 dígitos.');
+        return;
+      }
 
       $('btn-verify').disabled = true;
       $('btn-verify').innerHTML = '⏳ Verificando...';
 
       const { ok, data, status } = await fetchJSON(`${API_URL}/verify-code`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ access_code: code })
       });
 
@@ -647,9 +662,13 @@
       $('btn-verify').innerHTML = '✓ Verificar';
 
       if (!ok) {
-        const msg = data?.error || (status === 404 ? '🔍 Código no encontrado.' : status === 403 ? '⚠️ Este código ya fue utilizado.' : '❌ No se pudo verificar el código.');
+        const msg = data?.error ||
+          (status === 404 ? '🔍 Código no encontrado.' :
+           status === 403 ? '⚠️ Este código ya fue utilizado.' :
+           '❌ No se pudo verificar el código.');
         showAlert($('access-alert'), status === 403 ? 'warn' : 'danger', msg);
-        verifiedStudent = null; verifiedCode = '';
+        verifiedStudent = null;
+        verifiedCode = '';
         $('student-box').style.display = 'none';
         $('btn-vote').disabled = true;
         return;
@@ -663,205 +682,93 @@
       $('student-course').textContent = verifiedStudent?.course ?? '';
       $('student-box').style.display = 'block';
 
-      // En modo 'ambos', mostrar qué ya votó
-      const voteStatusInfo = $('vote-status-info');
-      if (electionMode === 'ambos') {
-        const vp = verifiedStudent.voted_personero;
-        const vc = verifiedStudent.voted_contralor;
-        if (vp || vc) {
-          voteStatusInfo.style.display = 'block';
-          voteStatusInfo.innerHTML = `${vp ? '✅ Personero ya votado' : '⏳ Personero pendiente'} | ${vc ? '✅ Contralor ya votado' : '⏳ Contralor pendiente'}`;
-        } else {
-          voteStatusInfo.style.display = 'none';
-        }
-        // Si modo sequential, determinar qué rol sigue
-        if (votingFlow === 'sequential') {
-          if (!vp) currentRole = 'personero';
-          else if (!vc) currentRole = 'contralor';
-        }
-      } else {
-        voteStatusInfo.style.display = 'none';
-        currentRole = electionMode;
-      }
-
       showAlert($('access-alert'), 'ok', '✅ Código verificado. ¡Ya puedes votar!');
-      updateVoteUI();
+      $('vote-instructions').textContent = '👇 Selecciona un candidato.';
+      
+      // MOSTRAR SECCIÓN DE CANDIDATOS
       showCandidatesSection();
     }
 
-    // ==================== EMITIR VOTO ====================
     async function castVote() {
       hideAlert($('vote-alert'));
-      if (!electionOpen) { showAlert($('vote-alert'), 'warn', '⏰ La votación está cerrada.'); return; }
-      if (!verifiedStudent || !isValidCode(verifiedCode)) { showAlert($('vote-alert'), 'warn', '🔑 Primero verifica tu código.'); return; }
 
-      // Modo simultaneous: dos votos a la vez
-      if (electionMode === 'ambos' && votingFlow === 'simultaneous') {
-        await castSimultaneousVotes();
+      if (!electionOpen) {
+        showAlert($('vote-alert'), 'warn', '⏰ La votación está cerrada.');
+        return;
+      }
+      if (!verifiedStudent || !isValidCode(verifiedCode)) {
+        showAlert($('vote-alert'), 'warn', '🔑 Primero verifica tu código.');
+        return;
+      }
+      if (!selectedCandidateId) {
+        showAlert($('vote-alert'), 'warn', '👈 Selecciona un candidato.');
         return;
       }
 
-      if (!selectedCandidateId) { showAlert($('vote-alert'), 'warn', '👈 Selecciona un candidato.'); return; }
-
-      const role = (electionMode === 'ambos') ? currentRole : electionMode;
-      const list = getCandidatesForRole(role);
-      const candidate = list.find(c => c.id === selectedCandidateId);
-      const confirmMsg = `¿Confirmas tu voto?\n\n👤 Estudiante: ${verifiedStudent.name}\n🗳️ Cargo: ${role === 'personero' ? 'Personero' : 'Contralor'}\n👤 Candidato: ${candidate?.name || '?'}${candidate?.party ? `\n📋 Lista: ${candidate.party}` : ''}`;
+      const candidate = candidates.find(c => c.id === selectedCandidateId);
+      const confirmMsg = `¿Confirmas tu voto?\n\n👤 Estudiante: ${verifiedStudent.name}\n📚 Grado: ${verifiedStudent.grade}° - Curso: ${verifiedStudent.course}\n🗳️ Candidato: ${candidate?.name || 'Unknown'}\n${candidate?.party ? `📋 Lista: ${candidate.party}` : ''}`;
+      
       if (!confirm(confirmMsg)) return;
 
       $('btn-vote').disabled = true;
       $('btn-vote').innerHTML = '⏳ Enviando voto...';
 
       const { ok, data } = await fetchJSON(`${API_URL}/cast-vote`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ access_code: verifiedCode, candidate_id: selectedCandidateId, role })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_code: verifiedCode, candidate_id: selectedCandidateId })
       });
 
       $('btn-vote').innerHTML = '🗳️ Confirmar Voto';
 
-      if (!ok) { showAlert($('vote-alert'), 'danger', data?.error || '❌ No se pudo registrar el voto.'); $('btn-vote').disabled = false; return; }
-
-      // Si es modo ambos sequential y acabamos de votar personero, pasar a contralor
-      if (electionMode === 'ambos' && votingFlow === 'sequential' && role === 'personero') {
-        showAlert($('vote-alert'), 'ok', '✅ Voto de Personero registrado. Ahora vota por Contralor.');
-        currentRole = 'contralor';
-        selectedCandidateId = null;
-        // Actualizar info de votos del estudiante
-        if (verifiedStudent) verifiedStudent.voted_personero = true;
-        setTimeout(() => {
-          hideAlert($('vote-alert'));
-          updateVoteUI();
-          $('candidates-section').scrollIntoView({ behavior: 'smooth' });
-        }, 1800);
-        return;
-      }
-
-      // Voto completado
-      onVoteComplete(role === 'personero' ? '🎉 ¡Voto de Personero registrado!' : '🎉 ¡Voto de Contralor registrado!');
-    }
-
-    async function castSimultaneousVotes() {
-      if (!selectedPersoneroId || !selectedContraloristaId) { showAlert($('vote-alert'), 'warn', '👈 Selecciona un candidato de cada cargo.'); return; }
-
-      const cp = candidatesPersonero.find(c => c.id === selectedPersoneroId);
-      const cc = candidatesContralor.find(c => c.id === selectedContraloristaId);
-      const confirmMsg = `¿Confirmas tus votos?\n\n👤 Estudiante: ${verifiedStudent.name}\n🏛️ Personero: ${cp?.name || '?'}\n🔍 Contralor: ${cc?.name || '?'}`;
-      if (!confirm(confirmMsg)) return;
-
-      $('btn-vote').disabled = true;
-      $('btn-vote').innerHTML = '⏳ Enviando votos...';
-
-      const [r1, r2] = await Promise.all([
-        fetchJSON(`${API_URL}/cast-vote`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ access_code: verifiedCode, candidate_id: selectedPersoneroId, role: 'personero' }) }),
-        fetchJSON(`${API_URL}/cast-vote`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ access_code: verifiedCode, candidate_id: selectedContraloristaId, role: 'contralor' }) })
-      ]);
-
-      $('btn-vote').innerHTML = '🗳️ Confirmar Ambos Votos';
-
-      if (!r1.ok || !r2.ok) {
-        const msg = (!r1.ok ? r1.data?.error : '') || (!r2.ok ? r2.data?.error : '') || '❌ Error al registrar votos.';
+      if (!ok) {
+        const msg = data?.error || '❌ No se pudo registrar el voto.';
         showAlert($('vote-alert'), 'danger', msg);
         $('btn-vote').disabled = false;
         return;
       }
 
-      onVoteComplete('🎉 ¡Tus votos fueron registrados correctamente! Gracias por participar.');
-    }
-
-    function onVoteComplete(message) {
-      showAlert($('vote-alert'), 'ok', message);
+      showAlert($('vote-alert'), 'ok', '🎉 ¡Voto registrado correctamente! Gracias por participar.');
+      
       $('btn-vote').disabled = true;
       $('btn-verify').disabled = true;
       $('access-code').disabled = true;
-      document.querySelectorAll('.cand').forEach(x => { x.classList.add('disabled'); x.style.pointerEvents = 'none'; });
+
+      document.querySelectorAll('.cand').forEach(x => {
+        x.classList.add('disabled');
+        x.style.pointerEvents = 'none';
+      });
+
       showNextStudentSection();
     }
 
     function showNextStudentSection() {
-      $('next-student-section').style.display = 'block';
+      const section = $('next-student-section');
+      section.style.display = 'block';
+      
       let secondsLeft = 8;
+      
       $('countdown-text').textContent = `⏱️ Esta pantalla se reiniciará automáticamente en ${secondsLeft} segundos...`;
-      if (countdownInterval) clearInterval(countdownInterval);
+      
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+      }
+      
       countdownInterval = setInterval(() => {
         secondsLeft--;
-        if (secondsLeft > 0) $('countdown-text').textContent = `⏱️ Esta pantalla se reiniciará automáticamente en ${secondsLeft} segundos...`;
-        else { clearInterval(countdownInterval); prepareForNextStudent(); }
+        if (secondsLeft > 0) {
+          $('countdown-text').textContent = `⏱️ Esta pantalla se reiniciará automáticamente en ${secondsLeft} segundos...`;
+        } else {
+          clearInterval(countdownInterval);
+          prepareForNextStudent();
+        }
       }, 1000);
     }
 
-    function resetSessionUI() {
-      verifiedStudent = null; verifiedCode = '';
-      selectedCandidateId = null; selectedPersoneroId = null; selectedContraloristaId = null;
-      currentRole = electionMode === 'contralor' ? 'contralor' : 'personero';
-
-      $('student-box').style.display = 'none';
-      $('student-name').textContent = '';
-      $('student-grade').textContent = '';
-      $('student-course').textContent = '';
-      $('vote-status-info').style.display = 'none';
-
-      document.querySelectorAll('.cand').forEach(x => { x.classList.remove('selected', 'disabled'); x.style.pointerEvents = 'auto'; x.style.filter = 'none'; });
-      $('selection-text').textContent = 'Ningún candidato seleccionado.';
-      $('btn-vote').disabled = true;
-      hideAlert($('access-alert'));
-      hideAlert($('vote-alert'));
-      $('next-student-section').style.display = 'none';
-      if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
-      $('countdown-text').textContent = '';
-    }
-
-    function prepareForNextStudent() {
-      $('access-code').disabled = false;
-      $('access-code').value = '';
-      $('access-code').focus();
-      $('btn-verify').disabled = false;
-      $('btn-verify').innerHTML = '✓ Verificar';
-      resetSessionUI();
-      hideCandidatesSection();
-    }
-
-    // ==================== QR ====================
-    function openQRScanner() {
-      const modal = $('qr-modal');
-      modal.style.display = 'flex';
-      if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
-      $('qr-status').textContent = '📷 Iniciando cámara...';
-      html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 }, onScanSuccess, () => {}).then(() => { $('qr-status').textContent = '🎯 Escanea el código QR'; }).catch(() => { $('qr-status').textContent = '❌ Error al acceder a la cámara'; });
-    }
-
-    function closeQRScanner() {
-      $('qr-modal').style.display = 'none';
-      if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop().catch(() => {});
-      $('qr-status').textContent = '';
-    }
-
-    function onScanSuccess(decodedText) {
-      let code = '';
-      if (decodedText.includes('?code=')) { const url = new URL(decodedText); code = url.searchParams.get('code'); }
-      else code = decodedText;
-      code = onlyDigits(code).slice(0, 5);
-      if (isValidCode(code)) {
-        $('access-code').value = code;
-        $('qr-status').textContent = `✅ Código detectado: ${code}`;
-        setTimeout(() => { closeQRScanner(); verifyCode(); }, 1000);
-      }
-    }
-
-    function checkURLForCode() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-      if (code) {
-        const cleanCode = onlyDigits(code).slice(0, 5);
-        if (isValidCode(cleanCode)) { $('access-code').value = cleanCode; window.history.replaceState({}, document.title, window.location.pathname); setTimeout(() => verifyCode(), 500); }
-      }
-    }
-
-    // ==================== EVENTOS ====================
+    // Eventos
     $('btn-verify').addEventListener('click', verifyCode);
     $('btn-vote').addEventListener('click', castVote);
     $('btn-next-student').addEventListener('click', prepareForNextStudent);
-    $('btn-scan-qr').addEventListener('click', openQRScanner);
-    $('btn-close-qr').addEventListener('click', closeQRScanner);
 
     $('btn-clear').addEventListener('click', () => {
       $('access-code').value = '';
@@ -870,6 +777,7 @@
       $('btn-verify').innerHTML = '✓ Verificar';
       resetSessionUI();
       hideCandidatesSection();
+      $('vote-instructions').textContent = 'Selecciona al candidato de tu preferencia.';
     });
 
     $('access-code').addEventListener('input', () => {
@@ -877,16 +785,120 @@
       if ($('access-code').value !== cleaned) $('access-code').value = cleaned;
     });
 
-    $('access-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') verifyCode(); });
+    $('access-code').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') verifyCode();
+    });
 
-    // ==================== INIT ====================
-    (async function init() {
+    // ==================== FUNCIONES QR ====================
+    
+    function openQRScanner() {
+      const modal = $('qr-modal');
+      modal.style.display = 'flex';
+      
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("qr-reader");
+      }
+      
+      $('qr-status').textContent = '📷 Iniciando cámara...';
+      
+      const config = {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0
+      };
+      
+      html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        onScanSuccess,
+        onScanError
+      ).then(() => {
+        $('qr-status').textContent = '🎯 Escanea el código QR';
+      }).catch(err => {
+        $('qr-status').textContent = '❌ Error al acceder a la cámara';
+        console.error('Error starting QR scanner:', err);
+      });
+    }
+    
+    function closeQRScanner() {
+      const modal = $('qr-modal');
+      modal.style.display = 'none';
+      
+      if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().catch(err => console.error('Error stopping scanner:', err));
+      }
+      
+      $('qr-status').textContent = '';
+    }
+    
+    function onScanSuccess(decodedText) {
+      // Extraer el código del QR
+      let code = '';
+      
+      // Si el QR contiene una URL con parámetro ?code=
+      if (decodedText.includes('?code=')) {
+        const url = new URL(decodedText);
+        code = url.searchParams.get('code');
+      } else {
+        // Si es solo el código
+        code = decodedText;
+      }
+      
+      code = onlyDigits(code).slice(0, 5);
+      
+      if (isValidCode(code)) {
+        $('access-code').value = code;
+        $('qr-status').textContent = `✅ Código detectado: ${code}`;
+        
+        // Cerrar escáner después de 1 segundo
+        setTimeout(() => {
+          closeQRScanner();
+          // Verificar automáticamente
+          verifyCode();
+        }, 1000);
+      }
+    }
+    
+    function onScanError(errorMessage) {
+      // No hacer nada con los errores normales de escaneo
+    }
+    
+    function checkURLForCode() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      
+      if (code) {
+        const cleanCode = onlyDigits(code).slice(0, 5);
+        if (isValidCode(cleanCode)) {
+          $('access-code').value = cleanCode;
+          // Limpiar la URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          // Verificar automáticamente después de un momento
+          setTimeout(() => {
+            verifyCode();
+          }, 500);
+        }
+      }
+    }
+    
+    // Event listeners para QR
+    $('btn-scan-qr').addEventListener('click', openQRScanner);
+    $('btn-close-qr').addEventListener('click', closeQRScanner);
+
+    // Init
+    (async function init(){
+      // Asegurar que la sección de candidatos esté oculta inicialmente
       $('candidates-section').style.display = 'none';
+      
       resetSessionUI();
       await loadStatus();
       await loadCandidates();
       setInterval(loadStatus, 10000);
+      
+      // Verificar si hay código en la URL (desde QR)
       checkURLForCode();
+
+      // Verificar activación de terminal (al final, para que el resto cargue)
       await checkTerminalActivation();
     })();
   </script>
